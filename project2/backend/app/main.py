@@ -133,16 +133,6 @@ def health() -> dict[str, str]:
     return {"status": "ok", "database": database_label(), "dataset": "MIMIC-IV + MIMIC-CXR-JPG"}
 
 
-@app.get("/health/db")
-def health_db() -> dict:
-    import traceback
-    try:
-        with engine.connect() as conn:
-            result = conn.execute(text("SELECT COUNT(*) FROM patients")).scalar()
-        return {"db": "ok", "patients": result}
-    except Exception as e:
-        return {"db": "error", "error": str(e), "traceback": traceback.format_exc()}
-
 
 @app.get("/data/status")
 def data_status(
