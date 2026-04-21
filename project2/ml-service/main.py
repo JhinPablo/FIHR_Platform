@@ -14,8 +14,10 @@ import numpy as np
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-MODELS_DIR = Path(__file__).parent / "models"
-MODELS_DIR.mkdir(exist_ok=True)
+import os as _os
+_vercel = _os.environ.get("VERCEL") == "1"
+MODELS_DIR = Path("/tmp/ml_models") if _vercel else Path(__file__).parent / "models"
+MODELS_DIR.mkdir(parents=True, exist_ok=True)
 ONNX_PATH = MODELS_DIR / "ml_model.onnx"
 META_PATH = MODELS_DIR / "ml_model_meta.pkl"
 

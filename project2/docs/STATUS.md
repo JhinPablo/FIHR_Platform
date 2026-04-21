@@ -404,14 +404,133 @@ Verificacion local:
 - [x] Headers de seguridad configurados en Nginx.
 - [x] Healthchecks verificados para Nginx, frontend, backend, ML, DL y MinIO.
 - [x] Supabase verificado con `pgcrypto` activo y 11 tablas publicas esperadas.
+- [x] Bug imaging corregido: auto-reload de media al entrar a `/imaging` con
+  paciente seleccionado (`state._imagingLoadedFor` tracker).
+- [x] URL presignada MinIO extendida de 300s a 3600s.
+- [x] MinIO CORS habilitado (`mc anonymous set download` + `mc cors set`) en
+  `minio-init`.
+- [x] `vercel.json` creado para frontend, backend, ml-service y dl-service.
+- [x] Entry points `api/index.py` creados para backend, ml-service y dl-service.
+- [x] `requirements-vercel.txt` creado en ml-service (sin onnxruntime).
+- [x] CORS backend cambiado a `"*"` por defecto con `allow_credentials=False`.
+- [x] `VITE_API_URL` integrado en frontend para configurar backend desde Vercel.
+- [x] `MODELS_DIR` del ml-service redirige a `/tmp` cuando `VERCEL=1`.
+
+## Despliegue en Vercel
+
+Arquitectura de despliegue completa en Vercel (sin DigitalOcean por ahora):
+
+```
+Frontend  → Vercel static (Vite build)          project2/frontend/
+Backend   → Vercel Python serverless (FastAPI)   project2/backend/
+ML        → Vercel Python serverless (FastAPI)   project2/ml-service/
+DL        → Vercel Python serverless (FastAPI)   project2/dl-service/
+DB        → Supabase PostgreSQL (ya configurado)
+Storage   → MinIO no disponible en Vercel (imagenes muestran fallback)
+```
+
+### Archivos de configuracion Vercel creados
+
+| Archivo | Descripcion |
+|---|---|
+| `frontend/vercel.json` | Build Vite + rewrite SPA hash-router |
+| `backend/vercel.json` | Build Python serverless FastAPI |
+| `backend/api/index.py` | Entry point: `from app.main import app` |
+| `ml-service/vercel.json` | Build Python con `requirements-vercel.txt` |
+| `ml-service/api/index.py` | Entry point ML service |
+| `ml-service/requirements-vercel.txt` | Sin onnxruntime/skl2onnx (too heavy) |
+| `dl-service/vercel.json` | Build Python DL service |
+| `dl-service/api/index.py` | Entry point DL service |
+
+### Cambios aplicados al codigo
+
+- `backend/app/config.py`: `cors_origins` default cambiado a `"*"`.
+- `backend/app/main.py`: CORS middleware desactiva `allow_credentials` cuando
+  `allow_origins=["*"]` (requerido por Starlette).
+- `frontend/src/main.js`: `API` usa `import.meta.env.VITE_API_URL` como
+  fallback antes de `http://localhost:8000`.
+- `ml-service/main.py`: `MODELS_DIR` apunta a `/tmp/ml_models` en Vercel
+  (filesystem de escritura). Detectado via `VERCEL=1` env var.
+- `backend/app/minio_client.py`: URL presignada expira en 3600s (antes 300s).
+
+### Variables de entorno requeridas en Vercel
+
+Para cada proyecto en Vercel dashboard → Settings → Environment Variables:
+
+**Backend:**
+
+| Variable | Valor |
+|---|---|
+| `DATABASE_URL` | `postgresql+psycopg://postgres.[ref]:[pass]@aws-0-us-east-1.pooler.supabase.com:5432/postgres` |
+| `DATA_ENCRYPTION_KEY` | (clave segura, no dev-only) |
+| `ACCESS_KEY_ADMIN` | (clave admin real) |
+| `PERMISSION_KEY_ADMIN` | (clave admin real) |
+| `ACCESS_KEY_MEDICO_1` | (clave medico real) |
+| `PERMISSION_KEY_MEDICO_1` | (clave medico real) |
+| `ACCESS_KEY_PATIENT` | (clave paciente real) |
+| `PERMISSION_KEY_PATIENT` | (clave paciente real) |
+| `ML_SERVICE_URL` | URL del ml-service en Vercel |
+| `DL_SERVICE_URL` | URL del dl-service en Vercel |
+
+**Frontend:**
+
+| Variable | Valor |
+|---|---|
+| `VITE_API_URL` | URL del backend en Vercel (ej. `https://fhir-backend.vercel.app`) |
+
+**ML Service:**
+
+| Variable | Valor |
+|---|---|
+| `VERCEL` | `1` (para usar `/tmp` como directorio de modelos) |
+
+### Procedimiento de deploy
+
+Cada servicio es un proyecto Vercel independiente. En tu terminal:
+
+```bash
+# 1. Frontend
+cd project2/frontend
+npx vercel --prod
+# Root dir: .  |  Framework: Vite  |  Output: dist
+
+# 2. Backend
+cd project2/backend
+npx vercel --prod
+# Root dir: .  |  Framework: Other
+
+# 3. ML Service
+cd project2/ml-service
+npx vercel --prod
+# Root dir: .  |  Framework: Other
+
+# 4. DL Service
+cd project2/dl-service
+npx vercel --prod
+# Root dir: .  |  Framework: Other
+```
+
+Orden recomendado: backend primero, luego ml/dl (para tener sus URLs), luego
+frontend con `VITE_API_URL` apuntando al backend.
+
+### Limitaciones conocidas en Vercel
+
+| Componente | Estado | Motivo |
+|---|---|---|
+| Pacientes, Observaciones, Inferencia, Audit | Funcional | Supabase + Vercel |
+| Firma de reportes, Consentimientos | Funcional | Supabase + Vercel |
+| Imagenes ECG (MinIO SVG) | Sin preview inline | MinIO no corre en Vercel |
+| Link "Open SVG" en Imaging | Funcional | URL presignada hacia MinIO local |
+| ML inference (numpy fallback) | Funcional | sin onnxruntime en Vercel |
+| ONNX real inference | Solo en Docker local | onnxruntime demasiado pesado |
+| DL GradCAM | Fallback sin MinIO upload | MinIO no disponible |
 
 ## Pendiente
 
+- [ ] Ejecutar `npx vercel --prod` en cada servicio y capturar URLs.
+- [ ] Configurar `VITE_API_URL` en frontend Vercel con URL del backend.
+- [ ] Configurar `ML_SERVICE_URL` y `DL_SERVICE_URL` en backend Vercel.
+- [ ] Verificar `GET /health` y `GET /data/status` en backend Vercel.
 - [ ] Importar a Supabase remoto las 240 observaciones tabulares locales.
-- [ ] Configurar `DATABASE_URL` real de Supabase en `project2/.env` para que el
-  backend local lea directamente la base remota.
-- [ ] Verificar `GET /data/status` contra Supabase remoto desde el backend.
-- [ ] Ejecutar Postman end-to-end con el dataset demo publico.
-- [ ] Ajustar ML/DL para inferencia ECG/tabular real o dejarlo declarado como
-  adaptador academico.
+- [ ] Ejecutar Postman end-to-end con el dataset demo publico contra Vercel.
 - [ ] Hacer commit firmado y push.

@@ -3,8 +3,10 @@ from datetime import datetime
 from time import time
 from typing import Any
 
+import httpx
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 
@@ -18,10 +20,12 @@ from .security import current_principal, require_admin, require_medico, require_
 
 settings = get_settings()
 app = FastAPI(title=settings.app_name, version="2.0.0", docs_url="/docs", redoc_url="/redoc")
+_origins = settings.cors_origin_list
+_wildcard = _origins == ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origin_list,
-    allow_credentials=True,
+    allow_origins=_origins,
+    allow_credentials=not _wildcard,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -351,10 +355,11 @@ def list_diagnostic_reports(
     audit(db, principal, "LIST_DIAGNOSTIC_REPORTS", "DiagnosticReport", patient_id=patient_id, request=request)
     db.commit()
     resources = []
+    base = str(request.base_url).rstrip("/")
     for row in rows:
         media = db.get(models.ImagingStudy, row.imaging_study_id) if row.imaging_study_id else None
         if media and media.minio_object_name:
-            media.image_url = minio_client.presigned_url(media.minio_object_name)
+            media.image_url = f"{base}/media/proxy/{media.minio_object_name}"
         resources.append(fhir.diagnostic_report_resource(row, media))
     return fhir.bundle(resources, total, limit, offset)
 
@@ -375,12 +380,36 @@ def list_media(
         query = query.filter(models.ImagingStudy.patient_id == patient_id)
     total = query.count()
     rows = query.order_by(models.ImagingStudy.created_at.desc()).offset(offset).limit(limit).all()
+    base = str(request.base_url).rstrip("/")
     for row in rows:
         if row.minio_object_name:
-            row.image_url = minio_client.presigned_url(row.minio_object_name)
+            row.image_url = f"{base}/media/proxy/{row.minio_object_name}"
     audit(db, principal, "LIST_MEDIA", "Media", patient_id=patient_id, request=request)
     db.commit()
     return fhir.bundle([fhir.media_resource(row) for row in rows], total, limit, offset)
+
+
+@app.get("/media/proxy/{object_path:path}", include_in_schema=False)
+async def proxy_media(object_path: str) -> Response:
+    """Serves MinIO objects through the backend — avoids browser cross-origin issues."""
+    settings = get_settings()
+    url = f"http://{settings.minio_endpoint}/{settings.minio_bucket}/{object_path}"
+    try:
+        async with httpx.AsyncClient(timeout=12.0) as client:
+            r = await client.get(url)
+        if r.status_code != 200:
+            raise HTTPException(404, "Media object not found")
+        ctype = r.headers.get("content-type", "image/svg+xml")
+        return Response(
+            content=r.content,
+            media_type=ctype,
+            headers={
+                "Cache-Control": "public, max-age=3600",
+                "Access-Control-Allow-Origin": "*",
+            },
+        )
+    except httpx.RequestError:
+        raise HTTPException(503, "Storage service unavailable")
 
 
 @app.post("/images", status_code=status.HTTP_201_CREATED)

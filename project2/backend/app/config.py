@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     database_url: str = "sqlite:///./dev.db"
     data_encryption_key: str = "dev-only-insecure-key"
-    cors_origins: str = "http://localhost:5173,http://localhost:8000"
+    cors_origins: str = "*"
     rate_limit_per_minute: int = 120
 
     access_key_admin: str = "dev-access-admin"
