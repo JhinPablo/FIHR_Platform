@@ -44,7 +44,11 @@ async function api(path, options = {}) {
     headers: { ...headers(options.json !== false), ...(options.headers || {}) },
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+  if (!res.ok) throw new Error(
+    typeof data.detail === "string" ? data.detail :
+    Array.isArray(data.detail) ? data.detail.map(e => e.msg || JSON.stringify(e)).join("; ") :
+    `HTTP ${res.status}`
+  );
   return data;
 }
 
@@ -214,6 +218,7 @@ window.signReport = async () => {
   const note = document.querySelector("#clinicalNote")?.value || "";
   const reportId = state.lastInference?.risk_report?.id;
   if (!reportId) return alert("No hay RiskReport para firmar.");
+  if (note.length < 30) return alert(`La nota clínica debe tener mínimo 30 caracteres (actual: ${note.length}).`);
   try {
     state.lastInference.risk_report = await api(`/risk-reports/${reportId}/sign`, {
       method: "PATCH",
