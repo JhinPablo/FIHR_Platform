@@ -1,7 +1,8 @@
 # Datasets: MIMIC-IV + MIMIC-CXR-JPG
 
-Este proyecto usa MIMIC-IV y MIMIC-CXR-JPG como norte de integración, pero no
-incluye datos en el repositorio.
+Este proyecto usa MIMIC-IV y MIMIC-CXR-JPG como norte de integración. El repo
+solo incluye `datasets/local-demo/`, un dataset pequeno sin PHI real para probar
+la subida de imagenes a MinIO y el mapeo FHIR.
 
 ## Problema Que Resuelve
 
@@ -45,6 +46,27 @@ datasets/
     mimic-cxr-2.0.0-chexpert.csv.gz
 ```
 
+## Dataset Local Versionable
+
+```text
+datasets/local-demo/
+  mimic-iv/
+    patients.csv
+    labs.csv
+  mimic-cxr-jpg/
+    metadata.csv
+    images/
+```
+
+Este dataset se puede sembrar con:
+
+```bash
+python scripts/seed_local_datasets.py
+```
+
+El script crea pacientes y observaciones via API, sube las imagenes a MinIO por
+`POST /images`, y crea `DiagnosticReport.presentedForm` con URL presignada.
+
 ## Subset Recomendado
 
 Para la entrega, basta un extracto reproducible de 30 a 100 pacientes con:
@@ -61,4 +83,3 @@ Para la entrega, basta un extracto reproducible de 30 a 100 pacientes con:
 - No redistribuir datos.
 - No subir datasets, imágenes, ONNX entrenados con datos restringidos ni dumps a GitHub.
 - Documentar fuente, versión, fecha de descarga y subset utilizado.
-

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 760" role="img" aria-label="Synthetic chest x-ray demo image">
+  <rect width="640" height="760" fill="#0a111d"/>
+  <ellipse cx="245" cy="380" rx="118" ry="250" fill="#d7dde8" opacity=".18"/>
+  <ellipse cx="395" cy="380" rx="118" ry="250" fill="#d7dde8" opacity=".18"/>
+  <path d="M320 120 C300 210 296 310 312 650" stroke="#e8edf6" stroke-width="20" opacity=".26" fill="none"/>
+  <path d="M230 180 C270 250 278 420 238 590" stroke="#f5f7fb" stroke-width="10" opacity=".18" fill="none"/>
+  <path d="M410 180 C370 250 362 420 402 590" stroke="#f5f7fb" stroke-width="10" opacity=".18" fill="none"/>
+  <g stroke="#edf2f7" stroke-width="7" opacity=".14">
+    <path d="M320 220 L188 250"/><path d="M320 260 L174 305"/><path d="M320 305 L168 365"/>
+    <path d="M320 220 L452 250"/><path d="M320 260 L466 305"/><path d="M320 305 L472 365"/>
+  </g>
+  <circle cx="252" cy="430" r="34" fill="#ffffff" opacity=".08"/>
+  <text x="34" y="704" fill="#b8c2d6" font-family="monospace" font-size="22">MIMIC-CXR LOCAL DEMO · 10000032</text>
+</svg>
+

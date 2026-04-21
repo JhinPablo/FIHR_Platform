@@ -1,0 +1,4 @@
+subject_id,study_id,dicom_id,modality,image_path,conclusion,conclusion_code
+10000032,50414267,02aa804e-bde0afdd-112c0b34-7bc16630-4e384014,CR,images/cxr-demo-10000032.svg,No acute cardiopulmonary abnormality in local demo CXR label.,404684003
+10001217,58913004,8a099177-5e0c26a2-4aa2a7f5-aef1ca0b-9f39f974,CR,images/cxr-demo-10001217.svg,Mild bibasilar atelectatic opacity in local demo CXR label.,404684003
+

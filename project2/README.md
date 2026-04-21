@@ -11,6 +11,7 @@ rate limiting, frontend SPA y flujos de inferencia clínica.
 - Base de datos: Supabase PostgreSQL mediante `DATABASE_URL`.
 - Frontend: SPA Vite desplegable en Vercel, Netlify o Render Static.
 - Servicios IA: `ml-service` y `dl-service` CPU-first, con adaptadores listos para ONNX.
+- Imagenes: MinIO S3-compatible, bucket `clinical-images`.
 - Dataset objetivo: MIMIC-IV + MIMIC-CXR-JPG.
 
 ## Arranque Local
@@ -35,6 +36,7 @@ Luego crear usuarios demo y datos semilla:
 cd project2
 python scripts/create_demo_users.py
 python scripts/seed_mimic.py
+python scripts/seed_local_datasets.py
 ```
 
 Backend:
@@ -76,14 +78,18 @@ Supabase. No se deben committear `.env` ni llaves reales.
 | Rate limiting 429 | Cumplido |
 | Audit log filtrado | Cumplido |
 | Inferencia ML/DL y firma RiskReport | Implementación inicial |
+| MinIO bucket `clinical-images` | Cumplido en Docker Compose |
+| Imagenes en informes FHIR | `DiagnosticReport.presentedForm` enlaza URL presignada |
 | README datasets sin subir datos | Cumplido en `docs/datasets.md` |
 | Postman | `postman/FHIR_Platform_Corte2.postman_collection.json` |
 
 ## Dataset
 
-Este repositorio no incluye MIMIC-IV ni MIMIC-CXR-JPG. El equipo debe obtener
-acceso autorizado desde PhysioNet y seguir DUA/CITI. La estructura esperada y
-el mapeo a FHIR están documentados en:
+Este repositorio incluye solo un dataset demo versionable en
+`datasets/local-demo/`, sin PHI real, para probar MinIO y FHIR localmente. No
+incluye MIMIC-IV ni MIMIC-CXR-JPG reales. El equipo debe obtener acceso
+autorizado desde PhysioNet y seguir DUA/CITI. La estructura esperada y el mapeo
+a FHIR están documentados en:
 
 - `docs/datasets.md`
 - `docs/fhir_mapping.md`
@@ -94,4 +100,3 @@ el mapeo a FHIR están documentados en:
 - Base de datos: Supabase PostgreSQL.
 - Frontend: Vercel/Netlify/Render Static apuntando a `project2/frontend`.
 - Variables sensibles: configurar en Render/Vercel/Supabase secrets.
-

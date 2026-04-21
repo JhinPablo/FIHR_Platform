@@ -39,3 +39,17 @@ postgresql+psycopg://postgres:<password>@db.<ref>.supabase.co:5432/postgres
 3. Output directory: `dist`.
 4. Configurar variable o reemplazar `API` si se desea usar backend público.
 
+## MinIO Local
+
+Docker Compose levanta:
+
+- API S3: `http://localhost:9000`
+- Console: `http://localhost:9001`
+- Bucket: `clinical-images`
+
+Credenciales locales por defecto:
+
+```text
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin123
+```

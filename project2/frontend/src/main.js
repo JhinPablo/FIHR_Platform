@@ -1,9 +1,14 @@
+/* ================================================================
+   Novena Health Systems — Clinical Platform SPA
+   Three layouts: Landing (public) · Auth (login) · App (authed)
+   ================================================================ */
+
 const API = localStorage.getItem("apiBase") || "http://localhost:8000";
 
 const state = {
   route: location.hash.replace("#", "") || "/",
-  accessKey: localStorage.getItem("accessKey") || "dev-access-medico-1",
-  permissionKey: localStorage.getItem("permissionKey") || "dev-permission-medico-1",
+  accessKey: localStorage.getItem("accessKey") || "",
+  permissionKey: localStorage.getItem("permissionKey") || "",
   principal: null,
   patients: [],
   selectedPatient: null,
@@ -13,58 +18,99 @@ const state = {
   audit: [],
   consents: [],
   lastInference: null,
+  message: "",
+  loading: false,
 };
 
-function headers() {
-  return {
-    "Content-Type": "application/json",
+/* ── Utilities ─────────────────────────────────────────────────── */
+function headers(json = true) {
+  const base = {
     "X-Access-Key": state.accessKey,
     "X-Permission-Key": state.permissionKey,
   };
+  return json ? { ...base, "Content-Type": "application/json" } : base;
 }
 
 async function api(path, options = {}) {
-  const res = await fetch(`${API}${path}`, { ...options, headers: { ...headers(), ...(options.headers || {}) } });
+  const res = await fetch(`${API}${path}`, {
+    ...options,
+    headers: { ...headers(options.json !== false), ...(options.headers || {}) },
+  });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
   return data;
 }
 
-function nav(route, label) {
-  return `<button class="${state.route === route ? "active" : ""}" onclick="go('${route}')">${label}</button>`;
+function resourceEntries(bundle) {
+  return (bundle.entry || []).map((e) => e.resource);
 }
 
+function patientName(p) {
+  return p?.name?.[0]?.text || p?.name?.[0]?.family || "Paciente";
+}
+
+function toast(msg, dur = 3200) {
+  state.message = msg;
+  render();
+  setTimeout(() => { state.message = ""; render(); }, dur);
+}
+
+/* ── Navigation ─────────────────────────────────────────────────── */
 window.go = (route) => {
   state.route = route;
   location.hash = route;
   render();
 };
 
+/* ── Auth actions ───────────────────────────────────────────────── */
+window.fillDemo = (ak, pk) => {
+  document.querySelector("#accessKey").value = ak;
+  document.querySelector("#permissionKey").value = pk;
+};
+
 window.login = async () => {
-  state.accessKey = document.querySelector("#accessKey").value;
-  state.permissionKey = document.querySelector("#permissionKey").value;
-  localStorage.setItem("accessKey", state.accessKey);
-  localStorage.setItem("permissionKey", state.permissionKey);
+  state.accessKey = document.querySelector("#accessKey").value.trim();
+  state.permissionKey = document.querySelector("#permissionKey").value.trim();
+  if (!state.accessKey || !state.permissionKey) return alert("Ingresa ambas llaves.");
   try {
     const data = await api("/auth/validate-keys", { method: "POST" });
     state.principal = data.principal;
-    go("/patients");
+    localStorage.setItem("accessKey", state.accessKey);
+    localStorage.setItem("permissionKey", state.permissionKey);
+    await loadPatients(false);
+    go("/dashboard");
   } catch (err) {
-    alert(err.message);
+    alert("Acceso denegado: " + err.message);
   }
 };
 
-window.loadPatients = async () => {
-  const data = await api("/fhir/Patient?limit=20&offset=0");
-  state.patients = data.entry.map((e) => e.resource);
-  render();
+window.logout = () => {
+  state.principal = null;
+  state.accessKey = "";
+  state.permissionKey = "";
+  localStorage.removeItem("accessKey");
+  localStorage.removeItem("permissionKey");
+  go("/");
 };
 
+/* ── Data loaders ───────────────────────────────────────────────── */
+async function loadPatients(shouldRender = true) {
+  const data = await api("/fhir/Patient?limit=50&offset=0");
+  state.patients = resourceEntries(data);
+  if (shouldRender) render();
+}
+window.loadPatients = loadPatients;
+
+async function refreshPatientData(patientId) {
+  state.selectedPatient = await api(`/fhir/Patient/${patientId}`);
+  state.observations = resourceEntries(await api(`/fhir/Observation?patient_id=${patientId}&limit=80&offset=0`));
+  state.reports = resourceEntries(await api(`/fhir/DiagnosticReport?patient_id=${patientId}&limit=20&offset=0`));
+  state.media = resourceEntries(await api(`/fhir/Media?patient_id=${patientId}&limit=20&offset=0`));
+  state.consents = resourceEntries(await api(`/consents?patient_id=${patientId}&limit=20&offset=0`));
+}
+
 window.openPatient = async (id) => {
-  state.selectedPatient = await api(`/fhir/Patient/${id}`);
-  state.observations = (await api(`/fhir/Observation?patient_id=${id}&limit=50&offset=0`)).entry.map((e) => e.resource);
-  state.reports = (await api(`/fhir/DiagnosticReport?patient_id=${id}&limit=20&offset=0`)).entry.map((e) => e.resource);
-  state.media = (await api(`/fhir/Media?patient_id=${id}&limit=20&offset=0`)).entry.map((e) => e.resource);
+  await refreshPatientData(id);
   go("/patient");
 };
 
@@ -72,14 +118,20 @@ window.runInference = async (modelType) => {
   if (!state.selectedPatient) return alert("Selecciona un paciente primero.");
   const data = await api("/infer", {
     method: "POST",
-    body: JSON.stringify({ patient_id: state.selectedPatient.id, model_type: modelType, features: { observations: state.observations.length } }),
+    body: JSON.stringify({
+      patient_id: state.selectedPatient.id,
+      model_type: modelType,
+      features: { observations: state.observations.length, media: state.media.length },
+      image_url: state.media[0]?.content?.url || null,
+    }),
   });
   state.lastInference = data;
-  go("/risk");
+  toast(`Inferencia ${modelType} completada`);
+  go("/report");
 };
 
 window.signReport = async () => {
-  const note = document.querySelector("#clinicalNote").value;
+  const note = document.querySelector("#clinicalNote")?.value || "";
   const reportId = state.lastInference?.risk_report?.id;
   if (!reportId) return alert("No hay RiskReport para firmar.");
   try {
@@ -87,6 +139,7 @@ window.signReport = async () => {
       method: "PATCH",
       body: JSON.stringify({ decision: "ACCEPT", clinical_note: note }),
     });
+    toast("RiskReport firmado correctamente ✓");
     render();
   } catch (err) {
     alert(err.message);
@@ -94,138 +147,735 @@ window.signReport = async () => {
 };
 
 window.loadAudit = async () => {
-  state.audit = (await api("/audit-log?limit=50&offset=0")).entry.map((e) => e.resource);
+  state.audit = resourceEntries(await api("/audit-log?limit=80&offset=0"));
   render();
 };
 
-window.loadConsents = async () => {
-  const suffix = state.selectedPatient ? `?patient_id=${state.selectedPatient.id}` : "";
-  state.consents = (await api(`/consents${suffix}`)).entry.map((e) => e.resource);
-  render();
+window.uploadImage = async () => {
+  if (!state.selectedPatient) return alert("Selecciona un paciente primero.");
+  const file = document.querySelector("#imageFile").files[0];
+  if (!file) return alert("Selecciona una imagen (SVG, JPG o PNG).");
+  const form = new FormData();
+  form.append("patient_id", state.selectedPatient.id);
+  form.append("source_study_id", document.querySelector("#studyId").value || `LOCAL-${Date.now()}`);
+  form.append("source_dicom_id", document.querySelector("#dicomId").value || `LOCAL-DICOM-${Date.now()}`);
+  form.append("modality", document.querySelector("#modality").value || "CR");
+  form.append("conclusion", document.querySelector("#conclusion").value || "Local image pending review.");
+  form.append("conclusion_code", "404684003");
+  form.append("file", file);
+  const res = await fetch(`${API}/images`, { method: "POST", headers: headers(false), body: form });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) return alert(data.detail || `HTTP ${res.status}`);
+  await refreshPatientData(state.selectedPatient.id);
+  toast("Imagen almacenada en MinIO y enlazada al informe ✓");
+  go("/imaging");
 };
 
-function layout(content) {
+/* ================================================================
+   LANDING PAGE  (public, no sidebar/topbar)
+   ================================================================ */
+function renderLanding() {
   return `
-    <div class="shell">
-      <header class="topbar">
-        <div class="brand">FHIR Platform Corte 2</div>
-        <div class="badge">MIMIC-IV + MIMIC-CXR</div>
-        <nav class="nav">
-          ${nav("/", "Inicio")}
-          ${nav("/login", "Llaves")}
-          ${nav("/patients", "Pacientes")}
-          ${nav("/patient", "Detalle")}
-          ${nav("/risk", "RiskReport")}
-          ${nav("/audit", "Audit")}
-        </nav>
-      </header>
-      ${content}
-    </div>`;
-}
+<div class="landing-page">
+  <!-- Fixed nav -->
+  <nav class="landing-nav">
+    <div class="brand"><span class="dot"></span>Novena Health Systems</div>
+    <div class="nav-links">
+      <a href="#">Platform</a>
+      <a href="#">FHIR</a>
+      <a href="#">Security</a>
+      <a href="#">Interoperability</a>
+    </div>
+    <div class="nav-cta">
+      <button class="btn ghost small" onclick="go('/auth')" style="color:#fff;border-color:rgba(255,255,255,.3)">Sign in</button>
+      <button class="btn primary small" onclick="go('/auth')">Request access ➜</button>
+    </div>
+  </nav>
 
-function home() {
-  return layout(`
-    <section class="hero">
-      <div>
-        <h1>Sistema Clínico Digital Interoperable</h1>
-        <p style="color:#dbeafe;max-width:760px">FastAPI, Supabase PostgreSQL, FHIR-Lite/FHIR R4, doble API-Key, ML/DL y trazabilidad clínica sobre MIMIC-IV + MIMIC-CXR-JPG.</p>
+  <!-- Hero -->
+  <section class="landing-hero">
+    <div class="landing-hero-copy">
+      <span class="eyebrow">Clinical infrastructure · HL7 FHIR R4</span>
+      <h1>Interoperable<br/>clinical records,<br/>signed &amp; traceable.</h1>
+      <p>A regulated platform for patient records, medical imaging, AI-assisted risk assessment and auditable clinical reports — designed for hospital workflow.</p>
+      <div class="hero-cta">
+        <button class="btn primary" onclick="go('/auth')">Open clinical console</button>
+        <button class="btn ghost" style="color:#fff;border-color:rgba(255,255,255,.3)">Platform overview ➜</button>
       </div>
-    </section>
-    <main class="page grid">
-      <div class="card"><h2>FHIR</h2><p>Patient, Observation, Media, DiagnosticReport, RiskAssessment, Consent y AuditEvent.</p></div>
-      <div class="card"><h2>Seguridad</h2><p>Roles, doble llave, cifrado de datos sensibles y rate limiting 429.</p></div>
-      <div class="card"><h2>Datos</h2><p>MIMIC resuelve fragmentación clínica al mapear EHR e imágenes a recursos interoperables.</p></div>
-    </main>`);
-}
-
-function login() {
-  return layout(`<main class="page">
-    <div class="grid two">
-      <section class="card">
-        <h2>Acceso por doble API-Key</h2>
-        <label>X-Access-Key</label>
-        <input id="accessKey" value="${state.accessKey}">
-        <label>X-Permission-Key</label>
-        <input id="permissionKey" value="${state.permissionKey}">
-        <p><button class="btn primary" onclick="login()">Validar llaves</button></p>
-      </section>
-      <section class="card">
-        <h2>Credenciales demo</h2>
-        <p class="mono">Admin: dev-access-admin / dev-permission-admin</p>
-        <p class="mono">Medico 1: dev-access-medico-1 / dev-permission-medico-1</p>
-        <p class="mono">Medico 2: dev-access-medico-2 / dev-permission-medico-2</p>
-        <p class="mono">Paciente: dev-access-patient / dev-permission-patient</p>
-      </section>
+      <div class="hero-badges">
+        <span class="hb">FHIR R4</span>
+        <span class="hb">RBAC</span>
+        <span class="hb">Audit-trail</span>
+        <span class="hb">Signed reports</span>
+        <span class="hb">Habeas Data</span>
+      </div>
     </div>
-  </main>`);
+    <div class="landing-hero-mock">
+      <div class="mock-card">
+        <div class="mc-label">Patient · P-00421 · Urgent review</div>
+        <div class="mc-row">
+          <div class="mc-stat"><div class="k">RISK</div><div class="v">0.87</div></div>
+          <div class="mc-stat"><div class="k">MODEL</div><div class="v" style="font-size:18px">dl-resnet</div></div>
+          <div class="mc-stat"><div class="k">SIG.</div><div class="v" style="font-size:18px">pending</div></div>
+        </div>
+      </div>
+      <div class="mock-terminal">
+        <div class="cmd">$ fhir.get Patient?_id=421</div>
+        <div>&gt; 200 OK · 1 resource</div>
+        <div>&gt; observations:12 · media:3 · consent:active</div>
+        <div class="cmd" style="margin-top:8px">$ infer.run --model dl.resnet.v3</div>
+        <div>&gt; status: running · eta 00:01:42</div>
+        <div>&gt; queued by dr.alvarez · trace a8f2..</div>
+        <div class="ok-line">&gt; signature required before close ⓘ</div>
+      </div>
+      <div class="mock-card">
+        <div class="mc-label">Operational flow</div>
+        <div style="display:flex;gap:6px;font-size:11px;color:rgba(255,255,255,.55);font-family:var(--mono)">
+          ${["Upload","Observe","Infer","Review","Sign","Audit"].map((s,i,a) => `<span>${s}</span>${i<a.length-1?'<span style="opacity:.3">→</span>':''}`).join("")}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Standards strip -->
+  <div class="landing-standards">
+    <span>HL7 FHIR R4</span><span>ISO 27001-aligned</span><span>Habeas Data · Ley 1581</span>
+    <span>Signed reports</span><span>Append-only audit</span><span>RBAC · scoped keys</span>
+  </div>
+
+  <!-- Features -->
+  <section class="landing-features">
+    <h2>One platform, every clinical need.</h2>
+    <p class="sub">From patient intake through risk inference and signed report — fully auditable and FHIR-native.</p>
+    <div class="features-grid">
+      ${[
+        ["01 / PATIENT RECORDS","Unified clinical record","FHIR-coded observations, history, consent, linked studies."],
+        ["02 / IMAGING","Lightweight PACS","Modality-aware viewer with overlay explanations."],
+        ["03 / AI INFERENCE","Orchestrated models","ML, DL and multimodal with calibrated probabilities."],
+        ["04 / RISK REPORTS","Signed & exportable","Document-grade output with physician decision."],
+        ["05 / AUDIT","Append-only log","Every access, change and signature — traceable."],
+        ["06 / CONSENT","Habeas data","Versioned consent with persistence and review."],
+      ].map(([n,t,d]) => `
+        <div class="feature-card">
+          <span class="fc-num">${n}</span>
+          <h3>${t}</h3>
+          <p>${d}</p>
+        </div>`).join("")}
+    </div>
+  </section>
+
+  <!-- Workflow -->
+  <section class="landing-workflow">
+    <h2>Intake to audit — seven steps.</h2>
+    <div class="workflow-steps">
+      ${["Intake","Observation","Image upload","AI analysis","Review","Signed report","Audit"].map((s,i) =>
+        `<div class="ws"><b>${String(i+1).padStart(2,"0")}</b><span>${s}</span></div>`).join("")}
+    </div>
+  </section>
+
+  <!-- FHIR + Security -->
+  <section class="landing-fhir">
+    <div class="fhir-block">
+      <h3>FHIR R4 resources</h3>
+      <div class="fhir-pills">
+        ${["Patient","Observation","Media","DiagnosticReport","RiskAssessment","Consent","AuditEvent","Practitioner"].map(r => `<span>${r}</span>`).join("")}
+      </div>
+      <p style="margin-top:14px;color:var(--muted);font-size:13px">Native import / export, REST & bulk data.</p>
+    </div>
+    <div class="sec-block">
+      <h3>Security &amp; governance</h3>
+      <div class="sec-list">
+        ${["API keys & scopes","Role-based access","At-rest encryption","Critical alerts","Consent persistence","Append-only audit"].map(x => `<span>${x}</span>`).join("")}
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <span>© Novena Health Systems · 2026 — FHIR R4 Clinical Platform</span>
+    <div>
+      <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Habeas Data</a>
+      <a href="#" onclick="go('/auth')">Sign in</a>
+    </div>
+  </footer>
+</div>`;
 }
 
-function patients() {
-  const rows = state.patients.map((p) => `
-    <tr>
-      <td>${p.id}</td><td>${p.name?.[0]?.text || "Paciente"}</td><td>${p.gender || "-"}</td>
-      <td>${p.extension?.[1]?.valueString || "-"}</td>
-      <td><button class="btn" onclick="openPatient('${p.id}')">Abrir</button></td>
-    </tr>`).join("");
-  return layout(`<main class="page">
-    <div class="row"><h2>Pacientes FHIR</h2><span class="spacer"></span><button class="btn primary" onclick="loadPatients()">Cargar</button></div>
-    <section class="card"><table><thead><tr><th>ID</th><th>Nombre</th><th>Sexo</th><th>MIMIC subject_id</th><th></th></tr></thead><tbody>${rows}</tbody></table></section>
-  </main>`);
+/* ================================================================
+   AUTH PAGE  (split dark/light, no sidebar)
+   ================================================================ */
+function renderAuth() {
+  const demoCredentials = [
+    { role: "ADMIN",    label: "Administrator",   ak: "dev-access-admin",     pk: "dev-permission-admin" },
+    { role: "MÉDICO 1", label: "Dr. Medico Uno",  ak: "dev-access-medico-1",  pk: "dev-permission-medico-1" },
+    { role: "MÉDICO 2", label: "Dr. Medico Dos",  ak: "dev-access-medico-2",  pk: "dev-permission-medico-2" },
+    { role: "PACIENTE", label: "Paciente Demo",   ak: "dev-access-patient",   pk: "dev-permission-patient" },
+  ];
+
+  return `
+<div class="auth-page">
+  <!-- Left dark panel -->
+  <div class="auth-dark">
+    <div class="ad-brand">
+      <span class="dot"></span>Novena Health Systems
+    </div>
+    <h2>Secure clinical access</h2>
+    <p>Access is restricted to authorized personnel. All sessions are logged and attributable to a verified practitioner identity.</p>
+    <div class="auth-security">
+      <div>Session timeout · 15 min inactivity</div>
+      <div>Dual-key authentication · required</div>
+      <div>All actions logged to audit trail</div>
+      <div>At-rest encryption · AES-256</div>
+    </div>
+    <div style="margin-top:auto;padding-top:40px">
+      <button class="btn ghost" onclick="go('/')" style="color:rgba(255,255,255,.55);border-color:rgba(255,255,255,.2);font-size:12px">← Back to overview</button>
+    </div>
+  </div>
+
+  <!-- Right form panel -->
+  <div class="auth-form-panel">
+    <span class="af-sub">AREA 01 · ACCESS CONTROL</span>
+    <h2>Practitioner access</h2>
+
+    <label for="accessKey">X-Access-Key</label>
+    <input id="accessKey" type="text" placeholder="dev-access-medico-1"
+      value="${state.accessKey}" autocomplete="off" spellcheck="false">
+
+    <label for="permissionKey">X-Permission-Key</label>
+    <input id="permissionKey" type="password" placeholder="dev-permission-medico-1"
+      value="${state.permissionKey}" autocomplete="off">
+
+    <button class="btn primary" onclick="login()" style="width:100%;justify-content:center;margin-top:4px">
+      Sign in to clinical console
+    </button>
+
+    <div class="auth-demo">
+      <div class="ad-title">Demo credentials — click to fill</div>
+      ${demoCredentials.map(c => `
+        <div class="auth-demo-row" onclick="fillDemo('${c.ak}','${c.pk}')">
+          <span class="role-pill">${c.role}</span>
+          <span class="keys">${c.ak} / ${c.pk}</span>
+        </div>`).join("")}
+    </div>
+  </div>
+</div>`;
 }
 
-function patient() {
+/* ================================================================
+   APP SHELL  (authenticated: sidebar + topbar + content)
+   ================================================================ */
+function renderApp(content) {
+  const p = state.principal;
+  const role = p?.role || "—";
+  const name = p?.display_name || p?.username || "Usuario";
+
+  const navItems = [
+    { icon: "⌂", label: "Dashboard",    route: "/dashboard" },
+    { icon: "👥", label: "Patients",     route: "/patients"  },
+    { icon: "📋", label: "Record",       route: "/patient"   },
+    { icon: "🩻", label: "Imaging",      route: "/imaging"   },
+    { icon: "✦",  label: "AI Inference", route: "/ai"        },
+    { icon: "📄", label: "Risk Report",  route: "/report"    },
+    { icon: "📜", label: "Audit",        route: "/audit"     },
+  ];
+
+  const navHTML = navItems.map(item => `
+    <div class="sb-item${state.route === item.route ? " active" : ""}" onclick="go('${item.route}')">
+      <span class="si">${item.icon}</span><span>${item.label}</span>
+    </div>`).join("");
+
+  const breadcrumb = navItems.find(i => i.route === state.route)?.label || "Dashboard";
+
+  const criticalCount = state.patients.filter(p =>
+    p.extension?.some(e => e.url?.includes("risk") && (e.valueDecimal || 0) > 0.8)
+  ).length;
+
+  return `
+<div class="app-shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <span class="dot"></span>
+      <div><div>Novena</div><small>Health · FHIR R4</small></div>
+    </div>
+    <nav>
+      <div class="sb-group">Main</div>
+      ${navHTML}
+      <div class="sb-group">Account</div>
+      <div class="sb-item" onclick="logout()"><span class="si">⎋</span><span>Sign out</span></div>
+    </nav>
+    <div class="sb-footer">
+      <div class="user-info">${role.toUpperCase()}</div>
+      <div class="user-role">${name}</div>
+    </div>
+  </aside>
+
+  <!-- Main area -->
+  <div class="app-main">
+    <header class="app-topbar">
+      <span class="breadcrumb">${breadcrumb}</span>
+      <span class="spacer"></span>
+      <span class="role-badge">${role.toUpperCase()}</span>
+      <div class="icon-btn" title="Notifications">🔔</div>
+      <div class="icon-btn" onclick="logout()" title="Sign out">⎋</div>
+    </header>
+
+    ${criticalCount > 0 ? `
+    <div class="alert-banner">
+      <span class="dot-crit"></span>
+      <strong>${criticalCount} critical patient${criticalCount > 1 ? "s" : ""} require attention</strong>
+      <span class="spacer"></span>
+      <button class="btn small" onclick="go('/patients')">Review queue ➜</button>
+    </div>` : ""}
+
+    <div class="app-content">
+      ${content}
+      ${state.message ? `<div class="toast">${state.message}</div>` : ""}
+    </div>
+  </div>
+</div>`;
+}
+
+/* ================================================================
+   VIEW — DASHBOARD
+   ================================================================ */
+function viewDashboard() {
+  const total = state.patients.length;
+  const withMedia = state.media.length;
+  const lastRole = state.principal?.role || "—";
+
+  return `
+<span class="section-sub">AREA 02 · Operational dashboard</span>
+<div class="section-title">Clinical command surface</div>
+
+<div class="stats-row">
+  <div class="stat">
+    <div class="k">Active patients</div>
+    <div class="v">${total || "—"}</div>
+    <div class="trend">${total ? "loaded from FHIR" : "seed data pending"}</div>
+  </div>
+  <div class="stat">
+    <div class="k">CXR media</div>
+    <div class="v">${withMedia || "—"}</div>
+    <div class="trend">in MinIO bucket</div>
+  </div>
+  <div class="stat">
+    <div class="k">Role</div>
+    <div class="v" style="font-size:22px">${lastRole}</div>
+    <div class="trend">active session</div>
+  </div>
+  <div class="stat">
+    <div class="k">Pending inferences</div>
+    <div class="v">${state.lastInference ? "1" : "—"}</div>
+    <div class="trend${state.lastInference ? " crit" : ""}">
+      ${state.lastInference ? "needs signature" : "no active job"}
+    </div>
+  </div>
+</div>
+
+<div class="two-col">
+  <div class="worklist">
+    <h3>System status</h3>
+    ${["✓ FHIR gateway — Patient, Observation, Media",
+       "✓ MinIO bucket — clinical-images",
+       "✓ Audit writer — AuditEvent active",
+       "✓ ML service — ONNX CPU placeholder",
+       "✓ DL service — ONNX INT8 placeholder",
+       "⚙  Supabase PostgreSQL — connect DATABASE_URL"].map(x =>
+      `<p><span class="status-dot" style="background:${x.startsWith("⚙") ? "#d97706" : "#16a34a"}"></span>${x}</p>`).join("")}
+  </div>
+  <div class="terminal">
+$ fhir.get Patient?_count=50<br>
+&gt; ${state.patients.length} resources loaded<br>
+$ minio.bucket clinical-images<br>
+&gt; ${state.media.length} objects indexed<br>
+$ risk.sign --requires-note &gt;30 chars<br>
+&gt; pending: ${state.lastInference ? "yes" : "none"}<br>
+$ audit.log --tail 10<br>
+&gt; events streaming...
+  </div>
+</div>`;
+}
+
+/* ================================================================
+   VIEW — PATIENTS
+   ================================================================ */
+function viewPatients() {
+  const rows = state.patients.length
+    ? state.patients.map(p => `
+      <tr>
+        <td class="mono-cell">${p.id.slice(0, 8)}…</td>
+        <td>${patientName(p)}</td>
+        <td>${p.gender || "—"}</td>
+        <td class="mono-cell">${p.extension?.find(e => e.url?.includes("source-subject"))?.valueString || "—"}</td>
+        <td>
+          <span class="badge soft"><span class="d"></span>ACTIVE</span>
+        </td>
+        <td><button class="btn small" onclick="openPatient('${p.id}')">Open ➜</button></td>
+      </tr>`).join("")
+    : `<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">
+        No patients loaded. Run seed script or <button class="btn small" onclick="loadPatients()">refresh</button>.
+      </td></tr>`;
+
+  return `
+<div class="page-head">
+  <div>
+    <span class="section-sub">AREA 03 · Patient list</span>
+    <div class="section-title">Patients</div>
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="loadPatients()">⟳ Refresh</button>
+  </div>
+</div>
+
+<div class="table-shell">
+  <table>
+    <thead>
+      <tr>
+        <th>FHIR ID</th><th>Name</th><th>Sex</th><th>MIMIC subject_id</th><th>Status</th><th></th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+</div>
+
+<div class="pagination">
+  <span class="mono">Showing ${state.patients.length} patients · page 1</span>
+  <button class="btn small ghost">◀ Prev</button>
+  <button class="btn small">Next ▶</button>
+</div>`;
+}
+
+/* ================================================================
+   VIEW — PATIENT DETAIL
+   ================================================================ */
+function viewPatient() {
   const p = state.selectedPatient;
-  if (!p) return layout(`<main class="page"><section class="card"><h2>Selecciona un paciente</h2><button class="btn" onclick="go('/patients')">Ir a pacientes</button></section></main>`);
-  const obs = state.observations.map((o) => `<tr><td>${o.code?.coding?.[0]?.code}</td><td>${o.code?.coding?.[0]?.display}</td><td>${o.valueQuantity?.value || "-"}</td><td>${o.valueQuantity?.unit || ""}</td></tr>`).join("");
-  const media = state.media.map((m) => `<p class="mono">${m.modality?.coding?.[0]?.code || "CR"} · ${m.content?.url || "sin URL"}</p>`).join("");
-  return layout(`<main class="page">
-    <section class="card">
-      <div class="row"><h2>${p.name?.[0]?.text}</h2><span class="spacer"></span><button class="btn primary" onclick="runInference('ML')">Inferencia ML</button><button class="btn primary" onclick="runInference('DL')">Inferencia DL</button><button class="btn danger" onclick="runInference('MULTIMODAL')">Multimodal</button></div>
-      <p class="mono">Patient/${p.id}</p>
-    </section>
-    <div class="grid two" style="margin-top:16px">
-      <section class="card"><h2>Observations</h2><table><tbody>${obs}</tbody></table></section>
-      <section class="card"><h2>Media CXR</h2>${media || "<p>Sin imágenes cargadas.</p>"}</section>
+  if (!p) return `
+    <div class="panel" style="max-width:480px">
+      <h3>No patient selected</h3>
+      <p style="color:var(--muted);margin-bottom:16px">Go to the Patients list and open a record.</p>
+      <button class="btn" onclick="go('/patients')">Go to Patients</button>
+    </div>`;
+
+  const obsRows = state.observations.map(o => `
+    <tr>
+      <td class="mono-cell">${o.code?.coding?.[0]?.code || "—"}</td>
+      <td>${o.code?.coding?.[0]?.display || o.code?.text || "—"}</td>
+      <td>${o.valueQuantity?.value ?? o.valueString ?? "—"}</td>
+      <td class="mono-cell">${o.valueQuantity?.unit || ""}</td>
+      <td class="mono-cell">${o.effectiveDateTime?.slice(0,10) || ""}</td>
+    </tr>`).join("") || `<tr><td colspan="5" style="color:var(--muted);padding:16px">No observations.</td></tr>`;
+
+  return `
+<div class="record-head">
+  <div>
+    <span class="section-sub">AREA 04 · Patient record</span>
+    <div class="section-title">${patientName(p)}</div>
+    <span class="mono-cell">Patient/${p.id} · ${p.gender || "—"}</span>
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="go('/imaging')">🩻 Imaging</button>
+    <button class="btn" onclick="go('/ai')">✦ Run inference</button>
+    <button class="btn primary" onclick="go('/report')">📄 Risk report</button>
+  </div>
+</div>
+
+<div class="grid-4" style="margin-bottom:22px">
+  <div class="stat"><div class="k">Observations</div><div class="v">${state.observations.length}</div></div>
+  <div class="stat"><div class="k">CXR studies</div><div class="v">${state.media.length}</div></div>
+  <div class="stat"><div class="k">Reports</div><div class="v">${state.reports.length}</div></div>
+  <div class="stat"><div class="k">Consents</div><div class="v">${state.consents.length}</div></div>
+</div>
+
+<div class="two-col">
+  <div>
+    <div class="panel">
+      <h3>FHIR-coded observations</h3>
+      <div class="table-shell">
+        <table>
+          <thead><tr><th>LOINC</th><th>Name</th><th>Value</th><th>Unit</th><th>Date</th></tr></thead>
+          <tbody>${obsRows}</tbody>
+        </table>
+      </div>
     </div>
-  </main>`);
+  </div>
+  <div>
+    <div class="worklist">
+      <h3>Linked FHIR resources</h3>
+      <p><span class="status-dot"></span>Patient / ${p.id.slice(0,8)}</p>
+      <p><span class="status-dot"></span>Observation × ${state.observations.length}</p>
+      <p><span class="status-dot"></span>Media × ${state.media.length}</p>
+      <p><span class="status-dot"></span>DiagnosticReport × ${state.reports.length}</p>
+      <p><span class="status-dot"></span>Consent × ${state.consents.length}</p>
+    </div>
+    <div class="panel" style="margin-top:14px">
+      <h3>MIMIC identifiers</h3>
+      ${(p.extension || []).map(e => `
+        <p style="font-family:var(--mono);font-size:12px;color:var(--muted);margin:4px 0">
+          ${e.url?.split(":").pop()}: ${e.valueString || e.valueDecimal || e.valueBoolean ?? "—"}
+        </p>`).join("") || "<p style='color:var(--muted)'>No extensions.</p>"}
+    </div>
+  </div>
+</div>`;
 }
 
-function risk() {
+/* ================================================================
+   VIEW — IMAGING
+   ================================================================ */
+function viewImaging() {
+  const imgs = state.media.length
+    ? state.media.map(m => `
+      <figure>
+        <img src="${m.content?.url}"
+          alt="CXR study"
+          onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 300 300\\'><rect fill=\\'%23111\\' width=\\'300\\' height=\\'300\\'/><text fill=\\'%23666\\' x=\\'50%\\' y=\\'50%\\' text-anchor=\\'middle\\' font-family=\\'monospace\\' font-size=\\'12\\'>Image unavailable</text></svg>'">
+        <figcaption>
+          ${m.modality?.coding?.[0]?.code || "CR"} · ${m.extension?.[0]?.valueString || m.id?.slice(0,8)}
+          ${m.content?.url ? `<a href="${m.content.url}" target="_blank" style="color:#7eaace;margin-left:8px">↗ Full size</a>` : ""}
+        </figcaption>
+      </figure>`).join("")
+    : `<div style="display:flex;align-items:center;justify-content:center;height:280px;color:#7eaace;font-family:var(--mono);font-size:12px">
+        No images loaded for selected patient.
+      </div>`;
+
+  return `
+<div class="page-head">
+  <div>
+    <span class="section-sub">AREA 05 · Imaging</span>
+    <div class="section-title">CXR media storage</div>
+  </div>
+  ${state.selectedPatient ? `<span style="font-family:var(--mono);font-size:12px;color:var(--muted)">${patientName(state.selectedPatient)}</span>` : ""}
+</div>
+
+<div class="two-col">
+  <div class="viewer">${imgs}</div>
+  <div class="panel">
+    <h3>Upload to MinIO</h3>
+    ${state.selectedPatient ? "" : `<div class="disclaimer" style="margin-bottom:12px">Select a patient first.</div>`}
+    <div class="form-group">
+      <label>Study ID</label>
+      <input id="studyId" placeholder="e.g. 50414267">
+    </div>
+    <div class="form-group">
+      <label>DICOM ID</label>
+      <input id="dicomId" placeholder="e.g. 02aa804e-bde0…">
+    </div>
+    <div class="form-group">
+      <label>Modality</label>
+      <select id="modality">
+        <option value="CR">CR — Computed Radiography</option>
+        <option value="CT">CT — Computed Tomography</option>
+        <option value="MR">MR — Magnetic Resonance</option>
+        <option value="FUNDUS">FUNDUS — Retinal</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Conclusion</label>
+      <textarea id="conclusion" placeholder="DiagnosticReport conclusion…"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Image file (SVG, JPG, PNG)</label>
+      <input id="imageFile" type="file" accept="image/*,.svg" style="padding:6px">
+    </div>
+    <button class="btn primary" onclick="uploadImage()" style="width:100%;justify-content:center">
+      ↥ Store image &amp; create report
+    </button>
+  </div>
+</div>`;
+}
+
+/* ================================================================
+   VIEW — AI INFERENCE
+   ================================================================ */
+function viewAI() {
+  const hasPatient = !!state.selectedPatient;
+  return `
+<span class="section-sub">AREA 06 · AI inference</span>
+<div class="section-title">Model orchestration</div>
+
+${!hasPatient ? `<div class="disclaimer">Select a patient in Patients tab before running inference.</div><br>` : ""}
+
+<div class="infer-grid">
+  ${[
+    ["ML",         "MIMIC-IV tabular",    "XGBoost → ONNX · calibrated probabilities · SHAP explanations"],
+    ["DL",         "MIMIC-CXR imaging",   "EfficientNet-B0 INT8 · Grad-CAM overlay · DiagnosticReport"],
+    ["MULTIMODAL", "Tabular + CXR fusion","Late fusion · combined risk score · end-to-end triage"],
+  ].map(([type, sub, desc]) => `
+    <button class="infer-card" onclick="runInference('${type}')" ${!hasPatient ? "disabled style='opacity:.45;cursor:not-allowed'" : ""}>
+      <b>${type}</b>
+      <strong style="display:block;font-size:13px;color:var(--navy);margin-bottom:6px">${sub}</strong>
+      <span>${desc}</span>
+    </button>`).join("")}
+</div>
+
+<div class="disclaimer">
+  Resultado generado por IA de apoyo diagnóstico. No reemplaza criterio médico. Sujeto a revisión clínica obligatoria.
+</div>
+
+${state.lastInference ? `
+<div class="panel" style="margin-top:20px">
+  <h3>Last inference result</h3>
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+    <div class="risk-score" style="font-size:48px">${state.lastInference?.risk_report?.prediction?.[0]?.probabilityDecimal ?? "—"}</div>
+    <div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:4px">Risk score</div>
+      <span class="badge crit"><span class="d"></span>${state.lastInference?.risk_report?.prediction?.[0]?.qualitativeRisk?.text || "PENDING"}</span>
+    </div>
+  </div>
+  <button class="btn primary" onclick="go('/report')">Open report &amp; sign ➜</button>
+</div>` : ""}`;
+}
+
+/* ================================================================
+   VIEW — RISK REPORT
+   ================================================================ */
+function viewReport() {
   const r = state.lastInference?.risk_report;
-  if (!r) return layout(`<main class="page"><section class="card"><h2>No hay inferencia activa</h2></section></main>`);
-  return layout(`<main class="page grid two">
-    <section class="card">
-      <h2>RiskAssessment</h2>
-      <p><span class="badge high">${r.prediction?.[0]?.qualitativeRisk?.text}</span></p>
-      <p class="mono">score=${r.prediction?.[0]?.probabilityDecimal}</p>
-      <pre class="log">${JSON.stringify(r, null, 2)}</pre>
-    </section>
-    <section class="card">
-      <h2>Firma médica</h2>
-      <div class="notice">Resultado generado por IA de apoyo diagnóstico. No reemplaza criterio médico.</div>
-      <textarea id="clinicalNote" placeholder="Nota clínica de al menos 30 caracteres"></textarea>
-      <p><button class="btn primary" onclick="signReport()">Firmar RiskReport</button></p>
-    </section>
-  </main>`);
+  const reportImages = state.reports.flatMap(rep => rep.presentedForm || []);
+  const isSigned = !!r?.performer?.length;
+
+  if (!r) return `
+    <div class="panel" style="max-width:480px">
+      <h3>No active RiskAssessment</h3>
+      <p style="color:var(--muted);margin-bottom:16px">Run an inference from the AI Inference tab first.</p>
+      <button class="btn" onclick="go('/ai')">Go to AI Inference</button>
+    </div>`;
+
+  return `
+<span class="section-sub">AREA 07 · Signed risk report</span>
+<div class="section-title">RiskAssessment</div>
+
+<div class="two-col">
+  <div>
+    <div class="panel">
+      <div class="risk-score">${r.prediction?.[0]?.probabilityDecimal ?? "—"}</div>
+      <div style="margin:12px 0 16px;display:flex;align-items:center;gap:10px">
+        <span class="badge crit"><span class="d"></span>${r.prediction?.[0]?.qualitativeRisk?.text || "—"}</span>
+        ${isSigned ? `<span class="badge ok"><span class="d"></span>SIGNED</span>` : `<span class="badge warn"><span class="d"></span>PENDING SIGNATURE</span>`}
+      </div>
+      <pre class="terminal" style="max-height:280px;overflow-y:auto;font-size:11px">${JSON.stringify(r, null, 2)}</pre>
+    </div>
+
+    ${reportImages.length ? `
+    <div class="panel" style="margin-top:14px">
+      <h3>Report imaging forms</h3>
+      ${reportImages.map(img => `
+        <div style="margin-bottom:10px">
+          <a class="image-link" href="${img.url}" target="_blank"
+            style="color:var(--navy);font-family:var(--mono);font-size:12px">
+            ↗ ${img.title || img.contentType || "CXR image"}
+          </a>
+        </div>`).join("")}
+    </div>` : ""}
+  </div>
+
+  <div class="panel">
+    <h3>Medical signature</h3>
+    ${isSigned
+      ? `<div class="badge ok" style="margin-bottom:12px"><span class="d"></span>Signed by ${r.performer?.[0]?.display || "physician"}</div>
+         <p style="color:var(--muted);font-size:13px">This report has been reviewed and signed.</p>`
+      : `<div class="disclaimer" style="margin-bottom:14px">
+           This RiskAssessment requires a physician signature before the patient record can be closed.
+         </div>
+         <label>Clinical note (minimum 30 characters)</label>
+         <textarea id="clinicalNote" placeholder="Enter your clinical assessment and decision…"></textarea>
+         <button class="btn primary" onclick="signReport()" style="width:100%;justify-content:center">
+           ✎ Sign RiskReport
+         </button>`}
+  </div>
+</div>`;
 }
 
-function audit() {
-  const rows = state.audit.map((a) => `<tr><td>${a.recorded}</td><td>${a.type?.text}</td><td>${a.agent?.[0]?.who?.display || "-"}</td><td>${a.outcome}</td></tr>`).join("");
-  return layout(`<main class="page">
-    <div class="row"><h2>Audit Log</h2><span class="spacer"></span><button class="btn primary" onclick="loadAudit()">Cargar audit</button><button class="btn" onclick="loadConsents()">Cargar consentimientos</button></div>
-    <section class="card"><table><tbody>${rows}</tbody></table></section>
-  </main>`);
+/* ================================================================
+   VIEW — AUDIT & CONSENT
+   ================================================================ */
+function viewAudit() {
+  const rows = state.audit.map(a => `
+    <tr>
+      <td class="mono-cell">${(a.recorded || "").slice(0,16)}</td>
+      <td>${a.type?.text || a.type?.coding?.[0]?.display || "—"}</td>
+      <td>${a.agent?.[0]?.who?.display || "—"}</td>
+      <td>
+        <span class="badge ${a.outcome === "0" || a.outcome === "success" ? "ok" : "warn"}">
+          <span class="d"></span>${a.outcome || "—"}
+        </span>
+      </td>
+      <td class="mono-cell">${a.entity?.[0]?.what?.reference || "—"}</td>
+    </tr>`).join("") || `<tr><td colspan="5" style="text-align:center;padding:28px;color:var(--muted)">
+      No audit events loaded. <button class="btn small" onclick="loadAudit()">Load audit</button>
+    </td></tr>`;
+
+  return `
+<div class="page-head">
+  <div>
+    <span class="section-sub">AREA 08 · Audit &amp; Consent</span>
+    <div class="section-title">Audit trail</div>
+  </div>
+  <button class="btn primary" onclick="loadAudit()">⟳ Load events</button>
+</div>
+
+<div class="table-shell" style="margin-bottom:24px">
+  <table>
+    <thead><tr><th>Timestamp</th><th>Action</th><th>Actor</th><th>Outcome</th><th>Entity</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+</div>
+
+<div class="panel" style="max-width:480px">
+  <h3>Consent records</h3>
+  ${state.consents.length
+    ? state.consents.map(c => `
+        <p style="margin:6px 0">
+          <span class="badge ${c.status === "active" ? "ok" : "soft"}">
+            <span class="d"></span>${c.status || "—"}
+          </span>
+          <span style="margin-left:8px;font-size:13px">${c.scope?.coding?.[0]?.display || c.category?.[0]?.coding?.[0]?.display || "Consent"}</span>
+        </p>`).join("")
+    : `<p style="color:var(--muted)">No consent records for selected patient.</p>`}
+</div>`;
 }
+
+/* ================================================================
+   ROUTER  — dispatch to correct shell
+   ================================================================ */
+const PROTECTED_ROUTES = ["/dashboard", "/patients", "/patient", "/imaging", "/ai", "/report", "/audit"];
+
+const APP_VIEWS = {
+  "/dashboard": viewDashboard,
+  "/patients":  viewPatients,
+  "/patient":   viewPatient,
+  "/imaging":   viewImaging,
+  "/ai":        viewAI,
+  "/report":    viewReport,
+  "/audit":     viewAudit,
+};
 
 function render() {
-  const routes = { "/": home, "/login": login, "/patients": patients, "/patient": patient, "/risk": risk, "/audit": audit };
-  document.querySelector("#app").innerHTML = (routes[state.route] || home)();
+  const app = document.querySelector("#app");
+  const route = state.route;
+
+  // Public routes
+  if (route === "/")     return (app.innerHTML = renderLanding());
+  if (route === "/auth") return (app.innerHTML = renderAuth());
+
+  // Auth guard
+  if (!state.principal && PROTECTED_ROUTES.includes(route)) {
+    state.route = "/auth";
+    location.hash = "/auth";
+    return (app.innerHTML = renderAuth());
+  }
+
+  // Authenticated app shell
+  const viewFn = APP_VIEWS[route] || viewDashboard;
+  app.innerHTML = renderApp(viewFn());
 }
 
+/* ── Routing listener ─────────────────────────────────────────── */
 window.addEventListener("hashchange", () => {
   state.route = location.hash.replace("#", "") || "/";
   render();
 });
 
+/* ── Boot ─────────────────────────────────────────────────────── */
 render();
-

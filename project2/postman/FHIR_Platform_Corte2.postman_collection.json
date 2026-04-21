@@ -68,6 +68,40 @@
       }
     },
     {
+      "name": "Images - Upload to MinIO",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-Access-Key", "value": "{{access_key}}" },
+          { "key": "X-Permission-Key", "value": "{{permission_key}}" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "patient_id", "value": "{{patient_id}}", "type": "text" },
+            { "key": "source_study_id", "value": "50414267", "type": "text" },
+            { "key": "source_dicom_id", "value": "local-demo-dicom", "type": "text" },
+            { "key": "modality", "value": "CR", "type": "text" },
+            { "key": "conclusion", "value": "Local CXR image uploaded to MinIO and linked to DiagnosticReport.", "type": "text" },
+            { "key": "conclusion_code", "value": "404684003", "type": "text" },
+            { "key": "file", "type": "file", "src": "project2/datasets/local-demo/mimic-cxr-jpg/images/cxr-demo-10000032.svg" }
+          ]
+        },
+        "url": "{{base_url}}/images"
+      }
+    },
+    {
+      "name": "FHIR - List Media",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-Access-Key", "value": "{{access_key}}" },
+          { "key": "X-Permission-Key", "value": "{{permission_key}}" }
+        ],
+        "url": "{{base_url}}/fhir/Media?patient_id={{patient_id}}&limit=10&offset=0"
+      }
+    },
+    {
       "name": "Inference - Multimodal",
       "request": {
         "method": "POST",
@@ -112,4 +146,3 @@
     }
   ]
 }
-

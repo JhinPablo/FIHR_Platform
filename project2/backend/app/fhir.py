@@ -43,21 +43,32 @@ def media_resource(study: models.ImagingStudy) -> dict[str, Any]:
         "status": "completed",
         "subject": {"reference": f"Patient/{study.patient_id}"},
         "modality": {"coding": [{"system": "http://dicom.nema.org/resources/ontology/DCM", "code": study.modality}]},
-        "content": {"url": study.image_url, "contentType": "image/jpeg"},
+        "content": {"url": study.image_url, "contentType": study.content_type or "image/jpeg"},
         "extension": [
             {"url": "urn:uao:mimic-study-id", "valueString": study.source_study_id},
             {"url": "urn:uao:mimic-dicom-id", "valueString": study.source_dicom_id},
+            {"url": "urn:uao:minio-object", "valueString": study.minio_object_name},
         ],
     }
 
 
-def diagnostic_report_resource(report: models.DiagnosticReport) -> dict[str, Any]:
+def diagnostic_report_resource(report: models.DiagnosticReport, media: models.ImagingStudy | None = None) -> dict[str, Any]:
     return {
         "resourceType": "DiagnosticReport",
         "id": report.id,
         "status": report.status,
         "subject": {"reference": f"Patient/{report.patient_id}"},
         "imagingStudy": [{"reference": f"ImagingStudy/{report.imaging_study_id}"}] if report.imaging_study_id else [],
+        "media": [{"link": {"reference": f"Media/{media.id}"}}] if media else [],
+        "presentedForm": [
+            {
+                "contentType": media.content_type or "image/jpeg",
+                "url": media.image_url,
+                "title": f"{media.modality} image from MinIO",
+            }
+        ]
+        if media and media.image_url
+        else [],
         "conclusion": report.conclusion,
         "conclusionCode": [{"coding": [{"system": "http://snomed.info/sct", "code": report.conclusion_code}]}]
         if report.conclusion_code
@@ -118,4 +129,3 @@ def bundle(resources: list[dict[str, Any]], total: int, limit: int, offset: int)
     for resource in resources:
         clean.append({"resource": {k: v for k, v in resource.items() if v not in (None, {}, [])}})
     return {"resourceType": "Bundle", "type": "searchset", "total": total, "limit": limit, "offset": offset, "entry": clean}
-

@@ -172,6 +172,10 @@ Verificacion:
 
 No se suben datasets al repositorio.
 
+Excepcion versionable: `project2/datasets/local-demo/` contiene una microcohorte
+sin PHI real con forma MIMIC-IV/MIMIC-CXR para probar localmente pacientes,
+observaciones, imagenes, MinIO y `DiagnosticReport.presentedForm`.
+
 Documentos:
 
 - `docs/datasets.md`: descarga, DUA/CITI, estructura esperada.
@@ -180,13 +184,18 @@ Documentos:
 Scripts:
 
 - `scripts/seed_mimic.py`: crea una cohorte demo con forma MIMIC.
+- `scripts/seed_local_datasets.py`: lee `datasets/local-demo`, crea recursos via
+  API y sube imagenes al bucket MinIO `clinical-images`.
 - En produccion academica, reemplazar filas demo por extractos autorizados de
   MIMIC-IV y MIMIC-CXR-JPG.
 
 Verificacion:
 
 - El seed crea pacientes, observaciones, imagenes, reportes y consentimientos.
-- No existe `datasets/` versionado.
+- MinIO contiene objetos en `patients/{patient_id}/source/{filename}`.
+- `GET /fhir/DiagnosticReport` incluye `presentedForm[].url` presignada.
+- Solo existe `datasets/local-demo/` versionado; los datasets reales siguen
+  excluidos.
 - El README explica como obtener cada dataset.
 
 ---
@@ -296,4 +305,3 @@ Checklist:
 - Supabase es la base PostgreSQL principal.
 - Render aloja backend FastAPI.
 - El sistema es academico y de apoyo, no un dispositivo diagnostico real.
-

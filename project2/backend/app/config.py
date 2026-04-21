@@ -26,6 +26,11 @@ class Settings(BaseSettings):
 
     ml_service_url: str = "http://localhost:8011"
     dl_service_url: str = "http://localhost:8012"
+    minio_endpoint: str = "minio:9000"
+    minio_public_endpoint: str = "http://localhost:9000"
+    minio_access_key: str = "minioadmin"
+    minio_secret_key: str = "minioadmin123"
+    minio_bucket: str = "clinical-images"
 
     @property
     def cors_origin_list(self) -> List[str]:
@@ -35,4 +40,3 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-

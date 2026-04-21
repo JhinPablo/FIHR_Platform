@@ -54,6 +54,15 @@ class ConsentCreate(BaseModel):
     granted: bool = True
 
 
+class ImageMetadata(BaseModel):
+    patient_id: str
+    source_study_id: str
+    source_dicom_id: str | None = None
+    modality: str = "CR"
+    conclusion: str | None = None
+    conclusion_code: str | None = "404684003"
+
+
 class InferenceCreate(BaseModel):
     patient_id: str
     model_type: Literal["ML", "DL", "MULTIMODAL"] = "ML"
@@ -73,4 +82,3 @@ class Page(BaseModel):
     limit: int
     offset: int
     entry: list[dict[str, Any]]
-

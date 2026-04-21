@@ -1,0 +1,4 @@
+subject_id,name,gender,birth_date,medical_summary
+10000032,MIMIC Local Demo 10000032,female,1950-01-01,Demo patient with abnormal hemoglobin and linked CXR.
+10001217,MIMIC Local Demo 10001217,male,1964-01-01,Demo patient with elevated lactate and linked CXR.
+

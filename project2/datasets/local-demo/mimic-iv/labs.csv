@@ -1,0 +1,6 @@
+subject_id,hadm_id,itemid,loinc,display,value,unit
+10000032,22595853,50811,718-7,Hemoglobin,10.2,g/dL
+10000032,22595853,50983,2951-2,Sodium,138,mmol/L
+10001217,24597018,50813,33747-0,Lactate,2.4,mmol/L
+10001217,24597018,223761,8310-5,Body temperature,38.2,Cel
+

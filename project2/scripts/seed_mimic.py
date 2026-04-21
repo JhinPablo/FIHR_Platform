@@ -78,6 +78,7 @@ def main():
                     source_study_id=row["study_id"],
                     source_dicom_id=row["dicom_id"],
                     modality="CR",
+                    content_type="image/svg+xml",
                     image_url=f"https://physionet.org/files/mimic-cxr-jpg/demo/{row['dicom_id']}.jpg",
                 )
                 db.add(study)
@@ -94,7 +95,7 @@ def main():
                 )
                 db.add(report)
                 db.flush()
-                report.fhir_json = diagnostic_report_resource(report)
+                report.fhir_json = diagnostic_report_resource(report, study)
 
             consent = db.query(Consent).filter_by(patient_id=patient.id, scope="HABEAS_DATA").first()
             if not consent:
@@ -108,4 +109,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

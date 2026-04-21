@@ -8,6 +8,7 @@
 | valor laboratorio | `Observation.valueQuantity` | `observations.value/unit` |
 | `study_id` | `ImagingStudy` / `Media.extension` | `imaging_studies.source_study_id` |
 | `dicom_id` | `Media.content.url` / extension | `imaging_studies.source_dicom_id` |
+| objeto MinIO | `Media.extension` / `DiagnosticReport.presentedForm.url` | `imaging_studies.minio_object_name` |
 | label/reporte CXR | `DiagnosticReport.conclusion` | `diagnostic_reports.conclusion` |
 | salida ML/DL | `RiskAssessment.prediction` | `risk_reports` |
 | acción de usuario | `AuditEvent` | `audit_log` |
@@ -40,4 +41,3 @@ con:
   "entry": []
 }
 ```
-

@@ -2,11 +2,12 @@ from datetime import datetime
 from time import time
 from typing import Any
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 
-from . import fhir, models
+from . import fhir, minio_client, models
 from .config import get_settings
 from .crypto import encrypt_text
 from .db import Base, engine, get_db
@@ -30,6 +31,27 @@ _rate_buckets: dict[str, list[float]] = {}
 @app.on_event("startup")
 def startup() -> None:
     Base.metadata.create_all(bind=engine)
+    ensure_runtime_columns()
+    try:
+        minio_client.ensure_bucket()
+    except Exception:
+        # The API still starts if MinIO is booting; upload endpoints will retry.
+        pass
+
+
+def ensure_runtime_columns() -> None:
+    inspector = inspect(engine)
+    if "imaging_studies" not in inspector.get_table_names():
+        return
+    existing = {column["name"] for column in inspector.get_columns("imaging_studies")}
+    additions = {
+        "minio_object_name": "TEXT",
+        "content_type": "VARCHAR(120)",
+    }
+    with engine.begin() as conn:
+        for column, sql_type in additions.items():
+            if column not in existing:
+                conn.execute(text(f"ALTER TABLE imaging_studies ADD COLUMN {column} {sql_type}"))
 
 
 @app.middleware("http")
@@ -281,7 +303,13 @@ def list_diagnostic_reports(
     rows = query.order_by(models.DiagnosticReport.created_at.desc()).offset(offset).limit(limit).all()
     audit(db, principal, "LIST_DIAGNOSTIC_REPORTS", "DiagnosticReport", patient_id=patient_id, request=request)
     db.commit()
-    return fhir.bundle([fhir.diagnostic_report_resource(row) for row in rows], total, limit, offset)
+    resources = []
+    for row in rows:
+        media = db.get(models.ImagingStudy, row.imaging_study_id) if row.imaging_study_id else None
+        if media and media.minio_object_name:
+            media.image_url = minio_client.presigned_url(media.minio_object_name)
+        resources.append(fhir.diagnostic_report_resource(row, media))
+    return fhir.bundle(resources, total, limit, offset)
 
 
 @app.get("/fhir/Media")
@@ -300,9 +328,61 @@ def list_media(
         query = query.filter(models.ImagingStudy.patient_id == patient_id)
     total = query.count()
     rows = query.order_by(models.ImagingStudy.created_at.desc()).offset(offset).limit(limit).all()
+    for row in rows:
+        if row.minio_object_name:
+            row.image_url = minio_client.presigned_url(row.minio_object_name)
     audit(db, principal, "LIST_MEDIA", "Media", patient_id=patient_id, request=request)
     db.commit()
     return fhir.bundle([fhir.media_resource(row) for row in rows], total, limit, offset)
+
+
+@app.post("/images", status_code=status.HTTP_201_CREATED)
+async def upload_image(
+    request: Request,
+    patient_id: str = Form(...),
+    source_study_id: str = Form(...),
+    source_dicom_id: str | None = Form(default=None),
+    modality: str = Form(default="CR"),
+    conclusion: str | None = Form(default=None),
+    conclusion_code: str | None = Form(default="404684003"),
+    file: UploadFile = File(...),
+    principal: Principal = Depends(require_medico),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    if not db.get(models.Patient, patient_id):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Patient not found")
+    object_name, content_type = await minio_client.put_upload(patient_id, file, "source")
+    url = minio_client.presigned_url(object_name)
+    study = models.ImagingStudy(
+        patient_id=patient_id,
+        source_study_id=source_study_id,
+        source_dicom_id=source_dicom_id,
+        modality=modality,
+        minio_object_name=object_name,
+        content_type=content_type,
+        image_url=url,
+    )
+    db.add(study)
+    db.flush()
+    study.fhir_json = fhir.media_resource(study)
+    report = None
+    if conclusion:
+        report = models.DiagnosticReport(
+            patient_id=patient_id,
+            imaging_study_id=study.id,
+            conclusion=conclusion,
+            conclusion_code=conclusion_code,
+        )
+        db.add(report)
+        db.flush()
+        report.fhir_json = fhir.diagnostic_report_resource(report, study)
+    audit(db, principal, "UPLOAD_IMAGE", "Media", study.id, patient_id, request=request)
+    db.commit()
+    db.refresh(study)
+    response = {"media": fhir.media_resource(study)}
+    if report:
+        response["diagnostic_report"] = fhir.diagnostic_report_resource(report, study)
+    return response
 
 
 def create_inference(body: InferenceCreate, principal: Principal, db: Session, request: Request) -> dict[str, Any]:

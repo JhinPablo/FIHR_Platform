@@ -93,6 +93,8 @@ class ImagingStudy(Base):
     source_study_id: Mapped[str] = mapped_column(String(80), index=True)
     source_dicom_id: Mapped[str | None] = mapped_column(String(80), nullable=True)
     modality: Mapped[str] = mapped_column(String(40), default="CR")
+    minio_object_name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    content_type: Mapped[str | None] = mapped_column(String(120), nullable=True)
     image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     fhir_json: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
@@ -166,4 +168,3 @@ class InferenceJob(Base):
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-
