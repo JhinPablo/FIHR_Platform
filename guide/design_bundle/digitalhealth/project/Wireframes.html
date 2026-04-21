@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Novena Health Systems — Clinical Platform Wireframes</title>
+<meta name="viewport" content="width=1400" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+<div id="root"></div>
+
+<!-- React + Router + Babel -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- Tiny hash router — plain JS so it's defined before Babel transpiles the JSX scripts -->
+<script>
+  (function(){
+    var h = React.createElement;
+    function useHash(){
+      var s = React.useState(function(){ return window.location.hash.slice(1) || '/'; });
+      var val = s[0], setVal = s[1];
+      React.useEffect(function(){
+        function fn(){ setVal(window.location.hash.slice(1) || '/'); }
+        window.addEventListener('hashchange', fn);
+        return function(){ window.removeEventListener('hashchange', fn); };
+      }, []);
+      return val;
+    }
+    var RouteCtx = React.createContext({ path:'/', params:{}, element:null });
+
+    function NavLink(props){
+      var to = props.to, end = props.end, className = props.className, children = props.children;
+      var path = React.useContext(RouteCtx).path;
+      var isActive;
+      if (end) isActive = path === to;
+      else {
+        // match on first segment to avoid "/patients" lighting up for "/patient/..."
+        var seg = to === '/' ? '/' : to;
+        isActive = path === seg || path.indexOf(seg + '/') === 0;
+      }
+      var cls = typeof className === 'function' ? className({isActive:isActive}) : className;
+      var rest = Object.assign({}, props);
+      delete rest.to; delete rest.end; delete rest.className; delete rest.children;
+      return h('a', Object.assign({ href:'#'+to, className:cls }, rest), children);
+    }
+    function Outlet(){ return React.useContext(RouteCtx).element; }
+    function useParams(){ return React.useContext(RouteCtx).params; }
+    function useNavigate(){ return function(to){ window.location.hash = to; }; }
+
+    function matchRoute(pattern, path){
+      var pp = pattern.split('/').filter(Boolean);
+      var pa = path.split('/').filter(Boolean);
+      if (pp.length !== pa.length) return null;
+      var params = {};
+      for (var i=0; i<pp.length; i++){
+        if (pp[i].charAt(0) === ':') params[pp[i].slice(1)] = decodeURIComponent(pa[i]);
+        else if (pp[i] !== pa[i]) return null;
+      }
+      return params;
+    }
+
+    function Router(props){
+      var path = useHash();
+      var routes = props.routes;
+      var matched = { element: null, params: {} };
+      for (var i=0; i<routes.length; i++){
+        var p = matchRoute(routes[i][0], path);
+        if (p){ matched = { element: h(routes[i][1]), params: p }; break; }
+      }
+      if (!matched.element) matched = { element: h(routes[0][1]), params: {} };
+      return h(RouteCtx.Provider,
+        { value: { path:path, element:matched.element, params:matched.params } },
+        h(window.Chrome)
+      );
+    }
+
+    window.ReactRouterDOM = { NavLink:NavLink, Outlet:Outlet, useParams:useParams, useNavigate:useNavigate };
+    window.__Router = Router;
+  })();
+</script>
+
+<!-- Chrome (top bar + tweaks) -->
+<script type="text/babel" src="src/Chrome.jsx"></script>
+
+<!-- Screens -->
+<script type="text/babel" src="src/screens/Landing.jsx"></script>
+<script type="text/babel" src="src/screens/Auth.jsx"></script>
+<script type="text/babel" src="src/screens/Dashboard.jsx"></script>
+<script type="text/babel" src="src/screens/Patients.jsx"></script>
+<script type="text/babel" src="src/screens/PatientDetail.jsx"></script>
+<script type="text/babel" src="src/screens/Imaging.jsx"></script>
+<script type="text/babel" src="src/screens/AIInference.jsx"></script>
+<script type="text/babel" src="src/screens/RiskReport.jsx"></script>
+<script type="text/babel" src="src/screens/AuditConsent.jsx"></script>
+<script type="text/babel" src="src/screens/Components.jsx"></script>
+
+<!-- Mount -->
+<script type="text/babel">
+  const routes = [
+    ['/',                Landing],
+    ['/auth',            Auth],
+    ['/dashboard',       Dashboard],
+    ['/patients',        Patients],
+    ['/patient/:id',     PatientDetail],
+    ['/imaging',         Imaging],
+    ['/ai',              AIInference],
+    ['/report',          RiskReport],
+    ['/audit',           AuditConsent],
+    ['/components',      Components],
+  ];
+
+  const Router = window.__Router;
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(<Router routes={routes}/>);
+</script>
+</body>
+</html>

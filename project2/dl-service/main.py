@@ -1,0 +1,29 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+
+app = FastAPI(title="MIMIC-CXR DL Inference Service", version="0.1.0")
+
+
+class DlRequest(BaseModel):
+    patient_id: str
+    image_url: str | None = None
+
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok", "runtime": "cpu-placeholder"}
+
+
+@app.post("/infer/dl")
+def infer_dl(body: DlRequest) -> dict[str, object]:
+    score = 0.72 if body.image_url else 0.41
+    return {
+        "patient_id": body.patient_id,
+        "score": score,
+        "category": "HIGH" if score >= 0.6 else "MODERATE",
+        "finding": "CXR abnormality risk",
+        "gradcam_url": None,
+        "dataset": "MIMIC-CXR-JPG",
+    }
+

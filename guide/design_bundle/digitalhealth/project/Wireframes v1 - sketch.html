@@ -1,0 +1,2165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Clinical Platform — Wireframes</title>
+<meta name="viewport" content="width=1400" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@300;400;700&family=JetBrains+Mono:wght@400;500&family=Gloria+Hallelujah&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#111;
+    --ink-2:#2a2a2a;
+    --ink-3:#4a4a4a;
+    --ink-4:#8a8a8a;
+    --ink-5:#c8c8c8;
+    --paper:#f6f4ef;
+    --paper-2:#efece4;
+    --grid:#e6e2d6;
+    --accent:#c23a2b;   /* used sparingly for critical */
+    --hand:'Kalam', 'Caveat', cursive;
+    --label:'Gloria Hallelujah','Caveat',cursive;
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--hand);}
+  body{
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(0,0,0,0.015), transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(0,0,0,0.02), transparent 45%),
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:auto, auto, 32px 32px, 32px 32px;
+    background-position:0 0, 0 0, -1px -1px, -1px -1px;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:40;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background:rgba(246,244,239,0.78);
+    border-bottom:1.5px solid var(--ink);
+    padding:14px 28px 10px;
+    display:flex; align-items:flex-end; gap:28px;
+  }
+  .brand{font-family:var(--label); font-size:22px; letter-spacing:.5px;}
+  .brand .dot{display:inline-block;width:10px;height:10px;border:1.5px solid var(--ink);border-radius:50%;margin-right:6px;vertical-align:middle;}
+  .brand small{font-family:var(--mono); font-size:10px; color:var(--ink-3); margin-left:10px; letter-spacing:.1em;}
+  .tabs{display:flex; gap:2px; flex:1; flex-wrap:wrap;}
+  .tabs button{
+    font-family:var(--hand); font-size:17px;
+    background:transparent; border:none; cursor:pointer;
+    padding:6px 14px 8px; color:var(--ink-3);
+    position:relative;
+  }
+  .tabs button:hover{color:var(--ink)}
+  .tabs button.active{color:var(--ink)}
+  .tabs button.active::after{
+    content:""; position:absolute; left:8px; right:8px; bottom:-2px;
+    height:3px; background:var(--ink);
+    border-radius:3px;
+    transform:rotate(-.4deg);
+  }
+  .bar-meta{font-family:var(--mono); font-size:11px; color:var(--ink-3)}
+
+  /* ---------- page / section ---------- */
+  .page{padding:26px 36px 80px; max-width:1400px; margin:0 auto;}
+  .section-title{
+    font-family:var(--label); font-size:28px; margin:6px 0 4px;
+  }
+  .section-sub{font-family:var(--mono); font-size:11px; color:var(--ink-3); letter-spacing:.08em; text-transform:uppercase;}
+  .section-sub span{color:var(--ink)}
+  .hr-hand{
+    height:6px; margin:14px 0 22px;
+    background:
+      radial-gradient(circle at 4% 50%, var(--ink) 0 2px, transparent 2.5px),
+      linear-gradient(var(--ink), var(--ink)) left center / 100% 1.5px no-repeat;
+    transform:rotate(-.15deg);
+    filter:url(#rough);
+  }
+
+  /* ---------- frame (the "sketch" card) ---------- */
+  .frame{
+    position:relative;
+    background:#fbfaf5;
+    border:1.5px solid var(--ink);
+    border-radius:4px;
+    padding:14px 16px 18px;
+    margin:0 0 26px;
+    box-shadow:
+      2px 2px 0 rgba(0,0,0,0.05),
+      0 0 0 4px var(--paper);
+  }
+  .frame::before{
+    /* fake tape */
+    content:""; position:absolute; top:-10px; left:18px;
+    width:50px; height:16px;
+    background:rgba(0,0,0,0.06);
+    border:1px dashed rgba(0,0,0,0.18);
+    transform:rotate(-3deg);
+  }
+  .frame-label{
+    font-family:var(--label); font-size:17px;
+    display:flex; align-items:baseline; gap:10px; margin-bottom:10px;
+  }
+  .frame-label .num{
+    font-family:var(--mono); font-size:10px; color:var(--ink-3);
+    border:1px solid var(--ink-3); border-radius:10px; padding:2px 7px;
+    letter-spacing:.1em;
+  }
+  .frame-label .note{font-family:var(--mono); font-size:11px; color:var(--ink-3); margin-left:auto;}
+  .variants{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  @media(max-width:1100px){.variants{grid-template-columns:1fr}}
+
+  /* ---------- the wire building blocks ---------- */
+  .wire{
+    position:relative;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.15));
+    border:1.5px solid var(--ink);
+    border-radius:3px;
+    padding:10px;
+  }
+  .wire.glass{
+    backdrop-filter: blur(4px);
+    background:
+      repeating-linear-gradient(135deg, rgba(0,0,0,0.022) 0 1px, transparent 1px 6px),
+      linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.2));
+  }
+  .wire.dim{background:repeating-linear-gradient(135deg, rgba(0,0,0,0.035) 0 1px, transparent 1px 6px);}
+  .wire.ink{background:#1b1b1b; color:#f1efe8; border-color:#1b1b1b;}
+  .wire.ink .lbl{color:#dcd8ca}
+  .wire.dotted{border-style:dashed;}
+  .lbl{font-family:var(--mono); font-size:10.5px; color:var(--ink-3); letter-spacing:.06em; text-transform:uppercase;}
+  .hand{font-family:var(--hand); font-size:15px;}
+  .hand.big{font-size:22px;}
+  .hand.huge{font-size:32px; line-height:1.05;}
+  .hand.xxl{font-size:46px; line-height:1;}
+  .mono{font-family:var(--mono); font-size:11px;}
+  .muted{color:var(--ink-3)}
+  .faint{color:var(--ink-4)}
+
+  /* scribble placeholders */
+  .scribble{
+    height:10px; border-radius:2px;
+    background:
+      repeating-linear-gradient(90deg, var(--ink) 0 18px, transparent 18px 24px),
+      repeating-linear-gradient(90deg, var(--ink) 0 12px, transparent 12px 20px);
+    background-size:100% 2px, 100% 2px;
+    background-position:0 30%, 0 70%;
+    background-repeat:no-repeat;
+    opacity:.6;
+  }
+  .line{height:1.5px;background:var(--ink); opacity:.7; margin:8px 0;}
+  .line.dashed{background:repeating-linear-gradient(90deg, var(--ink) 0 6px, transparent 6px 12px); height:1.5px; opacity:.7;}
+  .line.dotted{background:radial-gradient(circle,var(--ink) 0 1px, transparent 1.5px) repeat-x; background-size:8px 2px; height:2px; opacity:.7;}
+
+  /* buttons */
+  .btn{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--hand); font-size:14px;
+    border:1.5px solid var(--ink); border-radius:3px;
+    padding:5px 12px; background:#fff;
+    box-shadow:2px 2px 0 rgba(0,0,0,.08);
+  }
+  .btn.primary{background:var(--ink); color:#fff;}
+  .btn.ghost{background:transparent; box-shadow:none;}
+  .btn.sm{font-size:12px; padding:3px 9px;}
+  .btn.icon{width:26px; height:26px; padding:0; justify-content:center;}
+
+  /* input */
+  .input{
+    border:1.5px solid var(--ink); border-radius:3px;
+    padding:6px 10px; background:#fff;
+    font-family:var(--hand); font-size:14px; color:var(--ink-3);
+    display:flex; align-items:center; gap:8px;
+    min-height:30px;
+  }
+  .input.glass{background:rgba(255,255,255,0.55); backdrop-filter:blur(4px);}
+  .input .ph{flex:1;}
+  .input .k{font-family:var(--mono); font-size:10px; border:1px solid var(--ink-4); padding:1px 5px; border-radius:3px; color:var(--ink-3)}
+
+  /* badges */
+  .badge{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:var(--mono); font-size:10px; letter-spacing:.06em;
+    border:1.2px solid var(--ink); border-radius:10px; padding:2px 8px; text-transform:uppercase;
+    background:#fff;
+  }
+  .badge .d{width:6px;height:6px;border-radius:50%;background:var(--ink);}
+  .badge.crit{border-color:var(--accent); color:var(--accent)}
+  .badge.crit .d{background:var(--accent)}
+  .badge.warn{border-color:#8a6d00; color:#8a6d00}
+  .badge.warn .d{background:#8a6d00}
+  .badge.ok{border-color:#2a5a2a; color:#2a5a2a}
+  .badge.ok .d{background:#2a5a2a}
+  .badge.soft{border-color:var(--ink-4); color:var(--ink-3);}
+  .badge.soft .d{background:var(--ink-4)}
+
+  /* stat tile */
+  .stat{
+    border:1.5px solid var(--ink); border-radius:3px; padding:10px 12px;
+    background:rgba(255,255,255,0.55); backdrop-filter:blur(4px);
+    min-height:78px;
+    display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .stat .k{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-3)}
+  .stat .v{font-family:var(--hand); font-size:28px; line-height:1;}
+  .stat .trend{font-family:var(--mono); font-size:10px; color:var(--ink-3)}
+
+  /* rows (table) */
+  .tbl{border:1.5px solid var(--ink); border-radius:3px; overflow:hidden; background:rgba(255,255,255,0.5); backdrop-filter:blur(4px);}
+  .tr{display:grid; grid-template-columns: 70px 1.4fr 1fr .6fr .6fr 1fr .9fr .9fr; gap:8px; padding:7px 10px; align-items:center; border-bottom:1px dashed rgba(0,0,0,0.22);}
+  .tr.head{background:rgba(0,0,0,0.04); font-family:var(--mono); font-size:10px; letter-spacing:.08em; color:var(--ink-3); text-transform:uppercase;}
+  .tr:last-child{border-bottom:none}
+  .tr .hand{font-size:13.5px;}
+  .tr .mono{font-size:10.5px;}
+
+  /* grids */
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+  .grid-4{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+  .grid-5{display:grid; grid-template-columns:repeat(5,1fr); gap:10px;}
+  .grid-6{display:grid; grid-template-columns:repeat(6,1fr); gap:10px;}
+  .col{display:flex; flex-direction:column; gap:10px;}
+  .row{display:flex; gap:8px; align-items:center;}
+  .row.wrap{flex-wrap:wrap;}
+  .spacer{flex:1}
+
+  /* annotation arrows / notes */
+  .anno{
+    font-family:var(--label); font-size:13px; color:var(--ink-3);
+    position:relative; padding-left:22px;
+  }
+  .anno::before{
+    content:""; position:absolute; left:0; top:6px;
+    width:16px; height:10px;
+    background:
+      linear-gradient(var(--ink-3),var(--ink-3)) left center/14px 1.2px no-repeat;
+  }
+  .anno::after{
+    content:""; position:absolute; left:13px; top:3px;
+    border:5px solid transparent; border-left-color:var(--ink-3);
+  }
+  .callout{
+    position:absolute; font-family:var(--label); font-size:13px; color:var(--ink-3);
+    pointer-events:none;
+  }
+
+  /* tweak panel */
+  #tweaks{
+    position:fixed; right:18px; bottom:18px; width:270px;
+    border:1.5px solid var(--ink); border-radius:6px;
+    background:rgba(251,250,245,0.85); backdrop-filter:blur(8px);
+    padding:12px; z-index:60; display:none;
+    box-shadow:3px 3px 0 rgba(0,0,0,0.08);
+  }
+  #tweaks.on{display:block}
+  #tweaks h4{margin:0 0 8px; font-family:var(--label); font-size:16px;}
+  #tweaks .grp{margin-bottom:10px;}
+  #tweaks .grp .k{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); margin-bottom:4px;}
+  #tweaks .seg{display:flex; border:1.2px solid var(--ink); border-radius:3px; overflow:hidden;}
+  #tweaks .seg button{flex:1; font-family:var(--hand); font-size:13px; padding:4px; background:#fff; border:none; cursor:pointer; border-right:1px solid var(--ink);}
+  #tweaks .seg button:last-child{border-right:none}
+  #tweaks .seg button.on{background:var(--ink); color:#fff;}
+  #tweaks .toggle-btn{position:fixed; right:18px; bottom:18px; z-index:59;}
+
+  /* section (each screen) */
+  .screen{display:none}
+  .screen.active{display:block}
+
+  /* Mini visuals */
+  .chart{
+    height:110px; border:1.2px dashed var(--ink-4); border-radius:3px;
+    padding:8px; position:relative; overflow:hidden;
+    background:linear-gradient(180deg, transparent, rgba(0,0,0,0.02));
+  }
+  .chart .bars{display:flex; align-items:flex-end; gap:4px; height:100%;}
+  .chart .bars .b{flex:1; background:var(--ink); opacity:.8; border-radius:2px 2px 0 0;}
+  .chart .line-g{position:absolute; inset:8px; }
+  .chart svg{width:100%; height:100%;}
+
+  /* Gantt-ish list */
+  .queue .q-item{display:grid; grid-template-columns: 90px 1fr 90px; gap:8px; align-items:center; padding:5px 0; border-bottom:1px dashed rgba(0,0,0,.18)}
+  .queue .q-item:last-child{border-bottom:none}
+  .progress{height:6px; border:1px solid var(--ink); border-radius:3px; background:#fff; overflow:hidden;}
+  .progress > i{display:block; height:100%; background:var(--ink); opacity:.8;}
+
+  /* image viewer placeholder */
+  .viewer{
+    aspect-ratio:16/10; border:1.5px solid var(--ink); border-radius:3px;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(0,0,0,.08) 0 22%, transparent 45%),
+      repeating-linear-gradient(45deg, rgba(0,0,0,.04) 0 6px, transparent 6px 14px),
+      #1b1b1b;
+    color:#cfcabf; position:relative; overflow:hidden;
+  }
+  .viewer .corner{position:absolute; font-family:var(--mono); font-size:10px; color:#cfcabf; opacity:.8;}
+  .viewer .crosshair{position:absolute; inset:0;}
+  .viewer .crosshair::before,.viewer .crosshair::after{
+    content:""; position:absolute; background:rgba(255,255,255,.25);
+  }
+  .viewer .crosshair::before{left:50%; top:10%; bottom:10%; width:1px;}
+  .viewer .crosshair::after{top:50%; left:10%; right:10%; height:1px;}
+  .viewer .roi{position:absolute; left:40%; top:30%; width:22%; height:28%; border:1.5px dashed #f3d000; border-radius:50%;}
+  .viewer .roi-lbl{position:absolute; left:62%; top:28%; font-family:var(--mono); font-size:10px; color:#f3d000}
+
+  /* timeline */
+  .tl{position:relative; padding-left:22px;}
+  .tl::before{content:""; position:absolute; left:7px; top:2px; bottom:2px; width:1.5px; background:var(--ink); opacity:.6;}
+  .tl .tli{position:relative; padding:4px 0 10px;}
+  .tl .tli::before{content:""; position:absolute; left:-19px; top:8px; width:9px; height:9px; border:1.5px solid var(--ink); background:#fff; border-radius:50%;}
+  .tl .tli.ev-critical::before{background:var(--accent); border-color:var(--accent);}
+
+  /* audit row */
+  .audit-row{display:grid; grid-template-columns: 150px 80px 120px 1.3fr 1fr 70px; gap:10px; padding:6px 10px; border-bottom:1px dashed rgba(0,0,0,.2); font-family:var(--mono); font-size:11px;}
+  .audit-row.head{background:rgba(0,0,0,0.04); text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3)}
+
+  /* sidebar */
+  .sb{
+    border:1.5px solid var(--ink); border-radius:3px; padding:8px 6px;
+    background:rgba(255,255,255,0.55); backdrop-filter:blur(4px);
+    min-width:180px;
+  }
+  .sb .item{
+    display:flex; align-items:center; gap:8px;
+    padding:6px 10px; border-radius:3px; font-family:var(--hand); font-size:14px;
+    color:var(--ink-3);
+  }
+  .sb .item .i{width:14px; height:14px; border:1.2px solid var(--ink-3); border-radius:2px; display:inline-block;}
+  .sb .item.on{background:var(--ink); color:#fff}
+  .sb .item.on .i{border-color:#fff;}
+  .sb .group{font-family:var(--mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-4); padding:10px 10px 4px;}
+
+  /* workstation shell */
+  .shell{display:grid; grid-template-columns: 200px 1fr 300px; gap:10px;}
+  .shell.narrow{grid-template-columns: 60px 1fr 300px;}
+  .shell.nosidebar{grid-template-columns: 1fr 300px;}
+
+  /* hero mock */
+  .hero-mock{
+    border:1.5px solid var(--ink); border-radius:4px;
+    background:
+      linear-gradient(160deg, rgba(255,255,255,0.6), rgba(255,255,255,0.15));
+    backdrop-filter:blur(6px);
+    padding:14px; position:relative;
+    aspect-ratio:4/3;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .hero-mock::before{
+    content:""; position:absolute; inset:0;
+    background:repeating-linear-gradient(135deg, rgba(0,0,0,0.025) 0 1px, transparent 1px 8px);
+    pointer-events:none;
+  }
+
+  /* document */
+  .doc{
+    border:1.5px solid var(--ink); border-radius:3px;
+    background:#fcfbf7;
+    padding:18px 22px; font-family:var(--hand); line-height:1.35;
+    box-shadow:2px 2px 0 rgba(0,0,0,.05);
+    position:relative;
+  }
+  .doc::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:1.5px;
+    background:repeating-linear-gradient(180deg, var(--ink) 0 4px, transparent 4px 8px);
+    opacity:.3;
+  }
+  .doc h3{font-family:var(--label); font-size:20px; margin:0 0 4px;}
+  .doc .meta{font-family:var(--mono); font-size:10px; color:var(--ink-3); letter-spacing:.06em;}
+  .doc .sig{
+    margin-top:14px; padding:10px; border:1.5px dashed var(--ink);
+    display:flex; justify-content:space-between; align-items:flex-end;
+  }
+
+  /* flow diagram */
+  .flow{display:flex; align-items:stretch; gap:0; width:100%;}
+  .flow .node{
+    flex:1; border:1.5px solid var(--ink); border-radius:3px;
+    padding:10px; background:rgba(255,255,255,.55); backdrop-filter:blur(4px);
+    text-align:center; position:relative;
+  }
+  .flow .arrow{
+    width:22px; align-self:center; position:relative; height:1.5px; background:var(--ink);
+  }
+  .flow .arrow::after{content:""; position:absolute; right:-1px; top:-4px; border:5px solid transparent; border-left-color:var(--ink);}
+
+  /* small helpers */
+  .pill{display:inline-block; border:1.2px solid var(--ink-3); border-radius:12px; padding:1px 8px; font-family:var(--mono); font-size:10px; color:var(--ink-3); letter-spacing:.06em;}
+  .chk{display:inline-block; width:14px; height:14px; border:1.5px solid var(--ink); border-radius:2px; vertical-align:-3px; margin-right:6px; position:relative;}
+  .chk.on{background:var(--ink);}
+  .chk.on::after{content:"✓"; color:#fff; font-family:var(--mono); font-size:10px; position:absolute; left:2px; top:-2px;}
+  .rdio{display:inline-block; width:14px; height:14px; border:1.5px solid var(--ink); border-radius:50%; vertical-align:-3px; margin-right:6px; position:relative;}
+  .rdio.on::after{content:""; position:absolute; inset:3px; background:var(--ink); border-radius:50%;}
+
+  /* dashboard alert banner */
+  .alert-bar{
+    border:1.5px solid var(--accent); border-radius:3px; padding:8px 12px;
+    background:rgba(194,58,43,0.06); color:var(--accent);
+    font-family:var(--hand); display:flex; align-items:center; gap:10px;
+  }
+  .alert-bar .dot{width:10px; height:10px; background:var(--accent); border-radius:50%;}
+
+  /* legend */
+  .legend{
+    font-family:var(--mono); font-size:10.5px; color:var(--ink-3); letter-spacing:.06em;
+    display:flex; gap:14px; flex-wrap:wrap; margin:4px 0 14px;
+  }
+  .legend span::before{content:""; display:inline-block; width:10px; height:10px; border:1.2px solid var(--ink); border-radius:50%; vertical-align:-1px; margin-right:6px;}
+
+  /* utility */
+  .w-full{width:100%}
+  .mt{margin-top:10px}
+  .mt-lg{margin-top:18px}
+  .mb{margin-bottom:8px}
+  .b-bot{border-bottom:1px dashed rgba(0,0,0,.2); padding-bottom:6px; margin-bottom:6px;}
+  .p-sm{padding:6px 8px}
+  .hand-sm{font-family:var(--hand); font-size:13px;}
+  .center{text-align:center}
+  .right{text-align:right}
+  .nowrap{white-space:nowrap}
+
+  /* high-alert tweak */
+  body.alert .stat{border-color:var(--accent);}
+  body.alert .alert-bar{animation:pulse 2.4s infinite}
+  @keyframes pulse{50%{background:rgba(194,58,43,0.14)}}
+  body.compact .stat{min-height:60px; padding:7px 10px}
+  body.compact .stat .v{font-size:22px}
+  body.compact .tr{padding:4px 10px}
+
+  /* role filter hints */
+  body.role-auditor .role-clinician{opacity:.25}
+  body.role-clinician .role-auditor{opacity:.25}
+
+</style>
+</head>
+<body>
+
+<!-- SVG filter for "rough" line effect -->
+<svg style="position:absolute; width:0; height:0">
+  <defs>
+    <filter id="rough">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="3"/>
+      <feDisplacementMap in="SourceGraphic" scale="1.2"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="topbar">
+  <div class="brand"><span class="dot"></span>DigitalHealth <small>/ CLINICAL INTEROPERABLE SYSTEM — WIREFRAMES v0.1</small></div>
+  <div class="tabs" id="tabs">
+    <button data-t="landing" class="active">Landing</button>
+    <button data-t="auth">Login · Register</button>
+    <button data-t="dashboard">Dashboard</button>
+    <button data-t="patients">Patients</button>
+    <button data-t="detail">Patient Detail</button>
+    <button data-t="imaging">Imaging</button>
+    <button data-t="ai">AI Inference</button>
+    <button data-t="report">Risk Report</button>
+    <button data-t="audit">Audit · Consent</button>
+    <button data-t="components">Components</button>
+  </div>
+  <div class="bar-meta" id="env">ENV · STAGING / v0.1 / WIREFRAME</div>
+</div>
+
+<div class="page" id="page">
+
+<!-- ============================================================= -->
+<!-- LANDING -->
+<!-- ============================================================= -->
+<section class="screen active" data-screen="landing">
+  <div class="section-sub">AREA 01 · <span>Public experience — Landing page</span></div>
+  <div class="section-title">Landing — two takes</div>
+  <div class="legend">
+    <span>Institutional header, technical body</span>
+    <span style="opacity:.7">B&amp;W low-fi, glass surfaces, monospace technical markers</span>
+  </div>
+  <div class="hr-hand"></div>
+
+  <div class="variants">
+
+    <!-- ========== LANDING A ========== -->
+    <div class="frame">
+      <div class="frame-label"><span class="num">A</span> Editorial / institutional split hero <span class="note">// strong grid, product snapshot right</span></div>
+
+      <!-- top nav -->
+      <div class="wire glass" style="padding:10px 14px;">
+        <div class="row">
+          <div class="hand" style="font-weight:700">◐ DigitalHealth</div>
+          <div class="mono muted" style="margin-left:6px">/ clinical platform</div>
+          <div class="spacer"></div>
+          <div class="mono muted" style="display:flex; gap:18px">
+            <span>PLATFORM</span><span>MODULES</span><span>SECURITY</span><span>INTEROPERABILITY</span><span>CONTACT</span>
+          </div>
+          <div class="spacer"></div>
+          <span class="btn sm ghost">Sign in</span>
+          <span class="btn sm primary">Request access ➜</span>
+        </div>
+      </div>
+
+      <!-- hero -->
+      <div class="wire" style="margin-top:10px; padding:22px 20px; display:grid; grid-template-columns: 1.1fr 1fr; gap:22px;">
+        <div>
+          <div class="mono muted">CLINICAL INFRASTRUCTURE · HL7 FHIR R4</div>
+          <div class="hand xxl" style="margin:8px 0 10px">
+            Interoperable<br/>
+            clinical records,<br/>
+            signed &amp; traceable.
+          </div>
+          <div class="hand-sm muted" style="max-width:340px; line-height:1.35">
+            A regulated platform for patient records, medical imaging, AI-assisted risk
+            assessment and auditable clinical reports — designed for hospital workflow.
+          </div>
+          <div class="row" style="margin-top:16px; gap:10px">
+            <span class="btn primary">Request access</span>
+            <span class="btn ghost">Platform overview ➜</span>
+          </div>
+          <div class="row" style="margin-top:18px; gap:10px; flex-wrap:wrap">
+            <span class="badge"><span class="d"></span>FHIR R4</span>
+            <span class="badge"><span class="d"></span>RBAC</span>
+            <span class="badge"><span class="d"></span>AUDIT</span>
+            <span class="badge"><span class="d"></span>SIGNED REPORTS</span>
+          </div>
+        </div>
+
+        <!-- product snapshot -->
+        <div class="hero-mock">
+          <div class="row">
+            <span class="mono muted">// patient · P-00421 · Urgent review</span>
+            <span class="spacer"></span>
+            <span class="badge crit"><span class="d"></span>CRITICAL</span>
+          </div>
+          <div class="row" style="gap:8px">
+            <div class="stat" style="flex:1; min-height:52px">
+              <div class="k">RISK</div>
+              <div class="v">0.87</div>
+            </div>
+            <div class="stat" style="flex:1; min-height:52px">
+              <div class="k">MODEL</div>
+              <div class="hand" style="font-size:16px">dl-resnet-v3</div>
+            </div>
+            <div class="stat" style="flex:1; min-height:52px">
+              <div class="k">SIG.</div>
+              <div class="hand" style="font-size:16px">pending</div>
+            </div>
+          </div>
+          <div style="flex:1; border:1.2px dashed var(--ink-3); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:10px; color:var(--ink-3); background:#1b1b1b1a;">
+            [ IMAGING + GRAD-CAM OVERLAY ]
+          </div>
+          <div class="row mono muted" style="font-size:10px">
+            <span>▸ upload</span><span>▸ observation</span><span>▸ infer</span><span>▸ review</span><span>▸ sign</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- trust strip -->
+      <div class="wire dim" style="margin-top:10px; padding:10px 14px;">
+        <div class="row" style="justify-content:space-between; flex-wrap:wrap; gap:10px">
+          <span class="mono muted">STANDARDS &amp; COMPLIANCE</span>
+          <span class="mono">HL7 FHIR R4</span>
+          <span class="mono">ISO 27001-aligned</span>
+          <span class="mono">Habeas Data</span>
+          <span class="mono">Signed reports</span>
+          <span class="mono">Append-only audit</span>
+          <span class="mono">RBAC</span>
+        </div>
+      </div>
+
+      <!-- capabilities -->
+      <div class="grid-3" style="margin-top:10px">
+        <div class="wire"><div class="mono muted">01 / PATIENT RECORDS</div><div class="hand big">Unified clinical record</div><div class="line dashed"></div><div class="hand-sm muted">FHIR-coded observations, history, consent, linked studies.</div></div>
+        <div class="wire"><div class="mono muted">02 / IMAGING</div><div class="hand big">Lightweight PACS</div><div class="line dashed"></div><div class="hand-sm muted">Modality-aware viewer with overlay explanations.</div></div>
+        <div class="wire"><div class="mono muted">03 / AI INFERENCE</div><div class="hand big">Orchestrated models</div><div class="line dashed"></div><div class="hand-sm muted">ML, DL and multimodal with calibrated probabilities.</div></div>
+        <div class="wire"><div class="mono muted">04 / RISK REPORTS</div><div class="hand big">Signed &amp; exportable</div><div class="line dashed"></div><div class="hand-sm muted">Document-grade output with physician decision.</div></div>
+        <div class="wire"><div class="mono muted">05 / AUDIT</div><div class="hand big">Append-only log</div><div class="line dashed"></div><div class="hand-sm muted">Every access, change and signature — traceable.</div></div>
+        <div class="wire"><div class="mono muted">06 / CONSENT</div><div class="hand big">Habeas data</div><div class="line dashed"></div><div class="hand-sm muted">Versioned consent with persistence &amp; review.</div></div>
+      </div>
+
+      <!-- workflow flow -->
+      <div class="wire" style="margin-top:10px; padding:14px 16px;">
+        <div class="mono muted mb">OPERATIONAL FLOW</div>
+        <div class="flow">
+          <div class="node"><div class="mono muted">01</div><div class="hand-sm">Intake</div></div>
+          <div class="arrow"></div>
+          <div class="node"><div class="mono muted">02</div><div class="hand-sm">Observation</div></div>
+          <div class="arrow"></div>
+          <div class="node"><div class="mono muted">03</div><div class="hand-sm">Image upload</div></div>
+          <div class="arrow"></div>
+          <div class="node"><div class="mono muted">04</div><div class="hand-sm">AI analysis</div></div>
+          <div class="arrow"></div>
+          <div class="node"><div class="mono muted">05</div><div class="hand-sm">Review</div></div>
+          <div class="arrow"></div>
+          <div class="node"><div class="mono muted">06</div><div class="hand-sm">Signed report</div></div>
+          <div class="arrow"></div>
+          <div class="node"><div class="mono muted">07</div><div class="hand-sm">Audit</div></div>
+        </div>
+      </div>
+
+      <!-- interoperability + security -->
+      <div class="grid-2" style="margin-top:10px">
+        <div class="wire">
+          <div class="mono muted mb">FHIR RESOURCES</div>
+          <div class="row wrap" style="gap:6px">
+            <span class="pill">Patient</span><span class="pill">Observation</span><span class="pill">Media</span>
+            <span class="pill">DiagnosticReport</span><span class="pill">RiskAssessment</span>
+            <span class="pill">Consent</span><span class="pill">AuditEvent</span><span class="pill">Practitioner</span>
+          </div>
+          <div class="line dashed mt"></div>
+          <div class="hand-sm muted">Native import / export, REST &amp; bulk data.</div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">SECURITY &amp; GOVERNANCE</div>
+          <div class="grid-2">
+            <div class="hand-sm">◉ API keys &amp; scopes</div>
+            <div class="hand-sm">◉ Role-based access</div>
+            <div class="hand-sm">◉ At-rest encryption</div>
+            <div class="hand-sm">◉ Critical alerts</div>
+            <div class="hand-sm">◉ Consent persistence</div>
+            <div class="hand-sm">◉ Append-only audit</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- footer -->
+      <div class="wire dim" style="margin-top:10px; padding:14px;">
+        <div class="grid-4" style="gap:18px">
+          <div>
+            <div class="mono muted mb">PRODUCT</div>
+            <div class="hand-sm muted">Platform · Modules · Roadmap · Status</div>
+          </div>
+          <div>
+            <div class="mono muted mb">RESOURCES</div>
+            <div class="hand-sm muted">Docs · FHIR spec · API · Changelog</div>
+          </div>
+          <div>
+            <div class="mono muted mb">LEGAL</div>
+            <div class="hand-sm muted">Privacy · Habeas data · Terms · SLA</div>
+          </div>
+          <div>
+            <div class="mono muted mb">CONTACT</div>
+            <div class="hand-sm muted">Institutional enquiries · Support</div>
+          </div>
+        </div>
+        <div class="line dashed mt"></div>
+        <div class="row mono muted"><span>© DIGITALHEALTH · 2026</span><span class="spacer"></span><span>BUILD 0.1 · WIREFRAME</span></div>
+      </div>
+    </div>
+
+    <!-- ========== LANDING B ========== -->
+    <div class="frame">
+      <div class="frame-label"><span class="num">B</span> Full-bleed technical hero with console <span class="note">// enterprise infrastructure tone</span></div>
+
+      <div class="wire glass" style="padding:8px 14px;">
+        <div class="row">
+          <div class="hand" style="font-weight:700">◐ DigitalHealth</div>
+          <div class="mono muted" style="margin-left:6px">/ CIS</div>
+          <div class="spacer"></div>
+          <div class="mono muted" style="display:flex; gap:14px">
+            <span>▸ Platform</span><span>▸ FHIR</span><span>▸ Security</span><span>▸ Docs</span>
+          </div>
+          <div class="spacer"></div>
+          <span class="btn sm">Sign in</span>
+          <span class="btn sm primary">Register institution</span>
+        </div>
+      </div>
+
+      <!-- hero full bleed -->
+      <div class="wire ink" style="margin-top:10px; padding:28px 22px; position:relative; overflow:hidden;">
+        <div class="mono" style="color:#9e9a8c">// build 2026.04 · FHIR R4 · signed reports</div>
+        <div class="hand xxl" style="color:#f6f4ef; margin:10px 0">
+          Mission-critical<br/>
+          clinical record infrastructure.
+        </div>
+        <div class="hand-sm" style="color:#c8c4b6; max-width:520px; line-height:1.4">
+          Patient records, medical imaging, AI inference orchestration and
+          signed, auditable risk reports — in a single regulated system.
+        </div>
+        <div class="row" style="margin-top:18px; gap:10px">
+          <span class="btn primary" style="background:#f6f4ef; color:#1b1b1b; border-color:#f6f4ef">Request access</span>
+          <span class="btn ghost" style="color:#f6f4ef; border-color:#f6f4ef">▸ Read the brief</span>
+        </div>
+
+        <!-- mini console -->
+        <div style="position:absolute; right:20px; top:20px; width:42%; border:1px dashed #6a6458; padding:10px; font-family:var(--mono); font-size:10.5px; color:#c8c4b6; background:rgba(0,0,0,.22);">
+          <div style="color:#f3d000">$ fhir.get Patient?_id=421</div>
+          <div>&gt; 200 OK · 1 resource</div>
+          <div>&gt; observations:12 · media:3 · consent:active</div>
+          <div style="color:#f3d000; margin-top:6px">$ infer.run --model dl.resnet.v3 --study S-9921</div>
+          <div>&gt; status: running · eta 00:01:42</div>
+          <div>&gt; queued by dr.alvarez · trace a8f2..</div>
+          <div style="color:#78c27a; margin-top:6px">&gt; signature required before close ⓘ</div>
+        </div>
+      </div>
+
+      <!-- trust strip as horizontal markers -->
+      <div class="wire" style="margin-top:10px; padding:8px 14px;">
+        <div class="row mono muted" style="gap:18px; flex-wrap:wrap; justify-content:space-between">
+          <span>▣ HL7 FHIR R4</span>
+          <span>▣ RBAC · SCOPES</span>
+          <span>▣ AT-REST ENC.</span>
+          <span>▣ APPEND-ONLY AUDIT</span>
+          <span>▣ SIGNED REPORTS</span>
+          <span>▣ CONSENT PERSISTENCE</span>
+          <span>▣ CRITICAL ALERT BUS</span>
+        </div>
+      </div>
+
+      <!-- capabilities as numbered list -->
+      <div class="wire" style="margin-top:10px; padding:16px;">
+        <div class="mono muted mb">CAPABILITIES</div>
+        <div class="grid-2" style="gap:8px 22px">
+          <div class="b-bot"><span class="mono muted">01</span> &nbsp; <span class="hand">Unified clinical record</span></div>
+          <div class="b-bot"><span class="mono muted">02</span> &nbsp; <span class="hand">Imaging workstation</span></div>
+          <div class="b-bot"><span class="mono muted">03</span> &nbsp; <span class="hand">AI inference orchestration</span></div>
+          <div class="b-bot"><span class="mono muted">04</span> &nbsp; <span class="hand">Signed risk reports</span></div>
+          <div class="b-bot"><span class="mono muted">05</span> &nbsp; <span class="hand">Append-only audit</span></div>
+          <div class="b-bot"><span class="mono muted">06</span> &nbsp; <span class="hand">Habeas data / consent</span></div>
+          <div><span class="mono muted">07</span> &nbsp; <span class="hand">Interoperability (FHIR R4)</span></div>
+          <div><span class="mono muted">08</span> &nbsp; <span class="hand">Role-aware workflows</span></div>
+        </div>
+      </div>
+
+      <!-- workflow vertical timeline -->
+      <div class="wire" style="margin-top:10px; padding:16px;">
+        <div class="mono muted mb">WORKFLOW · INTAKE → AUDIT</div>
+        <div class="tl">
+          <div class="tli"><span class="mono muted">STEP 01</span> &nbsp; <span class="hand">Patient intake &amp; consent</span></div>
+          <div class="tli"><span class="mono muted">STEP 02</span> &nbsp; <span class="hand">Clinical observation capture</span></div>
+          <div class="tli"><span class="mono muted">STEP 03</span> &nbsp; <span class="hand">Image upload &amp; metadata</span></div>
+          <div class="tli"><span class="mono muted">STEP 04</span> &nbsp; <span class="hand">AI inference (ML · DL · multimodal)</span></div>
+          <div class="tli ev-critical"><span class="mono muted">STEP 05</span> &nbsp; <span class="hand">Physician review &amp; decision</span></div>
+          <div class="tli"><span class="mono muted">STEP 06</span> &nbsp; <span class="hand">Risk report — signed</span></div>
+          <div class="tli"><span class="mono muted">STEP 07</span> &nbsp; <span class="hand">Audit log &amp; archive</span></div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:10px">
+        <div class="wire">
+          <div class="mono muted mb">INTEROPERABILITY</div>
+          <div class="hand-sm">Native FHIR R4 resources, REST + bulk.</div>
+          <div class="line dashed"></div>
+          <div class="mono">Patient · Observation · Media · DiagnosticReport ·<br/>RiskAssessment · Consent · AuditEvent</div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">CTA · ACCESS</div>
+          <div class="hand big">Request institutional access</div>
+          <div class="hand-sm muted">Verification &amp; onboarding handled by platform operations.</div>
+          <div class="row mt"><span class="btn primary">Start request</span><span class="btn ghost">Speak to ops ➜</span></div>
+        </div>
+      </div>
+
+      <div class="wire dim" style="margin-top:10px; padding:12px 14px;">
+        <div class="row mono muted">
+          <span>© DIGITALHEALTH · 2026 — institutional healthcare platform</span>
+          <span class="spacer"></span>
+          <span>STATUS · ALL SYSTEMS OPERATIONAL ●</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- AUTH: LOGIN + REGISTER -->
+<!-- ============================================================= -->
+<section class="screen" data-screen="auth">
+  <div class="section-sub">AREA 02 · <span>Authentication &amp; onboarding</span></div>
+  <div class="section-title">Login · Register · Onboarding</div>
+  <div class="hr-hand"></div>
+
+  <div class="variants">
+
+    <!-- LOGIN -->
+    <div class="frame">
+      <div class="frame-label"><span class="num">B.1</span> Login — split panel with security note <span class="note">// 4 states shown</span></div>
+
+      <div class="wire" style="padding:0; overflow:hidden; display:grid; grid-template-columns: 1.1fr 1fr;">
+        <!-- side -->
+        <div class="wire ink" style="border:none; border-radius:0; padding:22px;">
+          <div class="mono" style="color:#9e9a8c">◐ DIGITALHEALTH</div>
+          <div class="hand huge" style="color:#f6f4ef; margin-top:16px">Secure clinical access</div>
+          <div class="hand-sm" style="color:#c8c4b6; max-width:300px; margin-top:10px">
+            Access is restricted to authorized personnel. All sessions are logged and
+            attributable to a verified practitioner identity.
+          </div>
+          <div class="line dashed" style="border-color:#555"></div>
+          <div class="mono" style="color:#c8c4b6">
+            <div>▸ Session timeout · 15 min</div>
+            <div>▸ Two-factor · required for clinicians</div>
+            <div>▸ All actions logged to audit</div>
+          </div>
+        </div>
+
+        <!-- form -->
+        <div style="padding:22px;">
+          <div class="mono muted">SIGN IN · DEFAULT STATE</div>
+          <div class="hand big mb">Practitioner access</div>
+
+          <div class="mono muted" style="font-size:10px">EMAIL</div>
+          <div class="input glass"><span class="ph">dr.alvarez@hospital.org</span></div>
+
+          <div class="mono muted mt" style="font-size:10px">PASSWORD</div>
+          <div class="input glass"><span class="ph">••••••••••••</span><span class="mono muted">show</span></div>
+
+          <div class="row mt" style="justify-content:space-between">
+            <span class="hand-sm"><span class="chk on"></span>Remember session</span>
+            <span class="hand-sm muted">Forgot password?</span>
+          </div>
+
+          <div class="row mt" style="gap:8px">
+            <span class="btn primary" style="flex:1; justify-content:center">Sign in</span>
+            <span class="btn ghost">SSO ▾</span>
+          </div>
+          <div class="line dashed mt"></div>
+          <div class="mono muted">Don't have an account? &nbsp;<span style="text-decoration:underline">Request institutional access</span></div>
+        </div>
+      </div>
+
+      <!-- state matrix -->
+      <div class="mono muted mt-lg mb">UI STATES</div>
+      <div class="grid-4">
+        <div class="wire"><div class="mono muted">FOCUS</div><div class="input glass" style="border-width:2px"><span class="ph">email…</span></div><div class="mono muted mt">outline thickens</div></div>
+        <div class="wire"><div class="mono muted">ERROR</div><div class="input glass" style="border-color:var(--accent)"><span class="ph" style="color:var(--accent)">invalid email</span></div><div class="mono" style="color:var(--accent)">! format not recognized</div></div>
+        <div class="wire"><div class="mono muted">LOCKED</div><div class="input glass" style="opacity:.5"><span class="ph">dr.alvarez@…</span></div><div class="mono muted">⌧ account locked · contact admin</div></div>
+        <div class="wire"><div class="mono muted">MAINTENANCE</div><div class="alert-bar" style="padding:6px 10px"><span class="dot"></span><span class="hand-sm">Scheduled maintenance 02:00–04:00 UTC</span></div></div>
+      </div>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="frame">
+      <div class="frame-label"><span class="num">B.2</span> Register · Onboarding — multi-step <span class="note">// role-aware fields</span></div>
+
+      <!-- steps -->
+      <div class="wire" style="padding:10px 14px;">
+        <div class="row mono muted" style="gap:6px">
+          <span class="pill" style="border-color:var(--ink); color:var(--ink)">① ROLE</span>
+          <span style="flex:.4; border-top:1.2px dashed var(--ink-3); margin:0 6px"></span>
+          <span class="pill" style="border-color:var(--ink); color:var(--ink)">② IDENTITY</span>
+          <span style="flex:.4; border-top:1.2px dashed var(--ink-3); margin:0 6px"></span>
+          <span class="pill">③ INSTITUTION</span>
+          <span style="flex:.4; border-top:1.2px dashed var(--ink-3); margin:0 6px"></span>
+          <span class="pill">④ CONSENT</span>
+          <span style="flex:.4; border-top:1.2px dashed var(--ink-3); margin:0 6px"></span>
+          <span class="pill">⑤ SUBMITTED</span>
+        </div>
+      </div>
+
+      <!-- role selection -->
+      <div class="wire mt">
+        <div class="mono muted">STEP 01 · USER TYPE</div>
+        <div class="hand big mb">Select your role</div>
+        <div class="grid-3">
+          <div class="wire"><span class="rdio"></span><span class="hand">Administrator</span><div class="mono muted mt">platform ops / institution mgmt</div></div>
+          <div class="wire" style="border-width:2.5px"><span class="rdio on"></span><span class="hand">Medical specialist</span><div class="mono muted mt">clinician / practitioner</div></div>
+          <div class="wire"><span class="rdio"></span><span class="hand">Patient / Auditor</span><div class="mono muted mt">read-only / compliance</div></div>
+        </div>
+      </div>
+
+      <!-- identity -->
+      <div class="wire mt">
+        <div class="mono muted">STEP 02 · IDENTITY</div>
+        <div class="grid-2 mt" style="gap:10px">
+          <div><div class="mono muted" style="font-size:10px">FULL NAME</div><div class="input glass"><span class="ph">Dra. A. Álvarez</span></div></div>
+          <div><div class="mono muted" style="font-size:10px">NATIONAL ID</div><div class="input glass"><span class="ph">CC · 1 098 …</span></div></div>
+          <div><div class="mono muted" style="font-size:10px">EMAIL</div><div class="input glass"><span class="ph">@hospital.org</span></div></div>
+          <div><div class="mono muted" style="font-size:10px">PHONE</div><div class="input glass"><span class="ph">+57 …</span></div></div>
+          <div><div class="mono muted" style="font-size:10px">PASSWORD</div><div class="input glass"><span class="ph">••••••••</span></div></div>
+          <div><div class="mono muted" style="font-size:10px">CONFIRM</div><div class="input glass"><span class="ph">••••••••</span></div></div>
+        </div>
+      </div>
+
+      <!-- institution -->
+      <div class="wire mt">
+        <div class="mono muted">STEP 03 · INSTITUTION &amp; LICENSE</div>
+        <div class="grid-2 mt" style="gap:10px">
+          <div><div class="mono muted" style="font-size:10px">MEDICAL REGISTRATION</div><div class="input glass"><span class="ph">RM · 0045…</span></div></div>
+          <div><div class="mono muted" style="font-size:10px">SPECIALTY</div><div class="input glass"><span class="ph">Radiology ▾</span></div></div>
+          <div><div class="mono muted" style="font-size:10px">INSTITUTION</div><div class="input glass"><span class="ph">Hospital Universitario ▾</span></div></div>
+          <div><div class="mono muted" style="font-size:10px">DEPARTMENT</div><div class="input glass"><span class="ph">Imaging &amp; Diagnostics</span></div></div>
+        </div>
+      </div>
+
+      <!-- consent -->
+      <div class="wire mt">
+        <div class="mono muted">STEP 04 · TERMS &amp; CONSENT</div>
+        <div class="hand-sm mt"><span class="chk on"></span>I accept the <u>Terms of Use</u> (v 2.3 · 2026-01-14)</div>
+        <div class="hand-sm"><span class="chk on"></span>I accept the <u>Privacy &amp; Habeas Data</u> policy</div>
+        <div class="hand-sm"><span class="chk"></span>I authorize processing of identifying data under regulatory retention</div>
+        <div class="hand-sm"><span class="chk"></span>I agree to platform audit of my clinical actions</div>
+        <div class="row mt"><span class="btn">Back</span><span class="spacer"></span><span class="btn primary">Submit request</span></div>
+      </div>
+
+      <!-- submitted state -->
+      <div class="wire mt dim center" style="padding:20px">
+        <div class="mono muted">STEP 05 · REQUEST SUBMITTED</div>
+        <div class="hand huge" style="margin:8px 0">Request received ✓</div>
+        <div class="hand-sm muted">Your institution administrator will verify credentials. You will be notified at the provided email address.</div>
+        <div class="mono muted mt">REQ · 2026-04-20 · #A-7741</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- DASHBOARD -->
+<!-- ============================================================= -->
+<section class="screen" data-screen="dashboard">
+  <div class="section-sub">AREA 03 · <span>Authenticated app shell &amp; dashboard</span></div>
+  <div class="section-title">Dashboard — two layouts</div>
+  <div class="hr-hand"></div>
+
+  <!-- DASH A: classic -->
+  <div class="frame">
+    <div class="frame-label"><span class="num">C.1</span> Classic left-sidebar workstation <span class="note">// safe, PACS-like, high scan-ability</span></div>
+
+    <div class="shell">
+      <!-- sidebar -->
+      <div class="sb">
+        <div class="group">MAIN</div>
+        <div class="item on"><span class="i"></span>Dashboard</div>
+        <div class="item"><span class="i"></span>Patients</div>
+        <div class="item"><span class="i"></span>Clinical Records</div>
+        <div class="item"><span class="i"></span>Images</div>
+        <div class="item"><span class="i"></span>AI Inference</div>
+        <div class="item"><span class="i"></span>Risk Reports</div>
+        <div class="group">GOVERNANCE</div>
+        <div class="item"><span class="i"></span>Audit Log</div>
+        <div class="item"><span class="i"></span>Consent</div>
+        <div class="group">ACCOUNT</div>
+        <div class="item"><span class="i"></span>Settings</div>
+        <div class="line dashed mt"></div>
+        <div class="mono muted p-sm">v0.1 · ENV: staging</div>
+      </div>
+
+      <!-- main -->
+      <div>
+        <!-- topbar -->
+        <div class="wire glass" style="padding:8px 12px; display:flex; gap:10px; align-items:center">
+          <span class="mono muted">home / dashboard</span>
+          <span class="spacer"></span>
+          <span class="input glass" style="min-width:260px"><span class="ph muted">Search patients, studies, reports…</span><span class="k">⌘K</span></span>
+          <span class="badge soft"><span class="d"></span>CLINICIAN</span>
+          <span class="btn icon sm">🔔</span>
+          <span class="btn icon sm">●</span>
+        </div>
+
+        <!-- alert -->
+        <div class="alert-bar mt"><span class="dot"></span><span class="hand">3 critical inferences awaiting signature · SLA breached on 1</span><span class="spacer"></span><span class="btn sm">Review queue ➜</span></div>
+
+        <!-- stat row -->
+        <div class="grid-6 mt">
+          <div class="stat"><div class="k">ACTIVE PATIENTS</div><div class="v">1 284</div><div class="trend">▲ 2.1% · 7d</div></div>
+          <div class="stat"><div class="k">PENDING SIGN.</div><div class="v">17</div><div class="trend" style="color:var(--accent)">3 critical</div></div>
+          <div class="stat"><div class="k">CRIT. ALERTS</div><div class="v">4</div><div class="trend">open</div></div>
+          <div class="stat"><div class="k">INFERENCES 24h</div><div class="v">318</div><div class="trend">▲ 9%</div></div>
+          <div class="stat"><div class="k">REVIEWS</div><div class="v">22</div><div class="trend">in queue</div></div>
+          <div class="stat"><div class="k">CONSENT</div><div class="v">98.2%</div><div class="trend">acceptance</div></div>
+        </div>
+
+        <!-- two columns -->
+        <div class="grid-2 mt" style="gap:10px; grid-template-columns: 1.6fr 1fr">
+          <div class="wire">
+            <div class="row b-bot"><div class="mono muted">RECENT PATIENT ACTIVITY</div><span class="spacer"></span><span class="mono muted">24h ▾</span></div>
+            <div class="tbl" style="border:none; background:transparent">
+              <div class="tr"><span class="mono">P-00421</span><span class="hand">Rojas, M.</span><span class="hand-sm muted">OBS · hs-CRP updated</span><span class="badge crit"><span class="d"></span>CRIT</span><span class="mono muted">08:12</span><span class="hand-sm">Dr. Alvarez</span><span class="mono muted">Study S-9921</span><span class="btn sm ghost">Open ➜</span></div>
+              <div class="tr"><span class="mono">P-00388</span><span class="hand">Mora, J.</span><span class="hand-sm muted">INFERENCE completed</span><span class="badge warn"><span class="d"></span>ELEV</span><span class="mono muted">08:04</span><span class="hand-sm">Dr. Yu</span><span class="mono muted">dl.resnet.v3</span><span class="btn sm ghost">Open ➜</span></div>
+              <div class="tr"><span class="mono">P-00357</span><span class="hand">Pérez, L.</span><span class="hand-sm muted">Report signed</span><span class="badge ok"><span class="d"></span>OK</span><span class="mono muted">07:58</span><span class="hand-sm">Dr. Kim</span><span class="mono muted">R-4421</span><span class="btn sm ghost">Open ➜</span></div>
+              <div class="tr"><span class="mono">P-00301</span><span class="hand">Díaz, F.</span><span class="hand-sm muted">Image uploaded</span><span class="badge soft"><span class="d"></span>INFO</span><span class="mono muted">07:44</span><span class="hand-sm">Tech. Ruiz</span><span class="mono muted">CT · chest</span><span class="btn sm ghost">Open ➜</span></div>
+              <div class="tr"><span class="mono">P-00289</span><span class="hand">Gil, R.</span><span class="hand-sm muted">Consent renewed</span><span class="badge ok"><span class="d"></span>OK</span><span class="mono muted">07:31</span><span class="hand-sm">Self</span><span class="mono muted">v2.3</span><span class="btn sm ghost">Open ➜</span></div>
+            </div>
+          </div>
+          <div class="wire">
+            <div class="row b-bot"><div class="mono muted">CRITICAL ALERT QUEUE</div><span class="spacer"></span><span class="mono muted">4 open</span></div>
+            <div class="col">
+              <div class="row"><span class="badge crit"><span class="d"></span>CRIT</span><span class="hand">P-00421 · risk 0.87</span><span class="spacer"></span><span class="mono muted">2m</span></div>
+              <div class="row"><span class="badge crit"><span class="d"></span>CRIT</span><span class="hand">P-00104 · risk 0.81</span><span class="spacer"></span><span class="mono muted">11m</span></div>
+              <div class="row"><span class="badge warn"><span class="d"></span>ELEV</span><span class="hand">P-00388 · risk 0.64</span><span class="spacer"></span><span class="mono muted">28m</span></div>
+              <div class="row"><span class="badge warn"><span class="d"></span>BLOCK</span><span class="hand">R-4402 · missing signature</span><span class="spacer"></span><span class="mono muted">1h</span></div>
+              <div class="line dashed"></div>
+              <div class="row"><span class="btn sm primary">Go to queue</span><span class="btn sm ghost">Escalate</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- charts + queue -->
+        <div class="grid-2 mt" style="gap:10px">
+          <div class="wire">
+            <div class="mono muted mb">INFERENCE VOLUME · 14d</div>
+            <div class="chart"><div class="bars">
+              <div class="b" style="height:35%"></div><div class="b" style="height:48%"></div>
+              <div class="b" style="height:42%"></div><div class="b" style="height:58%"></div>
+              <div class="b" style="height:66%"></div><div class="b" style="height:52%"></div>
+              <div class="b" style="height:70%"></div><div class="b" style="height:63%"></div>
+              <div class="b" style="height:74%"></div><div class="b" style="height:88%"></div>
+              <div class="b" style="height:72%"></div><div class="b" style="height:80%"></div>
+              <div class="b" style="height:95%"></div><div class="b" style="height:82%"></div>
+            </div></div>
+          </div>
+          <div class="wire">
+            <div class="mono muted mb">INFERENCE ACTIVITY</div>
+            <div class="queue">
+              <div class="q-item"><span class="mono">J-9921</span><div class="progress"><i style="width:84%"></i></div><span class="mono muted">RUNNING</span></div>
+              <div class="q-item"><span class="mono">J-9920</span><div class="progress"><i style="width:42%"></i></div><span class="mono muted">RUNNING</span></div>
+              <div class="q-item"><span class="mono">J-9919</span><div class="progress"><i style="width:100%"></i></div><span class="mono muted" style="color:#2a5a2a">DONE</span></div>
+              <div class="q-item"><span class="mono">J-9918</span><div class="progress"><i style="width:0%"></i></div><span class="mono muted">QUEUED</span></div>
+              <div class="q-item"><span class="mono">J-9917</span><div class="progress"><i style="width:30%; background:var(--accent)"></i></div><span class="mono" style="color:var(--accent)">FAILED</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- right inspector -->
+      <div class="col">
+        <div class="wire">
+          <div class="mono muted mb">QUICK ACTIONS</div>
+          <div class="col">
+            <span class="btn">↥ Upload study</span>
+            <span class="btn">👤 Open patient</span>
+            <span class="btn">⌗ Review risk report</span>
+            <span class="btn">✎ Sign report</span>
+            <span class="btn role-auditor">⎘ Export audit log</span>
+          </div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">AUDIT FEED · SNAPSHOT</div>
+          <div class="tl" style="padding-left:18px">
+            <div class="tli"><span class="mono muted">08:12</span> &nbsp;<span class="hand-sm">Alvarez signed R-4421</span></div>
+            <div class="tli ev-critical"><span class="mono muted">08:09</span> &nbsp;<span class="hand-sm">Critical flag raised P-00421</span></div>
+            <div class="tli"><span class="mono muted">08:04</span> &nbsp;<span class="hand-sm">Yu ran dl.resnet.v3 on S-9920</span></div>
+            <div class="tli"><span class="mono muted">07:58</span> &nbsp;<span class="hand-sm">Kim signed R-4420</span></div>
+            <div class="tli"><span class="mono muted">07:31</span> &nbsp;<span class="hand-sm">Gil renewed consent v2.3</span></div>
+          </div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">OPERATIONAL CHARTS</div>
+          <div class="mono muted">Signature turnaround</div>
+          <div class="chart" style="height:70px"><div class="bars">
+            <div class="b" style="height:40%"></div><div class="b" style="height:55%"></div><div class="b" style="height:70%"></div><div class="b" style="height:50%"></div><div class="b" style="height:62%"></div><div class="b" style="height:48%"></div><div class="b" style="height:66%"></div>
+          </div></div>
+          <div class="mono muted mt">Severity distribution</div>
+          <div class="row mt" style="gap:4px">
+            <div class="progress" style="flex:2"><i style="width:100%"></i></div>
+            <div class="progress" style="flex:1"><i style="width:100%; background:#8a6d00"></i></div>
+            <div class="progress" style="flex:.3"><i style="width:100%; background:var(--accent)"></i></div>
+          </div>
+          <div class="mono muted mt">Normal · Elevated · Critical</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASH B: three-pane workstation -->
+  <div class="frame">
+    <div class="frame-label"><span class="num">C.2</span> Three-pane workstation · rail + split work area <span class="note">// high-density, multi-case</span></div>
+
+    <div class="shell narrow">
+      <!-- icon rail -->
+      <div class="sb" style="min-width:60px; padding:8px 0; text-align:center">
+        <div style="font-family:var(--label); font-size:18px; padding:4px 0">◐</div>
+        <div class="line dashed"></div>
+        <div class="col" style="gap:4px; padding:4px 0">
+          <div class="btn icon sm">⌂</div>
+          <div class="btn icon sm" style="background:var(--ink); color:#fff">⎌</div>
+          <div class="btn icon sm">☰</div>
+          <div class="btn icon sm">⊞</div>
+          <div class="btn icon sm">✦</div>
+          <div class="btn icon sm">✎</div>
+          <div class="btn icon sm">⌗</div>
+          <div class="btn icon sm">🔒</div>
+        </div>
+      </div>
+
+      <div>
+        <!-- topbar with tabs for open cases -->
+        <div class="wire glass" style="padding:6px 10px; display:flex; gap:8px; align-items:center">
+          <span class="mono muted">Operations / Today</span>
+          <span class="spacer"></span>
+          <span class="input glass" style="min-width:220px"><span class="ph muted">search…</span><span class="k">/</span></span>
+          <span class="badge"><span class="d"></span>DR. ALVAREZ · CLINICIAN</span>
+          <span class="btn icon sm">🔔</span>
+        </div>
+        <!-- open case tabs -->
+        <div class="row mt" style="gap:0; border-bottom:1.5px solid var(--ink); padding-bottom:0">
+          <span class="pill" style="border-bottom:none; border-radius:3px 3px 0 0; background:#fff; padding:4px 10px">OPERATIONS</span>
+          <span class="pill" style="margin-left:4px; padding:4px 10px">P-00421 · Rojas</span>
+          <span class="pill" style="margin-left:4px; padding:4px 10px">P-00388 · Mora</span>
+          <span class="pill" style="margin-left:4px; padding:4px 10px">+ new case</span>
+        </div>
+
+        <!-- split region: metrics grid + live feed -->
+        <div class="grid-2 mt" style="grid-template-columns: 1.4fr 1fr; gap:10px">
+          <div>
+            <div class="grid-3">
+              <div class="stat"><div class="k">OPEN CASES</div><div class="v">42</div><div class="trend">assigned to me</div></div>
+              <div class="stat"><div class="k">PEND. SIGN</div><div class="v">7</div><div class="trend" style="color:var(--accent)">2 crit</div></div>
+              <div class="stat"><div class="k">TURNAROUND</div><div class="v">14m</div><div class="trend">median · today</div></div>
+            </div>
+
+            <div class="wire mt">
+              <div class="mono muted mb">CASE DISTRIBUTION · SEVERITY</div>
+              <svg viewBox="0 0 300 90" style="width:100%; height:100px">
+                <g font-family="var(--mono)" font-size="8" fill="#4a4a4a">
+                  <line x1="0" y1="70" x2="300" y2="70" stroke="#111" stroke-width="1"/>
+                  <polyline fill="none" stroke="#111" stroke-width="1.5" points="0,55 30,48 60,52 90,40 120,35 150,28 180,36 210,30 240,22 270,26 300,18"/>
+                  <polyline fill="none" stroke="#111" stroke-width="1" stroke-dasharray="3 2" points="0,62 30,60 60,58 90,55 120,57 150,52 180,54 210,50 240,48 270,46 300,44"/>
+                  <polyline fill="none" stroke="#c23a2b" stroke-width="1.2" points="0,75 30,72 60,74 90,70 120,68 150,64 180,66 210,60 240,58 270,55 300,52"/>
+                  <text x="5" y="12">elevated ——</text><text x="90" y="12">normal - - -</text><text x="165" y="12" fill="#c23a2b">critical ——</text>
+                </g>
+              </svg>
+            </div>
+
+            <div class="wire mt">
+              <div class="mono muted mb">RECENT · OPEN CASES</div>
+              <div class="tbl" style="border:none; background:transparent">
+                <div class="tr head"><span>ID</span><span>PATIENT</span><span>LAST UPDATE</span><span>RISK</span><span>SIGN</span><span>ASSIGNEE</span><span>MODEL</span><span></span></div>
+                <div class="tr"><span class="mono">P-00421</span><span class="hand">Rojas, M. · 54F</span><span class="hand-sm muted">obs updated</span><span class="badge crit"><span class="d"></span>0.87</span><span class="badge warn"><span class="d"></span>PEND</span><span class="hand-sm">Alvarez</span><span class="mono muted">dl.resnet.v3</span><span class="btn sm ghost">▸</span></div>
+                <div class="tr"><span class="mono">P-00388</span><span class="hand">Mora, J. · 38M</span><span class="hand-sm muted">inference done</span><span class="badge warn"><span class="d"></span>0.64</span><span class="badge warn"><span class="d"></span>PEND</span><span class="hand-sm">Yu</span><span class="mono muted">ml.xgb.v1</span><span class="btn sm ghost">▸</span></div>
+                <div class="tr"><span class="mono">P-00357</span><span class="hand">Pérez, L. · 61M</span><span class="hand-sm muted">signed</span><span class="badge ok"><span class="d"></span>0.12</span><span class="badge ok"><span class="d"></span>OK</span><span class="hand-sm">Kim</span><span class="mono muted">—</span><span class="btn sm ghost">▸</span></div>
+                <div class="tr"><span class="mono">P-00104</span><span class="hand">Vega, A. · 72F</span><span class="hand-sm muted">flagged</span><span class="badge crit"><span class="d"></span>0.81</span><span class="badge crit"><span class="d"></span>BLOCK</span><span class="hand-sm">Alvarez</span><span class="mono muted">mm.v2</span><span class="btn sm ghost">▸</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- live feed column -->
+          <div class="col">
+            <div class="wire">
+              <div class="mono muted mb">LIVE FEED · AUDIT</div>
+              <div class="tl">
+                <div class="tli ev-critical"><span class="mono muted">08:12:44</span><div class="hand-sm">CRITICAL raised — P-00421 risk 0.87 <span class="mono muted">(dl.resnet.v3)</span></div></div>
+                <div class="tli"><span class="mono muted">08:12:01</span><div class="hand-sm">Alvarez signed R-4421</div></div>
+                <div class="tli"><span class="mono muted">08:11:14</span><div class="hand-sm">Yu submitted inference J-9920</div></div>
+                <div class="tli"><span class="mono muted">08:10:02</span><div class="hand-sm">System: storage hot-tier &gt; 78%</div></div>
+                <div class="tli"><span class="mono muted">08:08:55</span><div class="hand-sm">Ruiz uploaded 3 DICOM files to S-9922</div></div>
+              </div>
+            </div>
+            <div class="wire">
+              <div class="mono muted mb">SYSTEM STATUS</div>
+              <div class="row"><span class="hand-sm">API</span><span class="spacer"></span><span class="badge ok"><span class="d"></span>OK</span></div>
+              <div class="row mt"><span class="hand-sm">FHIR gateway</span><span class="spacer"></span><span class="badge ok"><span class="d"></span>OK</span></div>
+              <div class="row mt"><span class="hand-sm">Inference workers</span><span class="spacer"></span><span class="badge warn"><span class="d"></span>2/3</span></div>
+              <div class="row mt"><span class="hand-sm">Image storage</span><span class="spacer"></span><span class="badge warn"><span class="d"></span>78% hot</span></div>
+              <div class="row mt"><span class="hand-sm">Audit writer</span><span class="spacer"></span><span class="badge ok"><span class="d"></span>OK</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- right sidebar: context + shortcuts -->
+      <div class="col">
+        <div class="wire">
+          <div class="mono muted mb">CONTEXT · TODAY</div>
+          <div class="hand-sm">Shift · 06:00–18:00</div>
+          <div class="hand-sm">Queue priority · CRITICAL-FIRST</div>
+          <div class="hand-sm">On call · Dr. Kim (backup)</div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">ROLE QUICK ACTIONS</div>
+          <div class="col">
+            <span class="btn">Create case</span>
+            <span class="btn">Run inference…</span>
+            <span class="btn">Sign pending reports (7)</span>
+            <span class="btn">Escalate critical</span>
+          </div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">STATES LEGEND</div>
+          <div class="row wrap" style="gap:6px">
+            <span class="badge ok"><span class="d"></span>OK</span>
+            <span class="badge soft"><span class="d"></span>INFO</span>
+            <span class="badge warn"><span class="d"></span>ELEV</span>
+            <span class="badge crit"><span class="d"></span>CRIT</span>
+            <span class="badge" style="border-color:var(--ink-4); color:var(--ink-4)"><span class="d" style="background:var(--ink-4)"></span>ARCHV</span>
+            <span class="badge warn"><span class="d"></span>PEND SIG</span>
+            <span class="badge soft"><span class="d"></span>BLOCKED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- dashboard state matrix -->
+    <div class="mono muted mt-lg mb">DASHBOARD STATES</div>
+    <div class="grid-5">
+      <div class="wire"><div class="mono muted">NORMAL</div><div class="scribble mt"></div><div class="scribble mt"></div></div>
+      <div class="wire"><div class="mono muted">HIGH ALERT</div><div class="alert-bar mt" style="padding:4px 8px"><span class="dot"></span><span class="hand-sm">3 crit</span></div></div>
+      <div class="wire"><div class="mono muted">EMPTY</div><div class="hand-sm muted mt">No cases assigned.<br/>You're all caught up.</div></div>
+      <div class="wire"><div class="mono muted">LIMITED PERM.</div><div class="hand-sm muted mt">Some panels hidden due to role (auditor).</div></div>
+      <div class="wire"><div class="mono muted">DEGRADED</div><div class="badge warn mt"><span class="d"></span>INFER WORKERS 1/3</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- PATIENTS LIST -->
+<!-- ============================================================= -->
+<section class="screen" data-screen="patients">
+  <div class="section-sub">AREA 04 · <span>Patient list — advanced table</span></div>
+  <div class="section-title">Patients</div>
+  <div class="hr-hand"></div>
+
+  <div class="frame">
+    <div class="frame-label"><span class="num">D</span> Dense table · drawer preview <span class="note">// filters · sort · bulk · density</span></div>
+
+    <div class="wire glass" style="padding:10px 12px">
+      <div class="row">
+        <span class="hand big">Patients</span>
+        <span class="mono muted">· 1 284 total · 42 assigned to me</span>
+        <span class="spacer"></span>
+        <span class="input glass" style="min-width:280px"><span class="ph muted">Name, document, study, FHIR id…</span><span class="k">⌘K</span></span>
+        <span class="btn">⎘ Export</span>
+        <span class="btn primary">+ New patient</span>
+      </div>
+      <div class="row mt" style="gap:6px; flex-wrap:wrap">
+        <span class="pill">Assignee: me ✕</span>
+        <span class="pill">Risk: ≥ elevated ✕</span>
+        <span class="pill">Consent: active</span>
+        <span class="pill">Sex: all</span>
+        <span class="pill">Updated: 7d</span>
+        <span class="pill">+ Filter</span>
+        <span class="spacer"></span>
+        <span class="mono muted">Density</span>
+        <span class="pill" style="background:var(--ink); color:#fff">COMPACT</span><span class="pill">COZY</span>
+      </div>
+    </div>
+
+    <div class="tbl mt">
+      <div class="tr head">
+        <span>ID</span><span>NAME</span><span>DOC / DEMO</span><span>AGE</span><span>SEX</span><span>ASSIGNEE</span><span>RISK</span><span>STATUS</span>
+      </div>
+      <div class="tr"><span class="mono">P-00421</span><span class="hand">Rojas, Martha</span><span class="mono muted">CC · 41 921 334</span><span class="hand">54</span><span class="hand">F</span><span class="hand">Dr. Alvarez</span><span class="badge crit"><span class="d"></span>0.87</span><span class="badge warn"><span class="d"></span>PEND SIG</span></div>
+      <div class="tr"><span class="mono">P-00388</span><span class="hand">Mora, Julián</span><span class="mono muted">CC · 1 022 884</span><span class="hand">38</span><span class="hand">M</span><span class="hand">Dr. Yu</span><span class="badge warn"><span class="d"></span>0.64</span><span class="badge warn"><span class="d"></span>REVIEW</span></div>
+      <div class="tr"><span class="mono">P-00357</span><span class="hand">Pérez, Luis</span><span class="mono muted">CC · 5 543 110</span><span class="hand">61</span><span class="hand">M</span><span class="hand">Dr. Kim</span><span class="badge ok"><span class="d"></span>0.12</span><span class="badge ok"><span class="d"></span>SIGNED</span></div>
+      <div class="tr"><span class="mono">P-00301</span><span class="hand">Díaz, Fernanda</span><span class="mono muted">CC · 72 019 882</span><span class="hand">29</span><span class="hand">F</span><span class="hand">Dr. Alvarez</span><span class="badge soft"><span class="d"></span>—</span><span class="badge soft"><span class="d"></span>INTAKE</span></div>
+      <div class="tr"><span class="mono">P-00289</span><span class="hand">Gil, Ricardo</span><span class="mono muted">CC · 80 331 002</span><span class="hand">47</span><span class="hand">M</span><span class="hand">Dr. Kim</span><span class="badge ok"><span class="d"></span>0.23</span><span class="badge ok"><span class="d"></span>ACTIVE</span></div>
+      <div class="tr"><span class="mono">P-00104</span><span class="hand">Vega, Ana</span><span class="mono muted">CC · 22 018 119</span><span class="hand">72</span><span class="hand">F</span><span class="hand">Dr. Alvarez</span><span class="badge crit"><span class="d"></span>0.81</span><span class="badge crit"><span class="d"></span>BLOCKED</span></div>
+      <div class="tr"><span class="mono">P-00092</span><span class="hand">Lopez, Sara</span><span class="mono muted">CC · 19 882 440</span><span class="hand">44</span><span class="hand">F</span><span class="hand">Dr. Yu</span><span class="badge warn"><span class="d"></span>0.58</span><span class="badge warn"><span class="d"></span>REVIEW</span></div>
+      <div class="tr"><span class="mono">P-00031</span><span class="hand">Ortiz, Carlos</span><span class="mono muted">CC · 10 552 770</span><span class="hand">59</span><span class="hand">M</span><span class="hand">Dr. Kim</span><span class="badge ok"><span class="d"></span>0.30</span><span class="badge ok"><span class="d"></span>ACTIVE</span></div>
+    </div>
+
+    <div class="row mt">
+      <span class="mono muted">Showing 1–8 of 1 284 · page 1 / 161</span>
+      <span class="spacer"></span>
+      <span class="btn sm ghost">◀</span>
+      <span class="btn sm">1</span><span class="btn sm">2</span><span class="btn sm">3</span><span class="mono muted">…</span>
+      <span class="btn sm">161</span>
+      <span class="btn sm ghost">▶</span>
+    </div>
+
+    <!-- preview drawer -->
+    <div class="mono muted mt-lg mb">ROW PREVIEW · DRAWER (opens on hover/select)</div>
+    <div class="wire glass" style="padding:14px;">
+      <div class="row">
+        <div>
+          <div class="mono muted">P-00421 · ROJAS, MARTHA · 54F</div>
+          <div class="hand big">Pending signature · critical</div>
+          <div class="hand-sm muted">Last update 2 min ago · Dr. Alvarez · Study S-9921</div>
+        </div>
+        <span class="spacer"></span>
+        <span class="badge crit"><span class="d"></span>RISK 0.87</span>
+        <span class="btn primary">Open record ➜</span>
+      </div>
+      <div class="grid-4 mt">
+        <div class="wire p-sm"><div class="mono muted">LATEST OBSERVATION</div><div class="hand-sm">hs-CRP 12.4 mg/L ▲</div></div>
+        <div class="wire p-sm"><div class="mono muted">STUDIES</div><div class="hand-sm">3 (1 today)</div></div>
+        <div class="wire p-sm"><div class="mono muted">INFERENCES</div><div class="hand-sm">4 · last dl.resnet.v3</div></div>
+        <div class="wire p-sm"><div class="mono muted">CONSENT</div><div class="hand-sm">v2.3 · active</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- PATIENT DETAIL -->
+<!-- ============================================================= -->
+<section class="screen" data-screen="detail">
+  <div class="section-sub">AREA 05 · <span>Patient detail · clinical workstation</span></div>
+  <div class="section-title">Patient Detail — multi-zone workstation</div>
+  <div class="hr-hand"></div>
+
+  <div class="frame">
+    <div class="frame-label"><span class="num">E</span> Overview tab · header · timeline · actions rail <span class="note">// 7 tabs</span></div>
+
+    <!-- header -->
+    <div class="wire glass" style="padding:14px 16px;">
+      <div class="row">
+        <div style="width:48px; height:48px; border:1.5px solid var(--ink); border-radius:50%; display:flex; align-items:center; justify-content:center; background:#fff" class="hand big">MR</div>
+        <div>
+          <div class="hand big">Rojas, Martha <span class="mono muted" style="font-size:11px">· 54F · O+</span></div>
+          <div class="mono muted">P-00421 · CC 41 921 334 · Bogotá · admitted 2026-04-18</div>
+        </div>
+        <span class="spacer"></span>
+        <div class="col" style="align-items:flex-end; gap:4px">
+          <div class="row"><span class="badge crit"><span class="d"></span>RISK 0.87</span><span class="badge warn"><span class="d"></span>PEND SIG</span><span class="badge ok"><span class="d"></span>CONSENT v2.3</span></div>
+          <div class="mono muted">assigned · Dr. Alvarez · last activity 2m</div>
+        </div>
+      </div>
+      <div class="row mt" style="gap:4px; flex-wrap:wrap; border-top:1px dashed rgba(0,0,0,.2); padding-top:10px">
+        <span class="pill" style="background:var(--ink); color:#fff">Overview</span>
+        <span class="pill">Observations</span>
+        <span class="pill">Images</span>
+        <span class="pill">AI Inference</span>
+        <span class="pill">Risk Report</span>
+        <span class="pill">Audit</span>
+        <span class="pill">Consent</span>
+      </div>
+    </div>
+
+    <!-- layout: summary + side panel -->
+    <div class="shell nosidebar mt">
+      <div class="col">
+        <!-- summary row -->
+        <div class="grid-4">
+          <div class="stat"><div class="k">ACTIVE DX</div><div class="v">3</div><div class="trend">codes · ICD-10</div></div>
+          <div class="stat"><div class="k">LAST OBS</div><div class="v">hs-CRP</div><div class="trend">12.4 mg/L ▲ abn.</div></div>
+          <div class="stat"><div class="k">STUDIES</div><div class="v">3</div><div class="trend">1 today</div></div>
+          <div class="stat"><div class="k">PEND. ACTION</div><div class="v">1</div><div class="trend" style="color:var(--accent)">signature</div></div>
+        </div>
+
+        <!-- timeline -->
+        <div class="wire">
+          <div class="row b-bot"><div class="mono muted">CLINICAL TIMELINE</div><span class="spacer"></span><span class="pill">all events</span><span class="pill">obs</span><span class="pill">img</span><span class="pill">infer</span><span class="pill">sig</span></div>
+          <div class="tl">
+            <div class="tli ev-critical"><span class="mono muted">2026-04-20 · 08:12</span><div class="hand">Critical risk flagged · dl.resnet.v3 · 0.87</div><div class="hand-sm muted">Grad-CAM overlay attached · requires signature</div></div>
+            <div class="tli"><span class="mono muted">2026-04-20 · 07:44</span><div class="hand">CT chest uploaded · study S-9921</div><div class="hand-sm muted">3 DICOM · Tech. Ruiz</div></div>
+            <div class="tli"><span class="mono muted">2026-04-20 · 07:30</span><div class="hand">Observation batch: hs-CRP, WBC, Creatinine</div><div class="hand-sm muted">2 abnormal values</div></div>
+            <div class="tli"><span class="mono muted">2026-04-19 · 18:02</span><div class="hand">Clinical note · Dr. Alvarez</div><div class="hand-sm muted">"Persistent dyspnea, 3 days"</div></div>
+            <div class="tli"><span class="mono muted">2026-04-18 · 09:15</span><div class="hand">Admission &amp; consent v2.3 accepted</div><div class="hand-sm muted">Institutional policy</div></div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="wire">
+            <div class="mono muted mb">LATEST OBSERVATIONS · FHIR-CODED</div>
+            <div class="tbl" style="border:none; background:transparent">
+              <div class="tr" style="grid-template-columns: 1.1fr 80px 100px 80px 80px 80px"><span class="hand-sm">hs-CRP</span><span class="mono">12.4</span><span class="mono muted">0–3 mg/L</span><span class="badge crit"><span class="d"></span>ABN</span><span class="mono muted">▲</span><span class="mono muted">07:30</span></div>
+              <div class="tr" style="grid-template-columns: 1.1fr 80px 100px 80px 80px 80px"><span class="hand-sm">WBC</span><span class="mono">13.9</span><span class="mono muted">4–11 k/µL</span><span class="badge warn"><span class="d"></span>ELEV</span><span class="mono muted">▲</span><span class="mono muted">07:30</span></div>
+              <div class="tr" style="grid-template-columns: 1.1fr 80px 100px 80px 80px 80px"><span class="hand-sm">Creatinine</span><span class="mono">0.9</span><span class="mono muted">0.6–1.2</span><span class="badge ok"><span class="d"></span>OK</span><span class="mono muted">▬</span><span class="mono muted">07:30</span></div>
+              <div class="tr" style="grid-template-columns: 1.1fr 80px 100px 80px 80px 80px"><span class="hand-sm">SpO₂</span><span class="mono">93%</span><span class="mono muted">≥95%</span><span class="badge warn"><span class="d"></span>LOW</span><span class="mono muted">▼</span><span class="mono muted">07:15</span></div>
+            </div>
+          </div>
+          <div class="wire">
+            <div class="mono muted mb">CURRENT REPORT STATE</div>
+            <div class="hand big">R-4421 · draft</div>
+            <div class="hand-sm muted">dl.resnet.v3 · risk 0.87 · severity HIGH</div>
+            <div class="line dashed"></div>
+            <div class="hand-sm">Pending:</div>
+            <div class="hand-sm">◉ Physician decision</div>
+            <div class="hand-sm">◉ Digital signature</div>
+            <div class="row mt"><span class="btn primary">Open report</span><span class="btn">Sign &amp; close</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- right rail -->
+      <div class="col">
+        <div class="wire">
+          <div class="mono muted mb">ACTIONS</div>
+          <div class="col">
+            <span class="btn primary">Open risk report</span>
+            <span class="btn">+ Add observation</span>
+            <span class="btn">↥ Upload study</span>
+            <span class="btn">✦ Run inference</span>
+            <span class="btn">✎ Add clinical note</span>
+            <span class="btn ghost">Escalate to M&amp;M</span>
+          </div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">CARE TEAM</div>
+          <div class="hand-sm">◉ Dr. A. Alvarez · Radiology (owner)</div>
+          <div class="hand-sm">◉ Dr. T. Yu · Internal Med.</div>
+          <div class="hand-sm">◉ Tech. P. Ruiz · Imaging</div>
+          <div class="hand-sm">◉ Dr. L. Kim · On call</div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">FHIR · PRIMARY RESOURCES</div>
+          <div class="mono">Patient / 00421</div>
+          <div class="mono">Observation × 12</div>
+          <div class="mono">Media × 3</div>
+          <div class="mono">DiagnosticReport × 1</div>
+          <div class="mono">RiskAssessment × 1</div>
+          <div class="mono">Consent / v2.3</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- IMAGING -->
+<!-- ============================================================= -->
+<section class="screen" data-screen="imaging">
+  <div class="section-sub">AREA 06 · <span>Medical imaging workstation</span></div>
+  <div class="section-title">Imaging viewer</div>
+  <div class="hr-hand"></div>
+
+  <div class="frame">
+    <div class="frame-label"><span class="num">F</span> PACS-lite viewer with Grad-CAM overlay <span class="note">// comparison split + metadata</span></div>
+
+    <div class="shell">
+      <!-- study list -->
+      <div class="sb">
+        <div class="group">STUDIES · P-00421</div>
+        <div class="item on"><span class="i"></span>CT chest · S-9921 <span class="mono muted" style="margin-left:auto; font-size:9px">today</span></div>
+        <div class="item"><span class="i"></span>CR chest · S-9710</div>
+        <div class="item"><span class="i"></span>US abdomen · S-9431</div>
+        <div class="group">SERIES IN S-9921</div>
+        <div class="item on"><span class="i"></span>Axial · 256 img</div>
+        <div class="item"><span class="i"></span>Coronal · 128</div>
+        <div class="item"><span class="i"></span>Sagittal · 128</div>
+        <div class="group">OVERLAYS</div>
+        <div class="item on"><span class="i"></span>Grad-CAM</div>
+        <div class="item"><span class="i"></span>Segmentation</div>
+        <div class="item"><span class="i"></span>None</div>
+      </div>
+
+      <!-- viewer region -->
+      <div class="col">
+        <!-- toolbar -->
+        <div class="wire glass" style="padding:6px 10px">
+          <div class="row">
+            <span class="badge"><span class="d"></span>CT · S-9921</span>
+            <span class="mono muted">axial · 128/256</span>
+            <span class="spacer"></span>
+            <div class="row" style="gap:4px">
+              <span class="btn icon sm">⇱</span>
+              <span class="btn icon sm">⇲</span>
+              <span class="btn icon sm">✥</span>
+              <span class="btn icon sm">▭</span>
+              <span class="btn icon sm">◐</span>
+              <span class="btn icon sm">↻</span>
+              <span class="btn icon sm">⎌</span>
+            </div>
+            <span class="pill" style="background:var(--ink); color:#fff">GRAD-CAM ON</span>
+            <span class="pill">SPLIT ▸ ORIGINAL / EXPLAINED</span>
+          </div>
+        </div>
+
+        <!-- viewer split -->
+        <div class="grid-2" style="gap:6px">
+          <div class="viewer">
+            <span class="corner" style="top:8px; left:10px">CT · axial 128</span>
+            <span class="corner" style="top:8px; right:10px">WW 350 / WL 40</span>
+            <span class="corner" style="bottom:8px; left:10px">P-00421 · ROJAS M</span>
+            <span class="corner" style="bottom:8px; right:10px">S-9921 · 2026-04-20</span>
+            <div class="crosshair"></div>
+          </div>
+          <div class="viewer">
+            <span class="corner" style="top:8px; left:10px">GRAD-CAM · dl.resnet.v3</span>
+            <span class="corner" style="top:8px; right:10px">prob 0.87</span>
+            <span class="corner" style="bottom:8px; right:10px">overlay α 0.55</span>
+            <div class="crosshair"></div>
+            <div class="roi"></div>
+            <div class="roi-lbl">ROI · 0.87</div>
+          </div>
+        </div>
+
+        <!-- scroll strip -->
+        <div class="wire" style="padding:6px">
+          <div class="row mono muted" style="gap:3px; overflow:hidden">
+            <span class="pill">◀</span>
+            <span class="pill">119</span><span class="pill">120</span><span class="pill">121</span><span class="pill">122</span>
+            <span class="pill">123</span><span class="pill">124</span><span class="pill">125</span><span class="pill">126</span>
+            <span class="pill">127</span><span class="pill" style="background:var(--ink); color:#fff">128</span>
+            <span class="pill">129</span><span class="pill">130</span><span class="pill">131</span><span class="pill">132</span>
+            <span class="pill">▶</span>
+            <span class="spacer"></span>
+            <span>slice 128 / 256 · 1.25 mm</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- metadata panel -->
+      <div class="col">
+        <div class="wire">
+          <div class="mono muted mb">STUDY METADATA</div>
+          <div class="mono">Modality · CT</div>
+          <div class="mono">Manufacturer · SIEMENS</div>
+          <div class="mono">KVP · 120 · mAs · 180</div>
+          <div class="mono">Slice · 1.25 mm</div>
+          <div class="mono">Series · 3 (axial/cor/sag)</div>
+          <div class="mono">Uploaded · 2026-04-20 07:44</div>
+          <div class="mono">By · Tech. Ruiz</div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">ANALYSIS</div>
+          <div class="row"><span class="badge"><span class="d"></span>dl.resnet.v3</span><span class="badge ok"><span class="d"></span>DONE</span></div>
+          <div class="hand big mt">0.87 <span class="mono muted" style="font-size:10px">calibrated</span></div>
+          <div class="hand-sm muted">Grad-CAM localizes to RLL consolidation</div>
+          <div class="line dashed"></div>
+          <div class="col">
+            <span class="btn">↻ Re-run analysis</span>
+            <span class="btn">✎ Add finding</span>
+            <span class="btn primary">Generate risk report</span>
+          </div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">VIEWER STATES</div>
+          <div class="hand-sm">◉ Image available</div>
+          <div class="hand-sm">◉ Loading…</div>
+          <div class="hand-sm">◉ No image</div>
+          <div class="hand-sm">◉ Storage unavailable</div>
+          <div class="hand-sm">◉ Overlay active</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- AI INFERENCE -->
+<!-- ============================================================= -->
+<section class="screen" data-screen="ai">
+  <div class="section-sub">AREA 07 · <span>AI inference workspace</span></div>
+  <div class="section-title">AI Inference</div>
+  <div class="hr-hand"></div>
+
+  <div class="frame">
+    <div class="frame-label"><span class="num">G</span> Run config · queue · result with explanation <span class="note">// ML · DL · multimodal</span></div>
+
+    <div class="shell">
+      <!-- model config left -->
+      <div class="col">
+        <div class="wire">
+          <div class="mono muted mb">NEW INFERENCE</div>
+          <div class="mono muted" style="font-size:10px">MODEL TYPE</div>
+          <div class="row mt" style="gap:4px"><span class="pill">ML</span><span class="pill" style="background:var(--ink); color:#fff">DL</span><span class="pill">MULTIMODAL</span></div>
+
+          <div class="mono muted mt" style="font-size:10px">MODEL</div>
+          <div class="input glass"><span class="ph">dl.resnet.v3 · risk-chest ▾</span></div>
+
+          <div class="mono muted mt" style="font-size:10px">VERSION</div>
+          <div class="input glass"><span class="ph">3.2.1 · calibrated 2026-03</span></div>
+
+          <div class="mono muted mt" style="font-size:10px">INPUT · STUDY</div>
+          <div class="input glass"><span class="ph">S-9921 · CT chest ▾</span></div>
+
+          <div class="mono muted mt" style="font-size:10px">EXPLAIN</div>
+          <div class="row mt"><span class="chk on"></span><span class="hand-sm">Grad-CAM</span><span style="margin-left:10px"><span class="chk"></span><span class="hand-sm">SHAP (tabular)</span></span></div>
+
+          <div class="line dashed mt"></div>
+          <div class="row"><span class="btn primary" style="flex:1; justify-content:center">Run analysis</span><span class="btn">Cancel</span></div>
+          <div class="mono muted mt">estimated · 1m 42s · worker queue 2</div>
+        </div>
+
+        <div class="wire">
+          <div class="mono muted mb">QUEUE · TODAY</div>
+          <div class="queue">
+            <div class="q-item"><span class="mono">J-9921</span><div class="progress"><i style="width:84%"></i></div><span class="mono muted">RUN</span></div>
+            <div class="q-item"><span class="mono">J-9920</span><div class="progress"><i style="width:42%"></i></div><span class="mono muted">RUN</span></div>
+            <div class="q-item"><span class="mono">J-9919</span><div class="progress"><i style="width:100%"></i></div><span class="mono muted">DONE</span></div>
+            <div class="q-item"><span class="mono">J-9918</span><div class="progress"><i style="width:0"></i></div><span class="mono muted">QUEUED</span></div>
+            <div class="q-item"><span class="mono">J-9917</span><div class="progress"><i style="width:30%; background:var(--accent)"></i></div><span class="mono" style="color:var(--accent)">FAIL</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- center: live result -->
+      <div class="col">
+        <div class="wire">
+          <div class="row b-bot">
+            <div class="mono muted">RESULT · J-9921</div>
+            <span class="spacer"></span>
+            <span class="badge"><span class="d"></span>dl.resnet.v3</span>
+            <span class="badge ok"><span class="d"></span>COMPLETED</span>
+          </div>
+          <div class="row" style="gap:18px; align-items:flex-start">
+            <div>
+              <div class="mono muted">CALIBRATED PROBABILITY</div>
+              <div class="hand xxl">0.87</div>
+              <div class="mono muted">95% CI · 0.81 – 0.92</div>
+            </div>
+            <div style="flex:1">
+              <div class="mono muted mb">RISK BAND</div>
+              <!-- gauge-like -->
+              <div style="position:relative; height:14px; border:1.2px solid var(--ink); border-radius:7px; background:repeating-linear-gradient(90deg, #fff 0 20%, rgba(0,0,0,.05) 20% 60%, rgba(194,58,43,.25) 60% 100%);">
+                <div style="position:absolute; left:87%; top:-4px; width:2px; height:22px; background:var(--ink);"></div>
+              </div>
+              <div class="row mono muted mt" style="justify-content:space-between"><span>LOW</span><span>NORMAL</span><span>ELEVATED</span><span>HIGH</span><span>CRITICAL</span></div>
+
+              <div class="mono muted mt">PREDICTED CATEGORY</div>
+              <div class="hand big">Consolidation · RLL · probable infection</div>
+
+              <div class="mono muted mt">PLAIN-LANGUAGE INTERPRETATION</div>
+              <div class="hand-sm">Model finds high-probability RLL consolidation, consistent with hs-CRP ▲ and SpO₂ ▼. Recommend physician review.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="wire">
+            <div class="mono muted mb">EXPLANATION · GRAD-CAM</div>
+            <div class="viewer" style="aspect-ratio:16/9">
+              <span class="corner" style="top:8px; left:10px">axial 128 · overlay α 0.55</span>
+              <div class="crosshair"></div>
+              <div class="roi"></div>
+            </div>
+          </div>
+          <div class="wire">
+            <div class="mono muted mb">SHAP · TABULAR CONTRIBUTIONS</div>
+            <svg viewBox="0 0 260 120" style="width:100%; height:160px">
+              <g font-family="var(--mono)" font-size="9" fill="#2a2a2a">
+                <line x1="90" y1="5" x2="90" y2="115" stroke="#111" stroke-dasharray="2 2"/>
+                <text x="2" y="18">hs-CRP</text><rect x="90" y="11" width="80" height="8" fill="#1b1b1b"/><text x="175" y="18">+0.24</text>
+                <text x="2" y="34">SpO₂</text><rect x="90" y="27" width="55" height="8" fill="#1b1b1b"/><text x="150" y="34">+0.17</text>
+                <text x="2" y="50">WBC</text><rect x="90" y="43" width="40" height="8" fill="#1b1b1b"/><text x="135" y="50">+0.12</text>
+                <text x="2" y="66">Age</text><rect x="90" y="59" width="22" height="8" fill="#1b1b1b"/><text x="117" y="66">+0.06</text>
+                <text x="2" y="82">Sex · F</text><rect x="74" y="75" width="16" height="8" fill="#7a7a7a"/><text x="54" y="82">−0.03</text>
+                <text x="2" y="98">Smoker</text><rect x="70" y="91" width="20" height="8" fill="#7a7a7a"/><text x="48" y="98">−0.05</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="wire">
+          <div class="mono muted mb">EXECUTION LOG</div>
+          <div class="mono" style="font-size:10.5px; color:var(--ink-3); line-height:1.45">
+            [08:10:02] queued · priority=HIGH · by dr.alvarez<br/>
+            [08:10:04] worker-2 accepted · warmup 1.8s<br/>
+            [08:10:08] preprocess · resample 1.25mm → 2.0mm · 198ms<br/>
+            [08:10:12] forward · resnet.v3 · 42 layers · 1.11s<br/>
+            [08:10:13] calibrate · Platt · temp 1.14<br/>
+            [08:10:14] explain · grad-cam layer4.2 · 320ms<br/>
+            [08:10:15] trace a8f2-99ce · emit AuditEvent · OK<br/>
+            [08:11:44] completed · prob 0.87 · band CRITICAL · ✓
+          </div>
+        </div>
+      </div>
+
+      <!-- right: workflow actions -->
+      <div class="col">
+        <div class="wire">
+          <div class="mono muted mb">WORKFLOW</div>
+          <div class="col">
+            <span class="btn primary">Generate risk report</span>
+            <span class="btn">Open linked patient</span>
+            <span class="btn">↻ Re-run with other model</span>
+            <span class="btn">Escalate critical</span>
+            <span class="btn ghost">Cancel if pending</span>
+          </div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">MODEL METADATA</div>
+          <div class="mono">type · dl · classifier</div>
+          <div class="mono">arch · resnet-50 v3</div>
+          <div class="mono">train · 412k studies</div>
+          <div class="mono">AUROC · 0.93 (val)</div>
+          <div class="mono">calibrated · 2026-03-02</div>
+          <div class="mono">card · ▸ view model card</div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">STATES</div>
+          <div class="row wrap" style="gap:6px">
+            <span class="badge soft"><span class="d"></span>READY</span>
+            <span class="badge soft"><span class="d"></span>QUEUED</span>
+            <span class="badge warn"><span class="d"></span>RUNNING</span>
+            <span class="badge ok"><span class="d"></span>COMPLETED</span>
+            <span class="badge crit"><span class="d"></span>FAILED</span>
+            <span class="badge warn"><span class="d"></span>BLOCKED · DATA</span>
+            <span class="badge warn"><span class="d"></span>BLOCKED · PERM</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- RISK REPORT -->
+<!-- ============================================================= -->
+<section class="screen" data-screen="report">
+  <div class="section-sub">AREA 08 · <span>Risk report — document &amp; actions</span></div>
+  <div class="section-title">Risk Report</div>
+  <div class="hr-hand"></div>
+
+  <div class="frame">
+    <div class="frame-label"><span class="num">H</span> Document body · actions rail <span class="note">// hybrid: printable report + web-native workflow</span></div>
+
+    <div class="shell nosidebar">
+      <!-- document -->
+      <div class="doc">
+        <div class="row" style="align-items:flex-start">
+          <div>
+            <div class="mono meta">DIGITALHEALTH · CLINICAL RISK REPORT · R-4421 · v0.3 draft</div>
+            <h3>Risk Assessment — Pulmonary consolidation (RLL)</h3>
+            <div class="meta">Patient P-00421 · Rojas, Martha · 54F · CC 41 921 334</div>
+            <div class="meta">Generated 2026-04-20 08:12 · Institution · Hospital Universitario</div>
+          </div>
+          <span class="spacer"></span>
+          <div class="col" style="align-items:flex-end">
+            <span class="badge crit"><span class="d"></span>PENDING SIGNATURE</span>
+            <span class="mono meta">CLOSURE BLOCKED</span>
+          </div>
+        </div>
+
+        <div class="line dashed"></div>
+
+        <div class="grid-2" style="gap:22px">
+          <div>
+            <div class="mono meta">§1 — PATIENT CONTEXT</div>
+            <div>54F, admitted 2026-04-18 with 3-day dyspnea and fever. hs-CRP 12.4 mg/L, SpO₂ 93%, WBC 13.9. No prior chest surgery. Consent v2.3 active.</div>
+
+            <div class="mono meta mt-lg">§2 — MODEL &amp; INPUT</div>
+            <div>Model <b>dl.resnet.v3</b> (3.2.1, calibrated 2026-03). Input: CT chest study S-9921 (axial · 256 slices, 1.25 mm). Tabular features: 7.</div>
+
+            <div class="mono meta mt-lg">§3 — RESULT</div>
+            <div>Calibrated probability <b>0.87</b> (95% CI 0.81–0.92). Risk band <b>CRITICAL</b>. Predicted class: RLL consolidation, probable infection.</div>
+
+            <div class="mono meta mt-lg">§4 — EXPLANATION SUMMARY</div>
+            <div>Grad-CAM localizes evidence to right lower lobe. SHAP: hs-CRP (+0.24), SpO₂ (+0.17), WBC (+0.12) dominate contribution. No single feature single-handedly drives the prediction.</div>
+          </div>
+          <div>
+            <div class="mono meta">§5 — LINKED EVIDENCE</div>
+            <ul style="margin:2px 0; padding-left:18px">
+              <li>Study S-9921 · axial/coronal/sagittal</li>
+              <li>Observation bundle 2026-04-20 07:30</li>
+              <li>Clinical note Dr. Alvarez 2026-04-19</li>
+            </ul>
+
+            <div class="mono meta mt-lg">§6 — CLINICAL OBSERVATIONS</div>
+            <div>hs-CRP 12.4 ▲ · WBC 13.9 ▲ · SpO₂ 93% ▼ · Creatinine 0.9 ▬ · Temp 38.6°C ▲</div>
+
+            <div class="mono meta mt-lg">§7 — PHYSICIAN DECISION</div>
+            <div class="row mt" style="gap:6px">
+              <span class="btn sm" style="background:#fff">◯ Accept model finding</span>
+              <span class="btn sm" style="background:#fff">◯ Reject · alt diagnosis</span>
+              <span class="btn sm" style="background:#fff">◯ Require additional workup</span>
+            </div>
+            <div class="mono meta mt">NOTES (required):</div>
+            <div class="input" style="min-height:60px; align-items:flex-start"><span class="ph muted">Physician rationale…</span></div>
+
+            <div class="mono meta mt-lg">§8 — SIGNATURE</div>
+            <div class="sig">
+              <div>
+                <div class="mono meta">Dr. A. ALVAREZ · RM 0045…</div>
+                <div class="hand-sm muted">Radiology · Hospital Universitario</div>
+              </div>
+              <div class="mono meta">[ NOT SIGNED · awaiting decision ]</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- actions rail -->
+      <div class="col">
+        <div class="wire" style="border-color:var(--accent); background:rgba(194,58,43,0.04)">
+          <div class="mono" style="color:var(--accent); letter-spacing:.08em">CLOSURE BLOCKED</div>
+          <div class="hand-sm mt">Reason: physician decision &amp; signature required.</div>
+          <div class="hand-sm">Next action: record decision in §7, then sign.</div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">ACTIONS</div>
+          <div class="col">
+            <span class="btn primary">✎ Sign &amp; close</span>
+            <span class="btn">Reject &amp; return to AI</span>
+            <span class="btn">Add observation</span>
+            <span class="btn">⎘ Export PDF</span>
+            <span class="btn ghost">Discard draft</span>
+          </div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">REPORT META</div>
+          <div class="mono">ID · R-4421</div>
+          <div class="mono">Ver · 0.3 draft</div>
+          <div class="mono">Gen · 08:12</div>
+          <div class="mono">Model · dl.resnet.v3</div>
+          <div class="mono">Trace · a8f2-99ce</div>
+          <div class="mono">State · PENDING SIGNATURE</div>
+        </div>
+        <div class="wire">
+          <div class="mono muted mb">VERSION HISTORY</div>
+          <div class="tl" style="padding-left:16px">
+            <div class="tli"><span class="mono muted">v0.3 · 08:12</span><div class="hand-sm">Regenerated after obs update</div></div>
+            <div class="tli"><span class="mono muted">v0.2 · 07:50</span><div class="hand-sm">Draft · model re-run</div></div>
+            <div class="tli"><span class="mono muted">v0.1 · 07:44</span><div class="hand-sm">Initial draft</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- report states -->
+    <div class="mono muted mt-lg mb">REPORT STATES</div>
+    <div class="grid-5">
+      <div class="wire"><div class="mono muted">DRAFT</div><span class="badge soft mt"><span class="d"></span>DRAFT</span></div>
+      <div class="wire"><div class="mono muted">PENDING SIG</div><span class="badge warn mt"><span class="d"></span>PENDING SIG</span></div>
+      <div class="wire"><div class="mono muted">BLOCKED</div><span class="badge crit mt"><span class="d"></span>BLOCKED</span></div>
+      <div class="wire"><div class="mono muted">SIGNED</div><span class="badge ok mt"><span class="d"></span>SIGNED · v1</span></div>
+      <div class="wire"><div class="mono muted">ARCHIVED</div><span class="badge soft mt" style="opacity:.6"><span class="d"></span>ARCHIVED</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- AUDIT + CONSENT -->
+<!-- ============================================================= -->
+<section class="screen" data-screen="audit">
+  <div class="section-sub">AREA 09 · <span>Audit · compliance · consent</span></div>
+  <div class="section-title">Audit &amp; Consent</div>
+  <div class="hr-hand"></div>
+
+  <div class="variants">
+    <!-- AUDIT -->
+    <div class="frame">
+      <div class="frame-label"><span class="num">I.1</span> Audit log · append-only <span class="note">// filters · drawer · export</span></div>
+
+      <div class="wire glass" style="padding:10px 12px">
+        <div class="row">
+          <span class="hand big">Audit log</span>
+          <span class="mono muted">· 1 282 441 events · append-only</span>
+          <span class="spacer"></span>
+          <span class="input glass" style="min-width:220px"><span class="ph muted">actor, resource, trace…</span></span>
+          <span class="btn">⎘ Export</span>
+        </div>
+        <div class="row mt" style="gap:4px; flex-wrap:wrap">
+          <span class="pill">Actor: any</span>
+          <span class="pill">Role: any</span>
+          <span class="pill">Action: any</span>
+          <span class="pill">Resource: any</span>
+          <span class="pill">Patient: any</span>
+          <span class="pill">Result: any</span>
+          <span class="pill">Date: 24h</span>
+          <span class="pill">Severity: all</span>
+          <span class="pill">+ Filter</span>
+        </div>
+      </div>
+
+      <div class="tbl mt">
+        <div class="audit-row head"><span>TIMESTAMP · UTC</span><span>SEV</span><span>ACTOR</span><span>ACTION · RESOURCE</span><span>TRACE / RESULT</span><span></span></div>
+        <div class="audit-row"><span>2026-04-20 08:12:44</span><span style="color:var(--accent)">CRIT</span><span>system</span><span>RISK_FLAG · R-4421 · P-00421</span><span>a8f2-99ce · OK</span><span>▸</span></div>
+        <div class="audit-row"><span>2026-04-20 08:12:01</span><span>INFO</span><span>alvarez</span><span>SIGN · DiagnosticReport/R-4420</span><span>c211-7740 · OK</span><span>▸</span></div>
+        <div class="audit-row"><span>2026-04-20 08:11:14</span><span>INFO</span><span>yu</span><span>INFER_SUBMIT · J-9920</span><span>a8f2-88aa · OK</span><span>▸</span></div>
+        <div class="audit-row"><span>2026-04-20 08:10:22</span><span>WARN</span><span>system</span><span>STORAGE_PRESSURE · hot 78%</span><span>— · NOTICE</span><span>▸</span></div>
+        <div class="audit-row"><span>2026-04-20 08:08:55</span><span>INFO</span><span>ruiz</span><span>UPLOAD · Media × 3 · S-9922</span><span>b112-2203 · OK</span><span>▸</span></div>
+        <div class="audit-row"><span>2026-04-20 08:02:10</span><span>INFO</span><span>alvarez</span><span>READ · Patient/P-00421</span><span>— · OK</span><span>▸</span></div>
+        <div class="audit-row"><span>2026-04-20 08:00:01</span><span>INFO</span><span>gil</span><span>CONSENT_RENEW · v2.3</span><span>c001-1122 · OK</span><span>▸</span></div>
+        <div class="audit-row"><span>2026-04-20 07:44:39</span><span>WARN</span><span>yu</span><span>INFER_FAILED · J-9917</span><span>e991-0033 · TIMEOUT</span><span>▸</span></div>
+      </div>
+
+      <!-- detail drawer -->
+      <div class="wire mt">
+        <div class="mono muted mb">EVENT DETAIL · a8f2-99ce</div>
+        <div class="grid-2" style="gap:10px">
+          <div>
+            <div class="mono">action · RISK_FLAG</div>
+            <div class="mono">resource · RiskAssessment/R-4421</div>
+            <div class="mono">patient · P-00421</div>
+            <div class="mono">actor · system · model=dl.resnet.v3</div>
+            <div class="mono">severity · CRIT</div>
+            <div class="mono">result · OK</div>
+            <div class="mono">IP · 10.0.42.18</div>
+            <div class="mono">trace · a8f2-99ce-4401-…</div>
+          </div>
+          <div class="wire dim">
+            <div class="mono muted">PAYLOAD (signed, immutable)</div>
+            <div class="mono" style="line-height:1.4">{<br/>
+              &nbsp;&nbsp;"patient":"P-00421",<br/>
+              &nbsp;&nbsp;"report":"R-4421",<br/>
+              &nbsp;&nbsp;"prob":0.87,<br/>
+              &nbsp;&nbsp;"band":"CRITICAL",<br/>
+              &nbsp;&nbsp;"model":"dl.resnet.v3@3.2.1"<br/>
+            }</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONSENT -->
+    <div class="frame">
+      <div class="frame-label"><span class="num">I.2</span> Consent · first-login modal + management <span class="note">// habeas data</span></div>
+
+      <!-- modal mock -->
+      <div class="wire glass" style="padding:0; position:relative; min-height:320px;">
+        <div style="position:absolute; inset:0; background:repeating-linear-gradient(135deg, rgba(0,0,0,.04) 0 1px, transparent 1px 6px);"></div>
+        <div class="wire" style="position:relative; margin:36px auto; max-width:460px; background:#fcfbf7;">
+          <div class="mono muted">FIRST-LOGIN CONSENT · REQUIRED</div>
+          <div class="hand big mt">Processing of clinical data</div>
+          <div class="hand-sm muted mt">Policy v2.3 · effective 2026-01-14</div>
+          <div class="line dashed mt"></div>
+          <div class="hand-sm">By continuing you acknowledge that DigitalHealth will process your clinical data for the purposes of diagnosis, treatment, auditability and regulatory retention under the applicable habeas data framework.</div>
+          <div class="hand-sm mt">This decision is recorded, timestamped, and retained in the audit log.</div>
+          <div class="hand-sm mt"><span class="chk on"></span>I have read and accept the policy</div>
+          <div class="hand-sm"><span class="chk"></span>I authorize secondary use for anonymized research</div>
+          <div class="row mt"><span class="btn ghost">Decline</span><span class="spacer"></span><span class="btn">Review full policy</span><span class="btn primary">Accept &amp; continue</span></div>
+        </div>
+      </div>
+
+      <!-- management screen -->
+      <div class="wire mt">
+        <div class="row b-bot">
+          <div class="mono muted">CONSENT MANAGEMENT · P-00421</div>
+          <span class="spacer"></span>
+          <span class="badge ok"><span class="d"></span>CURRENT · ACTIVE</span>
+        </div>
+        <div class="grid-3 mt">
+          <div class="wire p-sm"><div class="mono muted">ACCEPTED VERSION</div><div class="hand big">v2.3</div><div class="mono muted">2026-01-14</div></div>
+          <div class="wire p-sm"><div class="mono muted">ACCEPTED AT</div><div class="hand big">2026-04-18 09:15</div><div class="mono muted">IP 186.42.12.30</div></div>
+          <div class="wire p-sm"><div class="mono muted">STATUS</div><div class="hand big">Active</div><div class="mono muted">next review · 2027-01</div></div>
+        </div>
+
+        <div class="mono muted mt">HISTORY</div>
+        <div class="tbl mt">
+          <div class="audit-row head"><span>DATE</span><span>VERSION</span><span>EVENT</span><span>CHANNEL</span><span>IP / META</span><span></span></div>
+          <div class="audit-row"><span>2026-04-18 09:15</span><span>v2.3</span><span>ACCEPT</span><span>first-login modal</span><span>186.42.12.30</span><span>▸</span></div>
+          <div class="audit-row"><span>2025-06-02 11:02</span><span>v2.1</span><span>ACCEPT</span><span>onboarding</span><span>186.42.12.30</span><span>▸</span></div>
+          <div class="audit-row"><span>2024-09-12 08:44</span><span>v2.0</span><span>ACCEPT</span><span>onboarding</span><span>186.42.12.28</span><span>▸</span></div>
+        </div>
+
+        <div class="row mt"><span class="btn">Review full policy</span><span class="btn">Download signed receipt</span><span class="spacer"></span><span class="btn ghost">Revoke (restricted)</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- COMPONENT SYSTEM -->
+<!-- ============================================================= -->
+<section class="screen" data-screen="components">
+  <div class="section-sub">AREA 10 · <span>Component system · states</span></div>
+  <div class="section-title">Component system</div>
+  <div class="hr-hand"></div>
+
+  <div class="frame">
+    <div class="frame-label"><span class="num">J.1</span> Core components <span class="note">// buttons · inputs · selects · badges</span></div>
+
+    <div class="grid-3">
+      <div class="wire">
+        <div class="mono muted mb">BUTTONS</div>
+        <div class="row wrap"><span class="btn primary">Primary</span><span class="btn">Secondary</span><span class="btn ghost">Ghost</span></div>
+        <div class="row wrap mt"><span class="btn sm primary">Sm</span><span class="btn sm">Sm</span><span class="btn sm ghost">Sm</span></div>
+        <div class="row wrap mt"><span class="btn icon">✦</span><span class="btn icon sm">+</span><span class="btn" style="opacity:.5">Disabled</span></div>
+      </div>
+
+      <div class="wire">
+        <div class="mono muted mb">INPUT · TEXT / PASSWORD / SEARCH</div>
+        <div class="input glass"><span class="ph muted">Email…</span></div>
+        <div class="input glass mt"><span class="ph muted">••••••••</span><span class="mono muted">show</span></div>
+        <div class="input glass mt"><span class="ph muted">🔍 Search…</span><span class="k">/</span></div>
+        <div class="input glass mt" style="border-color:var(--accent)"><span class="ph" style="color:var(--accent)">Invalid format</span></div>
+      </div>
+
+      <div class="wire">
+        <div class="mono muted mb">SELECT · COMBOBOX</div>
+        <div class="input glass"><span class="ph muted">Specialty ▾</span></div>
+        <div class="wire dotted mt p-sm">
+          <div class="hand-sm"><span class="chk on"></span>Radiology</div>
+          <div class="hand-sm"><span class="chk"></span>Internal medicine</div>
+          <div class="hand-sm"><span class="chk"></span>Cardiology</div>
+          <div class="hand-sm"><span class="chk"></span>Emergency</div>
+        </div>
+      </div>
+
+      <div class="wire">
+        <div class="mono muted mb">CHECK · RADIO · TOGGLE</div>
+        <div><span class="chk on"></span><span class="hand-sm">Remember session</span></div>
+        <div><span class="chk"></span><span class="hand-sm">Subscribe to alerts</span></div>
+        <div class="mt"><span class="rdio on"></span><span class="hand-sm">Clinician</span> &nbsp; <span class="rdio"></span><span class="hand-sm">Auditor</span></div>
+        <div class="mt"><span style="display:inline-block; width:34px; height:18px; border:1.5px solid var(--ink); border-radius:10px; background:var(--ink); position:relative; vertical-align:-4px"><i style="display:block; position:absolute; width:12px; height:12px; background:#fff; border-radius:50%; top:1.5px; right:1.5px"></i></span> <span class="hand-sm">Grad-CAM overlay</span></div>
+      </div>
+
+      <div class="wire">
+        <div class="mono muted mb">BADGES · STATUS</div>
+        <div class="row wrap" style="gap:6px">
+          <span class="badge ok"><span class="d"></span>OK</span>
+          <span class="badge soft"><span class="d"></span>INFO</span>
+          <span class="badge warn"><span class="d"></span>ELEVATED</span>
+          <span class="badge crit"><span class="d"></span>CRITICAL</span>
+          <span class="badge" style="border-color:var(--ink-4); color:var(--ink-4)"><span class="d" style="background:var(--ink-4)"></span>ARCHIVED</span>
+          <span class="badge warn"><span class="d"></span>PEND SIG</span>
+          <span class="badge soft"><span class="d"></span>NO PERM</span>
+        </div>
+      </div>
+
+      <div class="wire">
+        <div class="mono muted mb">TABS · SEGMENTED</div>
+        <div class="row" style="gap:0; border-bottom:1.5px solid var(--ink)">
+          <span class="pill" style="border-bottom:none; background:#fff">Overview</span>
+          <span class="pill" style="margin-left:4px; opacity:.7">Observations</span>
+          <span class="pill" style="margin-left:4px; opacity:.7">Images</span>
+          <span class="pill" style="margin-left:4px; opacity:.7">Audit</span>
+        </div>
+        <div class="mt"><span class="pill" style="background:var(--ink); color:#fff">DAY</span><span class="pill">WEEK</span><span class="pill">MONTH</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <div class="frame-label"><span class="num">J.2</span> Patterns <span class="note">// cards · stats · tables · timelines · uploads</span></div>
+    <div class="grid-3">
+      <div class="wire">
+        <div class="mono muted mb">STAT TILE</div>
+        <div class="stat"><div class="k">PENDING SIG.</div><div class="v">17</div><div class="trend" style="color:var(--accent)">3 critical</div></div>
+      </div>
+      <div class="wire">
+        <div class="mono muted mb">EMPTY STATE</div>
+        <div class="wire dotted center" style="padding:22px"><div class="hand big">⌧</div><div class="hand-sm muted">No inferences yet.<br/>Run one from a study.</div><span class="btn sm mt">Run inference</span></div>
+      </div>
+      <div class="wire">
+        <div class="mono muted mb">SKELETON · LOADING</div>
+        <div class="scribble" style="height:12px"></div>
+        <div class="scribble mt" style="height:12px"></div>
+        <div class="scribble mt" style="height:12px; width:60%"></div>
+      </div>
+      <div class="wire">
+        <div class="mono muted mb">TIMELINE ITEM</div>
+        <div class="tl">
+          <div class="tli ev-critical"><span class="mono muted">08:12</span><div class="hand-sm">Critical flag · R-4421</div></div>
+          <div class="tli"><span class="mono muted">07:50</span><div class="hand-sm">Report regenerated</div></div>
+        </div>
+      </div>
+      <div class="wire">
+        <div class="mono muted mb">AUDIT ROW</div>
+        <div class="mono" style="font-size:10.5px">2026-04-20 08:12 · alvarez · SIGN · R-4420 · OK</div>
+        <div class="mono" style="font-size:10.5px">2026-04-20 08:09 · system · RISK_FLAG · R-4421 · CRIT</div>
+      </div>
+      <div class="wire">
+        <div class="mono muted mb">UPLOAD ZONE</div>
+        <div class="wire dotted center" style="padding:18px;"><div class="hand big">↥</div><div class="hand-sm muted">Drop DICOM or click to browse</div><div class="mono muted mt">max 500 MB · .dcm .zip</div></div>
+      </div>
+      <div class="wire">
+        <div class="mono muted mb">FILE / IMAGE CARD</div>
+        <div class="row"><div style="width:40px; height:40px; background:#1b1b1b; border-radius:3px"></div><div><div class="hand-sm">CT chest · axial 128</div><div class="mono muted">S-9921 · 1.25 mm</div></div></div>
+      </div>
+      <div class="wire">
+        <div class="mono muted mb">TOAST · CRITICAL</div>
+        <div class="alert-bar"><span class="dot"></span><span class="hand-sm">R-4421 flagged critical — signature required</span></div>
+      </div>
+      <div class="wire">
+        <div class="mono muted mb">CONSENT BANNER</div>
+        <div class="wire dim p-sm"><div class="hand-sm">Policy v2.3 active. Your next review is in 9 months. <span class="mono muted">▸ view</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <div class="frame-label"><span class="num">J.3</span> State system <span class="note">// unified visual language</span></div>
+    <div class="grid-6">
+      <div class="wire center"><div class="mono muted">SUCCESS</div><span class="badge ok mt"><span class="d"></span>OK</span></div>
+      <div class="wire center"><div class="mono muted">INFO</div><span class="badge soft mt"><span class="d"></span>INFO</span></div>
+      <div class="wire center"><div class="mono muted">WARNING</div><span class="badge warn mt"><span class="d"></span>ELEV</span></div>
+      <div class="wire center"><div class="mono muted">CRITICAL</div><span class="badge crit mt"><span class="d"></span>CRIT</span></div>
+      <div class="wire center"><div class="mono muted">BLOCKED</div><span class="badge" style="border-color:var(--ink); background:repeating-linear-gradient(45deg, rgba(0,0,0,.08) 0 4px, transparent 4px 8px)" ><span class="d"></span>BLOCK</span></div>
+      <div class="wire center"><div class="mono muted">PEND SIG</div><span class="badge warn mt"><span class="d"></span>PEND SIG</span></div>
+      <div class="wire center"><div class="mono muted">PEND CONSENT</div><span class="badge warn mt"><span class="d"></span>PEND CONS</span></div>
+      <div class="wire center"><div class="mono muted">INF QUEUED</div><span class="badge soft mt"><span class="d"></span>QUEUED</span></div>
+      <div class="wire center"><div class="mono muted">INF RUNNING</div><span class="badge warn mt"><span class="d"></span>RUNNING</span></div>
+      <div class="wire center"><div class="mono muted">INF FAILED</div><span class="badge crit mt"><span class="d"></span>FAILED</span></div>
+      <div class="wire center"><div class="mono muted">NO PERM</div><span class="badge soft mt"><span class="d"></span>NO PERM</span></div>
+      <div class="wire center"><div class="mono muted">ARCHIVED</div><span class="badge" style="border-color:var(--ink-4); color:var(--ink-4)"><span class="d" style="background:var(--ink-4)"></span>ARCHV</span></div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /page -->
+
+<!-- Tweaks -->
+<button id="tweakBtn" class="btn toggle-btn" style="display:none">✦ Tweaks</button>
+<div id="tweaks">
+  <h4>Tweaks</h4>
+  <div class="grp">
+    <div class="k">Density</div>
+    <div class="seg" data-group="density">
+      <button data-v="compact">Compact</button>
+      <button class="on" data-v="cozy">Cozy</button>
+    </div>
+  </div>
+  <div class="grp">
+    <div class="k">Dashboard mode</div>
+    <div class="seg" data-group="alert">
+      <button class="on" data-v="normal">Normal</button>
+      <button data-v="alert">High-alert</button>
+    </div>
+  </div>
+  <div class="grp">
+    <div class="k">Role</div>
+    <div class="seg" data-group="role">
+      <button class="on" data-v="role-clinician">Clinician</button>
+      <button data-v="role-admin">Admin</button>
+      <button data-v="role-auditor">Auditor</button>
+    </div>
+  </div>
+  <div class="grp">
+    <div class="k">Sketch roughness</div>
+    <div class="seg" data-group="rough">
+      <button class="on" data-v="rough-off">Clean</button>
+      <button data-v="rough-on">Rough</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tabs
+  const tabs = document.querySelectorAll('#tabs button');
+  const screens = document.querySelectorAll('.screen');
+  const save = (k,v)=>{ try{localStorage.setItem(k,v)}catch(e){} };
+  const load = (k)=>{ try{return localStorage.getItem(k)}catch(e){return null} };
+
+  function showTab(name){
+    tabs.forEach(b=> b.classList.toggle('active', b.dataset.t===name));
+    screens.forEach(s=> s.classList.toggle('active', s.dataset.screen===name));
+    save('tab', name);
+    window.scrollTo({top:0});
+  }
+  tabs.forEach(b=> b.addEventListener('click', ()=> showTab(b.dataset.t)));
+  const initTab = load('tab');
+  if(initTab && [...tabs].some(b=>b.dataset.t===initTab)) showTab(initTab);
+
+  // --- Tweaks (edit mode) ---
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "density": "compact",
+    "alert": "alert",
+    "role": "role-clinician",
+    "rough": "rough-off"
+  }/*EDITMODE-END*/;
+  let state = Object.assign({}, TWEAK_DEFAULTS, JSON.parse(load('tweaks')||'{}'));
+
+  function applyState(){
+    document.body.classList.remove('compact','alert','role-clinician','role-admin','role-auditor','rough-on','rough-off');
+    document.body.classList.add(state.role, state.rough);
+    if(state.density==='compact') document.body.classList.add('compact');
+    if(state.alert==='alert') document.body.classList.add('alert');
+    // update buttons
+    document.querySelectorAll('#tweaks .seg').forEach(seg=>{
+      const g = seg.dataset.group;
+      seg.querySelectorAll('button').forEach(btn=>{
+        btn.classList.toggle('on',
+          (g==='density' && btn.dataset.v===state.density) ||
+          (g==='alert' && btn.dataset.v===state.alert) ||
+          (g==='role' && btn.dataset.v===state.role) ||
+          (g==='rough' && btn.dataset.v===state.rough)
+        );
+      });
+    });
+  }
+  document.querySelectorAll('#tweaks .seg button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const g = btn.parentElement.dataset.group;
+      state[g] = btn.dataset.v;
+      save('tweaks', JSON.stringify(state));
+      applyState();
+      window.parent && window.parent.postMessage({type:'__edit_mode_set_keys', edits: {[g]: btn.dataset.v}}, '*');
+    });
+  });
+  applyState();
+
+  // Edit mode protocol
+  const tweakBtn = document.getElementById('tweakBtn');
+  const tweaksEl = document.getElementById('tweaks');
+  function activateEditMode(){ tweaksEl.classList.add('on'); tweakBtn.style.display='none'; }
+  function deactivateEditMode(){ tweaksEl.classList.remove('on'); }
+  window.addEventListener('message', e=>{
+    const d = e.data || {};
+    if(d.type==='__activate_edit_mode') activateEditMode();
+    if(d.type==='__deactivate_edit_mode') deactivateEditMode();
+  });
+  window.parent && window.parent.postMessage({type:'__edit_mode_available'}, '*');
+
+  // Screen labels for comments
+  document.querySelectorAll('.screen').forEach((s,i)=>{
+    const name = s.dataset.screen;
+    s.setAttribute('data-screen-label', String(i+1).padStart(2,'0') + ' ' + name);
+  });
+</script>
+</body>
+</html>

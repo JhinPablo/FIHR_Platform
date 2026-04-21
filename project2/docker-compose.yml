@@ -1,0 +1,26 @@
+services:
+  backend:
+    build: ./backend
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  ml-service:
+    build: ./ml-service
+    ports:
+      - "8011:8011"
+
+  dl-service:
+    build: ./dl-service
+    ports:
+      - "8012:8012"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend

@@ -1,0 +1,115 @@
+{
+  "info": {
+    "name": "FHIR Platform Corte 2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "access_key", "value": "dev-access-medico-1" },
+    { "key": "permission_key", "value": "dev-permission-medico-1" },
+    { "key": "admin_access_key", "value": "dev-access-admin" },
+    { "key": "admin_permission_key", "value": "dev-permission-admin" },
+    { "key": "patient_id", "value": "" },
+    { "key": "risk_report_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth - Validate Keys",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-Access-Key", "value": "{{access_key}}" },
+          { "key": "X-Permission-Key", "value": "{{permission_key}}" }
+        ],
+        "url": "{{base_url}}/auth/validate-keys"
+      }
+    },
+    {
+      "name": "FHIR - List Patients Paginated",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-Access-Key", "value": "{{access_key}}" },
+          { "key": "X-Permission-Key", "value": "{{permission_key}}" }
+        ],
+        "url": "{{base_url}}/fhir/Patient?limit=10&offset=0"
+      }
+    },
+    {
+      "name": "FHIR - Create Patient",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Access-Key", "value": "{{access_key}}" },
+          { "key": "X-Permission-Key", "value": "{{permission_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"resourceType\":\"Patient\",\"name\":\"Paciente MIMIC Demo\",\"gender\":\"female\",\"birthDate\":\"1975-01-01\",\"identification_doc\":\"demo-doc\",\"medical_summary\":\"Resumen clinico cifrado\",\"source_subject_id\":\"postman-demo\"}"
+        },
+        "url": "{{base_url}}/fhir/Patient"
+      }
+    },
+    {
+      "name": "FHIR - Create Observation",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Access-Key", "value": "{{access_key}}" },
+          { "key": "X-Permission-Key", "value": "{{permission_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"resourceType\":\"Observation\",\"patient_id\":\"{{patient_id}}\",\"code\":\"718-7\",\"display\":\"Hemoglobin\",\"value\":10.2,\"unit\":\"g/dL\"}"
+        },
+        "url": "{{base_url}}/fhir/Observation"
+      }
+    },
+    {
+      "name": "Inference - Multimodal",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Access-Key", "value": "{{access_key}}" },
+          { "key": "X-Permission-Key", "value": "{{permission_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"patient_id\":\"{{patient_id}}\",\"model_type\":\"MULTIMODAL\",\"features\":{\"hemoglobin\":10.2},\"image_url\":\"https://example.org/cxr.jpg\"}"
+        },
+        "url": "{{base_url}}/infer"
+      }
+    },
+    {
+      "name": "RiskReport - Sign",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Access-Key", "value": "{{access_key}}" },
+          { "key": "X-Permission-Key", "value": "{{permission_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"decision\":\"ACCEPT\",\"clinical_note\":\"Firma medica de prueba con mas de treinta caracteres.\"}"
+        },
+        "url": "{{base_url}}/risk-reports/{{risk_report_id}}/sign"
+      }
+    },
+    {
+      "name": "Audit - Filtered",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-Access-Key", "value": "{{admin_access_key}}" },
+          { "key": "X-Permission-Key", "value": "{{admin_permission_key}}" }
+        ],
+        "url": "{{base_url}}/audit-log?role=medico&limit=20&offset=0"
+      }
+    }
+  ]
+}
+

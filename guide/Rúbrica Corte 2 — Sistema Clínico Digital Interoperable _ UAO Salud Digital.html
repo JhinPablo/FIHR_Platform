@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<!-- saved from url=(0117)https://campus.uaovirtual.edu.co/pluginfile.php/1428124/mod_resource/content/1/rubrica_definitiva_corte2.html?embed=1 -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style data-merge-styles="true"></style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rúbrica Corte 2 — Sistema Clínico Digital Interoperable | UAO Salud Digital</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Outfit:wght@300;400;600;700;800;900&display=swap');
+:root{
+  --bg:#04070e;--bg2:#070c18;--bg3:#0b1222;--card:#08101e;
+  --b0:#0f2040;--b1:#152a55;--b2:#1c3870;
+  --cyan:#00d4ff;--violet:#7c3aed;--emerald:#10b981;--amber:#f59e0b;--rose:#f43f5e;
+  --gold:#fbbf24;--txt:#d1d9f0;--txt2:#6b80a8;--txt3:#2d3f60;
+  --mono:'DM Mono',monospace;--sans:'Outfit',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:13.5px;line-height:1.65;overflow-x:hidden}
+
+/* ── SCAN LINE ── */
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,212,255,.006) 3px,rgba(0,212,255,.006) 4px)}
+
+/* ── HEADER ── */
+.hdr{position:relative;overflow:hidden;padding:44px 56px 38px;
+  background:linear-gradient(135deg,#030710 0%,#060e1e 55%,#030710 100%);
+  border-bottom:1px solid var(--b1)}
+.hdr-orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(80px)}
+.hdr-orb1{width:600px;height:600px;top:-200px;right:-100px;background:rgba(124,58,237,.09)}
+.hdr-orb2{width:400px;height:400px;bottom:-150px;left:50px;background:rgba(0,212,255,.06)}
+.hdr-inner{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:32px}
+.h-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--cyan);margin-bottom:12px}
+.h-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(124,58,237,.14);
+  border:1px solid rgba(124,58,237,.32);color:#a78bfa;
+  font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  padding:3px 11px;border-radius:20px;margin-bottom:20px}
+.h-badge::before{content:'●';font-size:7px;color:var(--violet);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hdr h1{font-size:34px;font-weight:900;color:#fff;line-height:1.1;margin-bottom:12px;
+  background:linear-gradient(135deg,#fff 0%,var(--cyan) 60%,#a78bfa 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.h-sub{color:var(--txt2);font-size:11.5px;font-family:var(--mono);line-height:1.8;max-width:560px}
+.h-meta{display:flex;flex-direction:column;gap:7px;min-width:220px}
+.mi{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.12);
+  border-left:3px solid var(--cyan);border-radius:3px;padding:9px 14px}
+.ml{font-family:var(--mono);color:var(--txt3);font-size:9px;letter-spacing:2px;text-transform:uppercase}
+.mv{color:var(--cyan);font-weight:700;font-size:12.5px;margin-top:2px}
+
+/* ── NAV ── */
+.nav{background:rgba(7,12,24,.95);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--b0);padding:0 56px;
+  display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:300}
+.nt{padding:14px 18px;cursor:pointer;font-family:var(--mono);font-size:9.5px;
+  letter-spacing:1.5px;color:var(--txt3);border-bottom:2px solid transparent;
+  white-space:nowrap;transition:all .2s;text-transform:uppercase;user-select:none}
+.nt:hover{color:var(--txt2);background:rgba(0,212,255,.03)}
+.nt.a{color:var(--cyan);border-bottom-color:var(--cyan);background:rgba(0,212,255,.05)}
+
+/* ── SECTIONS ── */
+.sec{display:none;padding:42px 56px;max-width:1440px;margin:0 auto;position:relative;z-index:1}
+.sec.a{display:block}
+.stit{display:flex;align-items:flex-start;gap:14px;margin-bottom:28px;
+  padding-bottom:16px;border-bottom:1px solid var(--b0)}
+.sico{font-size:28px;line-height:1;flex-shrink:0}
+.stit h2{font-size:22px;font-weight:800;color:#fff}
+.stit p{color:var(--txt2);font-size:11px;margin-top:3px;font-family:var(--mono)}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--b0);border-radius:6px;
+  padding:22px;margin-bottom:18px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.2}
+.ct{font-size:13.5px;font-weight:700;color:#fff;margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* ── BADGES ── */
+.b{font-family:var(--mono);font-size:8.5px;font-weight:500;
+  letter-spacing:.8px;padding:2px 8px;border-radius:20px;text-transform:uppercase}
+.bc{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.22)}
+.bp{background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.22)}
+.bg{background:rgba(16,185,129,.1);color:var(--emerald);border:1px solid rgba(16,185,129,.22)}
+.ba{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.22)}
+.br{background:rgba(244,63,94,.1);color:var(--rose);border:1px solid rgba(244,63,94,.22)}
+.bgo{background:rgba(251,191,36,.1);color:var(--gold);border:1px solid rgba(251,191,36,.22)}
+
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* ── LIST ── */
+ul.l{list-style:none}
+ul.l li{padding:8px 0 8px 24px;border-bottom:1px solid rgba(15,32,64,.6);
+  position:relative;color:var(--txt2);font-size:12.5px;font-family:var(--mono)}
+ul.l li:last-child{border-bottom:none}
+ul.l li::before{content:'▸';position:absolute;left:0;color:var(--cyan);top:9px}
+ul.l li strong{color:var(--txt);font-family:var(--sans)}
+ul.l li code{background:#070f1c;border:1px solid var(--b0);padding:1px 5px;
+  border-radius:3px;font-size:10.5px;color:#93c5fd}
+
+/* ── ALERTS ── */
+.al{border-left:3px solid;border-radius:3px;padding:13px 17px;margin-bottom:16px;
+  font-size:12px;font-family:var(--mono);line-height:1.7}
+.ali{border-color:var(--cyan);background:rgba(0,212,255,.04);color:var(--txt2)}
+.alw{border-color:var(--amber);background:rgba(245,158,11,.04);color:var(--txt2)}
+.ald{border-color:var(--rose);background:rgba(244,63,94,.05);color:var(--txt2)}
+.als{border-color:var(--emerald);background:rgba(16,185,129,.04);color:var(--txt2)}
+.al strong{color:#fff;font-family:var(--sans)}
+
+/* ── CODE ── */
+.co{background:#02060e;border:1px solid var(--b0);border-radius:5px;
+  padding:15px;font-family:var(--mono);font-size:11px;color:#94a3b8;
+  overflow-x:auto;margin:10px 0;line-height:1.85}
+.kw{color:#f472b6}.str{color:#7dd3fc}.cm{color:#334155}.fn{color:#4ade80}.nu{color:#c4b5fd}.ty{color:#fb923c}
+
+/* ── FORBIDDEN ── */
+.forb{background:rgba(244,63,94,.05);border:2px solid var(--rose);border-radius:6px;
+  padding:20px 24px;margin-bottom:20px;display:flex;align-items:flex-start;gap:16px}
+.fico{font-size:36px;flex-shrink:0;line-height:1}
+.ftxt{font-family:var(--mono);font-size:11.5px;color:var(--txt2);line-height:1.75}
+.ftxt strong{color:var(--rose);font-family:var(--sans)}
+.ftxt .ok{color:var(--emerald);font-family:var(--sans)}
+
+/* ── RUBRIC TABLE ── */
+.rt{width:100%;border-collapse:collapse;font-size:11.5px}
+.rt th{background:rgba(0,212,255,.06);color:var(--cyan);padding:12px 14px;
+  text-align:left;font-family:var(--mono);font-size:9px;letter-spacing:1.5px;
+  text-transform:uppercase;border-bottom:2px solid var(--b1)}
+.rt td{padding:11px 14px;border-bottom:1px solid rgba(15,32,64,.5);
+  vertical-align:top;color:var(--txt2);line-height:1.55;font-family:var(--mono)}
+.rt tr:hover td{background:rgba(0,212,255,.02)}
+.rt .comp{color:#fff;font-weight:700;font-family:var(--sans);font-size:13px}
+.rt .pts{color:var(--gold);font-weight:700;font-size:15px;text-align:center;
+  font-family:var(--mono)}
+.s5{color:#10b981}.s4{color:#84cc16}.s3{color:#f59e0b}.s1{color:#f43f5e}
+
+/* ── SCORE BOX ── */
+.sbox{background:linear-gradient(160deg,rgba(0,212,255,.03),rgba(124,58,237,.03));
+  border:1px solid var(--b1);border-radius:6px;padding:26px;margin-bottom:26px}
+.sr{display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:1px solid rgba(15,32,64,.6)}
+.sr:last-child{border-bottom:none}
+.sr.tot{margin-top:8px;padding-top:16px}
+.sr.tot .sl{color:#fff;font-weight:700;font-size:15px}
+.sr.tot .sv{color:var(--gold);font-weight:900;font-size:24px;font-family:var(--mono)}
+.sl{color:var(--txt2);font-size:12px;font-family:var(--mono)}
+.sv{color:var(--cyan);font-weight:700;font-size:14px;font-family:var(--mono)}
+.sr.bono .sl{color:var(--gold)}
+.sr.bono .sv{color:var(--gold)}
+
+/* ── TIMELINE ── */
+.tl{position:relative;padding-left:30px}
+.tl::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:1px;
+  background:linear-gradient(to bottom,var(--cyan),var(--violet),var(--emerald))}
+.tli{position:relative;margin-bottom:24px}
+.tldot{position:absolute;left:-32px;top:6px;width:11px;height:11px;border-radius:50%;
+  background:var(--cyan);border:2px solid var(--bg);box-shadow:0 0 8px rgba(0,212,255,.7)}
+.tldot.v{background:var(--violet);box-shadow:0 0 8px rgba(124,58,237,.7)}
+.tldot.e{background:var(--emerald);box-shadow:0 0 8px rgba(16,185,129,.7)}
+.tldot.a{background:var(--amber);box-shadow:0 0 8px rgba(245,158,11,.7)}
+.tldot.r{background:var(--rose);box-shadow:0 0 8px rgba(244,63,94,.7)}
+.tlnum{font-family:var(--mono);font-size:9.5px;color:var(--cyan);
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.tltit{color:#fff;font-weight:700;font-size:13.5px;margin-bottom:5px}
+.tldsc{color:var(--txt2);font-size:11.5px;font-family:var(--mono);line-height:1.7}
+
+/* ── ROLE CARDS ── */
+.rc{background:var(--bg3);border:1px solid var(--b0);border-radius:5px;padding:18px}
+.ri{font-size:30px;margin-bottom:8px}
+.rn{font-weight:700;color:#fff;font-size:14px;margin-bottom:6px}
+.rp{list-style:none}
+.rp li{font-family:var(--mono);font-size:10.5px;color:var(--txt2);
+  padding:3px 0 3px 15px;position:relative}
+.rp li::before{content:'✓';position:absolute;left:0;color:var(--emerald)}
+
+/* ── TECH PILLS ── */
+.pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.pill{display:inline-block;font-family:var(--mono);font-size:9.5px;
+  padding:2px 8px;border-radius:20px;letter-spacing:.5px}
+.pc{background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.18);color:var(--cyan)}
+.pv{background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.18);color:#a78bfa}
+.pe{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.18);color:var(--emerald)}
+.pa{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18);color:var(--amber)}
+
+/* ── SCREEN CARD ── */
+.scr{background:var(--bg3);border:1px solid var(--b1);border-radius:5px;
+  padding:16px;margin-bottom:10px}
+.scr-title{font-weight:700;color:#fff;font-size:13px;margin-bottom:6px;
+  display:flex;align-items:center;gap:8px}
+.scr-desc{font-family:var(--mono);font-size:10.5px;color:var(--txt2);line-height:1.75}
+
+/* ── PENALTY BOX ── */
+.pen{background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.2);
+  border-radius:5px;padding:10px 14px;font-family:var(--mono);
+  font-size:11px;color:var(--txt2);display:flex;justify-content:space-between;
+  align-items:center;margin-bottom:7px}
+.pen .plab{color:var(--txt)}
+.pen .pval{color:var(--rose);font-weight:700}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--b1);border-radius:3px}
+
+@media(max-width:1000px){
+  .hdr,.nav,.sec{padding-left:18px;padding-right:18px}
+  .hdr-inner{flex-direction:column}
+  .g2,.g3{grid-template-columns:1fr}
+}
+</style>
+<style data-jss="" data-meta="MuiDialog">
+@media print {
+  .MuiDialog-root {
+    position: absolute !important;
+  }
+}
+.MuiDialog-scrollPaper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.MuiDialog-scrollBody {
+  overflow-x: hidden;
+  overflow-y: auto;
+  text-align: center;
+}
+.MuiDialog-scrollBody:after {
+  width: 0;
+  height: 100%;
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+}
+.MuiDialog-container {
+  height: 100%;
+  outline: 0;
+}
+@media print {
+  .MuiDialog-container {
+    height: auto;
+  }
+}
+.MuiDialog-paper {
+  margin: 32px;
+  position: relative;
+  overflow-y: auto;
+}
+@media print {
+  .MuiDialog-paper {
+    box-shadow: none;
+    overflow-y: visible;
+  }
+}
+.MuiDialog-paperScrollPaper {
+  display: flex;
+  max-height: calc(100% - 64px);
+  flex-direction: column;
+}
+.MuiDialog-paperScrollBody {
+  display: inline-block;
+  text-align: left;
+  vertical-align: middle;
+}
+.MuiDialog-paperWidthFalse {
+  max-width: calc(100% - 64px);
+}
+.MuiDialog-paperWidthXs {
+  max-width: 444px;
+}
+@media (max-width:507.95px) {
+  .MuiDialog-paperWidthXs.MuiDialog-paperScrollBody {
+    max-width: calc(100% - 64px);
+  }
+}
+.MuiDialog-paperWidthSm {
+  max-width: 600px;
+}
+@media (max-width:663.95px) {
+  .MuiDialog-paperWidthSm.MuiDialog-paperScrollBody {
+    max-width: calc(100% - 64px);
+  }
+}
+.MuiDialog-paperWidthMd {
+  max-width: 960px;
+}
+@media (max-width:1023.95px) {
+  .MuiDialog-paperWidthMd.MuiDialog-paperScrollBody {
+    max-width: calc(100% - 64px);
+  }
+}
+.MuiDialog-paperWidthLg {
+  max-width: 1280px;
+}
+@media (max-width:1343.95px) {
+  .MuiDialog-paperWidthLg.MuiDialog-paperScrollBody {
+    max-width: calc(100% - 64px);
+  }
+}
+.MuiDialog-paperWidthXl {
+  max-width: 1920px;
+}
+@media (max-width:1983.95px) {
+  .MuiDialog-paperWidthXl.MuiDialog-paperScrollBody {
+    max-width: calc(100% - 64px);
+  }
+}
+.MuiDialog-paperFullWidth {
+  width: calc(100% - 64px);
+}
+.MuiDialog-paperFullScreen {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  max-width: 100%;
+  max-height: none;
+  border-radius: 0;
+}
+.MuiDialog-paperFullScreen.MuiDialog-paperScrollBody {
+  margin: 0;
+  max-width: 100%;
+}
+</style><style>undefined</style><link rel="preconnect" href="https://fonts.googleapis.com/" crossorigin="use-credentials"><link rel="preconnect" href="https://fonts.gstatic.com/"><link rel="stylesheet" href="./Rúbrica Corte 2 — Sistema Clínico Digital Interoperable _ UAO Salud Digital_files/css2"></head>
+<body>
+
+<!-- ════ HEADER ════ -->
+<header class="hdr">
+  <div class="hdr-orb hdr-orb1"></div>
+  <div class="hdr-orb hdr-orb2"></div>
+  <div class="hdr-inner">
+    <div>
+      <div class="h-eyebrow">Universidad Autónoma de Occidente · Salud Digital · 2026</div>
+      <div class="h-badge">● Segundo Corte Parcial </div>
+      <h1>Rúbrica &amp; Instructivo<br>Sistema Clínico Digital Interoperable</h1>
+      <p class="h-sub">
+        HL7 FHIR R4 · ML + DL cuantizados para CPU · Frontend profesional tipo PACS/RIS<br>
+        (sin Streamlit · sin Gradio) · RiskReport firmado · Anti-DDoS · Habeas Data<br>
+        Docker · PostgreSQL · MinIO · Interoperabilidad semántica · Normativa colombiana
+      </p>
+    </div>
+    <div class="h-meta">
+      <div class="mi"><div class="ml">Docente</div><div class="mv"> Carlos A. Ferro Sánchez</div></div>
+      <div class="mi"><div class="ml">Email</div><div class="mv">cferro@uao.edu.co</div></div>
+      <div class="mi"><div class="ml">Peso en nota</div><div class="mv">25 % — nota final</div></div>
+      <div class="mi"><div class="ml">Equipos</div><div class="mv">3 – 4 estudiantes</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ════ NAV ════ -->
+<nav class="nav">
+  <div class="nt a" onclick="T(&#39;vision&#39;)">01·Visión</div>
+  <div class="nt" onclick="T(&#39;herencia&#39;)">02·Herencia C1</div>
+  <div class="nt" onclick="T(&#39;arq&#39;)">03·Arquitectura</div>
+  <div class="nt" onclick="T(&#39;datos&#39;)">04·Datos</div>
+  <div class="nt" onclick="T(&#39;frontend&#39;)">05·Frontend</div>
+  <div class="nt" onclick="T(&#39;modelos&#39;)">06·Modelos IA</div>
+  <div class="nt" onclick="T(&#39;flujo&#39;)">07·Flujo Clínico</div>
+  <div class="nt" onclick="T(&#39;seguridad&#39;)">08·Seguridad</div>
+  <div class="nt" onclick="T(&#39;interop&#39;)">09·Interop</div>
+  <div class="nt" onclick="T(&#39;rubrica&#39;)">10·Rúbrica</div>
+  <div class="nt" onclick="T(&#39;entrega&#39;)">11·Entrega</div>
+</nav>
+
+<!-- ════════════ 01 VISIÓN ════════════ -->
+<section class="sec a" id="tab-vision">
+  <div class="stit"><div class="sico">🎯</div>
+    <div><h2>Visión General — ¿Qué es el Proyecto Corte 2?</h2>
+    <p>Sistema clínico completo que extiende el Corte 1 con IA cuantizada, imágenes médicas y frontend profesional</p></div>
+  </div>
+
+  <div class="al ali">
+    <strong>Principio fundacional:</strong> El Corte 2 <em>no reemplaza</em> el Corte 1. Lo extiende. El sistema FHIR-Lite con PostgreSQL en Render, doble API-Key, tres roles, paginación, cifrado AES-256 y rate-limiting <strong>deben seguir funcionando intactos</strong>. Sobre esa base, se agrega: un frontend clínico estético tipo PACS/RIS, microservicios de ML tabular + DL imagen cuantizados para CPU, almacenamiento de imágenes en MinIO S3, un orquestador de inferencias concurrentes, y el flujo obligatorio de firma del RiskReport antes de cerrar un paciente.
+  </div>
+
+  <div class="forb">
+    <div class="fico">🚫</div>
+    <div class="ftxt">
+      <strong>PROHIBIDO terminantemente en el frontend:</strong> Streamlit · Gradio · Jupyter Notebooks como interfaz · Panel.io · Dash.<br><br>
+      <span class="ok">PERMITIDO y recomendado:</span> React 18+ · Vue 3 · Svelte / SvelteKit · Astro · HTML5/CSS/JS moderno · <strong>AntiGravity</strong> u otros frameworks web innovadores. Librerías de UI: Shadcn/UI, Radix, Mantine, DaisyUI, Chakra. Visualización: Plotly.js, Recharts, D3, Three.js. Animaciones: Framer Motion, GSAP, CSS @keyframes.<br><br>
+      <strong>Propuestas creativas:</strong> glassmorphism clínico · cyberpunk HIS · dark PACS/RIS · visualizaciones 3D de datos médicos · interfaces tipo terminal médico. El diseño debe ser <strong>memorable y profesional</strong>, comparable a un sistema HIS comercial.<br><br>
+      <strong>Penalización:</strong> usar Streamlit o Gradio descuenta <strong>−1.5 pts automáticos</strong> del componente frontend y penaliza adicionalmente.
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ct">✅ Herencia obligatoria del Corte 1</div>
+      <ul class="l">
+        <li><strong>PostgreSQL en Render</strong> — BD normalizada, FK, esquema heredado completo</li>
+        <li><strong>Doble API-Key</strong> — X-Access-Key (entrada) + X-Permission-Key (rol)</li>
+        <li><strong>3 Roles</strong> — Admin, Médico, Paciente/Auditor con RBAC en backend</li>
+        <li><strong>FHIR-Lite</strong> — Patient + Observation con paginación <code>limit/offset</code></li>
+        <li><strong>Rate-limiting anti-DoS</strong> — Error 429 con <code>Retry-After</code></li>
+        <li><strong>Cifrado AES-256</strong> — campos sensibles con <code>pgcrypto</code></li>
+        <li><strong>Variables de entorno</strong> — credenciales en <code>.env</code>, nunca en código</li>
+        <li><strong>Colección Postman</strong> — CRUD, permisos, paginación</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="ct">🆕 Extensiones obligatorias del Corte 2</div>
+      <ul class="l">
+        <li><strong>Frontend SPA profesional</strong> — React/Vue/Svelte con UX tipo PACS/RIS (no Streamlit)</li>
+        <li><strong>MinIO S3</strong> — almacenamiento imágenes JPG/PNG; Orthanc PACS = bono</li>
+        <li><strong>ML Service cuantizado</strong> — ONNX tabular sin GPU; calibrado; SHAP</li>
+        <li><strong>DL Service cuantizado</strong> — INT8/ONNX imagen sin GPU; Grad-CAM</li>
+        <li><strong>Orquestador de inferencias</strong> — cola async, mínimo 4 concurrentes</li>
+        <li><strong>Pacientes sintéticos desde datasets reales</strong> — seed script automatizado</li>
+        <li><strong>RiskReport firmado</strong> — bloqueo de cierre de paciente sin firma médica</li>
+        <li><strong>Alertas críticas</strong> — modal bloqueante + email Mailhog + WebSocket</li>
+        <li><strong>Habeas Data UI</strong> — modal de consentimiento en primer login con persistencia en BD</li>
+        <li><strong>Audit log extendido</strong> — INSERT-ONLY, acciones IA, imágenes, firma</li>
+        <li><strong>MLflow</strong> — tracking de versiones y métricas de modelos</li>
+        <li><strong>HAPI FHIR R4 completo</strong> — servidor HL7, recursos extendidos</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">👥 Roles del Sistema</div>
+    <div class="g3">
+      <div class="rc" style="border-color:var(--cyan)">
+        <div class="ri">👑</div><div class="rn">Administrador</div>
+        <ul class="rp">
+          <li>CRUD completo de usuarios y roles</li>
+          <li>Asignar / revocar API-Keys</li>
+          <li>Ver y exportar audit log global</li>
+          <li>Ver todos los pacientes</li>
+          <li>Restaurar soft-delete</li>
+          <li>Configurar umbrales de alerta crítica</li>
+          <li>Estadísticas de uso del sistema</li>
+        </ul>
+      </div>
+      <div class="rc" style="border-color:var(--violet)">
+        <div class="ri">🩺</div><div class="rn">Médico Especialista</div>
+        <ul class="rp">
+          <li>Ver lista de sus pacientes asignados</li>
+          <li>Abrir ficha clínica completa</li>
+          <li>Subir imagen JPG/PNG del paciente</li>
+          <li>Ejecutar análisis ML / DL / Multimodal</li>
+          <li>Ver SHAP y Grad-CAM del resultado</li>
+          <li>Aceptar o rechazar diagnóstico crítico</li>
+          <li>Firmar obligatoriamente el RiskReport</li>
+          <li>Añadir observaciones al historial</li>
+        </ul>
+      </div>
+      <div class="rc" style="border-color:var(--emerald)">
+        <div class="ri">👤</div><div class="rn">Paciente / Auditor</div>
+        <ul class="rp">
+          <li>Solo su propia información (nunca otros)</li>
+          <li>Ver sus Observations y diagnósticos</li>
+          <li>Ver su RiskReport firmado</li>
+          <li>No puede ejecutar modelos</li>
+          <li>Aceptar política Habeas Data</li>
+          <li>Solicitar corrección de datos (ARCO)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">🏥 Stack tecnológico completo del sistema</div>
+    <div class="pills">
+      <span class="pill pc">HAPI FHIR R4</span><span class="pill pc">HL7 R4</span><span class="pill pc">LOINC</span><span class="pill pc">SNOMED CT</span><span class="pill pc">ICD-10</span><span class="pill pc">RxNorm</span><span class="pill pc">WADO-RS</span><span class="pill pc">SMART on FHIR</span>
+      <span class="pill pv">React/Vue/Svelte</span><span class="pill pv">Vite</span><span class="pill pv">Tailwind CSS</span><span class="pill pv">WebSocket</span><span class="pill pv">Plotly.js</span><span class="pill pv">cornerstone.js</span><span class="pill pv">Framer Motion</span>
+      <span class="pill pe">FastAPI</span><span class="pill pe">PostgreSQL</span><span class="pill pe">pgcrypto</span><span class="pill pe">MinIO S3</span><span class="pill pe">Docker Compose</span><span class="pill pe">Nginx</span><span class="pill pe">JWT</span><span class="pill pe">bcrypt</span>
+      <span class="pill pa">ONNX Runtime</span><span class="pill pa">XGBoost→ONNX</span><span class="pill pa">EfficientNet INT8</span><span class="pill pa">SHAP</span><span class="pill pa">Grad-CAM</span><span class="pill pa">MLflow</span><span class="pill pa">Mailhog</span><span class="pill pa">Faker es_CO</span>
+      <span class="pill pc">Ley 1581/2012</span><span class="pill pc">Ley 2015/2020</span><span class="pill pc">Res 866/2021 MIAS</span><span class="pill pc">Res 1995/1999</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 02 HERENCIA ════════════ -->
+<section class="sec" id="tab-herencia">
+  <div class="stit"><div class="sico">🔗</div>
+    <div><h2>Herencia y Evolución del Corte 1</h2>
+    <p>Qué se mantiene, qué se amplía y qué se reemplaza</p></div>
+  </div>
+
+  <div class="al alw"><strong>Advertencia crítica:</strong> El evaluador ejecuta <code>docker compose up -d</code> una sola vez. Si la herencia del Corte 1 está rota, esos 0.6 pts se pierden aunque los módulos nuevos funcionen perfectamente. Verifiquen la herencia <em>antes</em> de agregar los servicios nuevos.</div>
+
+  <table class="rt">
+    <thead><tr><th style="width:25%">Componente Corte 1</th><th style="width:13%">Estado C2</th><th>Detalle de la extensión</th></tr></thead>
+    <tbody>
+      <tr><td class="comp">PostgreSQL en Render</td><td><span class="b bg">AMPLIAR</span></td><td>Agregar tablas: <code>images</code>, <code>risk_reports</code>, <code>audit_log</code>, <code>inference_queue</code>, <code>model_feedback</code>, <code>consent</code>. Mantener normalización y FK.</td></tr>
+      <tr><td class="comp">Doble API-Key</td><td><span class="b bc">MANTENER</span></td><td>Todos los endpoints nuevos (inferencia, imágenes, risk-reports, audit) deben validar X-Access-Key + X-Permission-Key. Sin excepción.</td></tr>
+      <tr><td class="comp">3 Roles</td><td><span class="b bc">MANTENER</span></td><td>Médico gana permisos de inferencia y firma. Paciente ve su RiskReport firmado. Admin ve audit log global y exporta.</td></tr>
+      <tr><td class="comp">FHIR-Lite Patient + Observation</td><td><span class="b bg">AMPLIAR</span></td><td>Agregar: <code>Media</code> (imagen MinIO), <code>DiagnosticReport</code> (DL), <code>RiskAssessment</code> (firmado), <code>AuditEvent</code>, <code>Consent</code>. Mantener paginación en todos.</td></tr>
+      <tr><td class="comp">Rate-limiting 429</td><td><span class="b bc">MANTENER</span></td><td>Aplicar también a endpoints de inferencia. Máx. 10 inferencias/min/key. 429 con <code>Retry-After</code>.</td></tr>
+      <tr><td class="comp">Cifrado AES-256 (pgcrypto)</td><td><span class="b bg">AMPLIAR</span></td><td>Extender a <code>risk_prediction</code> en <code>risk_reports</code> y a <code>minio_key</code> en <code>images</code>.</td></tr>
+      <tr><td class="comp">Frontend Streamlit</td><td><span class="b br">REEMPLAZAR</span></td><td>El Streamlit del C1 se <strong>reemplaza por completo</strong> con una SPA React/Vue/Svelte de calidad profesional. No se entrega Streamlit en C2.</td></tr>
+      <tr><td class="comp">Colección Postman</td><td><span class="b bg">AMPLIAR</span></td><td>Agregar ejemplos: POST imagen, POST inferencia ML/DL, GET task status, PATCH firma RiskReport, GET audit log filtrado.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card" style="margin-top:20px">
+    <div class="ct">🐳 docker-compose.yml — Servicios Requeridos Corte 2</div>
+    <div class="co">
+<span class="cm"># docker-compose.yml — Proyecto Corte 2</span>
+<span class="cm"># PostgreSQL sigue en Render (externo). TODOS los demás servicios dockerizados.</span>
+
+<span class="kw">services:</span>
+
+  <span class="cm">## ── CAPA DE ENTRADA (único punto expuesto al exterior) ─────────────────────</span>
+  <span class="fn">nginx:</span>           <span class="cm"># Proxy reverso, WAF básico, rate-limit, SSL termination</span>
+    image: nginx:alpine
+    ports: [<span class="str">"80:80"</span>, <span class="str">"443:443"</span>]
+
+  <span class="cm">## ── FRONTEND ────────────────────────────────────────────────────────────────</span>
+  <span class="fn">frontend:</span>        <span class="cm"># SPA React/Vue/Svelte — clínica estética tipo PACS/RIS</span>
+    build: ./frontend
+
+  <span class="cm">## ── BACKEND PRINCIPAL (herencia Corte 1) ───────────────────────────────────</span>
+  <span class="fn">backend:</span>         <span class="cm"># FastAPI — FHIR extendido, auth doble API-Key, roles, cifrado</span>
+    build: ./backend
+
+  <span class="cm">## ── FHIR SERVER ────────────────────────────────────────────────────────────</span>
+  <span class="fn">fhir-server:</span>     <span class="cm"># HAPI FHIR R4 — servidor HL7 estándar con PostgreSQL</span>
+    image: hapiproject/hapi:latest
+
+  <span class="cm">## ── MICROSERVICIOS DE IA (todos sin GPU) ───────────────────────────────────</span>
+  <span class="fn">ml-service:</span>      <span class="cm"># FastAPI — modelo tabular ONNX (cuantizado, calibrado, SHAP)</span>
+    build: ./ml-service
+  <span class="fn">dl-service:</span>      <span class="cm"># FastAPI — modelo imagen INT8/ONNX (Grad-CAM, MinIO)</span>
+    build: ./dl-service
+  <span class="fn">orchestrator:</span>    <span class="cm"># FastAPI — cola async, Semaphore(4), polling</span>
+    build: ./orchestrator
+
+  <span class="cm">## ── ALMACENAMIENTO S3 ──────────────────────────────────────────────────────</span>
+  <span class="fn">minio:</span>           <span class="cm"># Imágenes JPG/PNG + Grad-CAM generados</span>
+    image: minio/minio
+  <span class="fn">minio-init:</span>      <span class="cm"># One-shot: crea bucket 'clinical-images' al arrancar</span>
+    image: minio/mc
+
+  <span class="cm">## ── TRACKING Y NOTIFICACIONES ──────────────────────────────────────────────</span>
+  <span class="fn">mlflow:</span>          <span class="cm"># Tracking de versiones y métricas de modelos</span>
+    image: ghcr.io/mlflow/mlflow
+  <span class="fn">mailhog:</span>         <span class="cm"># SMTP de prueba — alertas críticas por email al médico</span>
+    image: mailhog/mailhog
+
+  <span class="cm">## ── OPCIONAL (bono +0.3 pts) ────────────────────────────────────────────────</span>
+  <span class="cm"># orthanc:        # PACS DICOM + WADO-RS — si se integra</span>
+
+<span class="kw">volumes:</span>
+  minio_data:      <span class="cm"># persistencia de imágenes médicas</span>
+  mlflow_data:     <span class="cm"># persistencia de experimentos</span>
+
+<span class="kw">networks:</span>
+  clinical_net:    <span class="cm"># red interna — servicios no expuestos directamente al exterior</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 03 ARQUITECTURA ════════════ -->
+<section class="sec" id="tab-arq">
+  <div class="stit"><div class="sico">🏗️</div>
+    <div><h2>Arquitectura del Sistema</h2>
+    <p>Diagrama de capas, recursos FHIR R4 y esquema de BD extendido</p></div>
+  </div>
+
+  <div class="card">
+    <div class="ct">📐 Diagrama de Capas</div>
+    <div id="arch-svg" style="background:#020609;border-radius:5px;padding:16px"><svg viewBox="0 0 1050 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:&#39;Outfit&#39;,sans-serif"><defs><marker id="ar2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3z" fill="#1c3870"></path></marker></defs><rect x="0" y="5" width="1050" height="58" fill="#0a1525" opacity=".6" rx="2"></rect><text x="10" y="18" font-size="8.5" fill="#2d3f60" font-family="&#39;DM Mono&#39;,monospace" letter-spacing="1.5">INTERNET / USUARIO FINAL</text><rect x="0" y="73" width="1050" height="58" fill="#0c1d38" opacity=".6" rx="2"></rect><text x="10" y="86" font-size="8.5" fill="#2d3f60" font-family="&#39;DM Mono&#39;,monospace" letter-spacing="1.5">CAPA PROXY — Nginx (único punto expuesto)</text><rect x="0" y="141" width="1050" height="112" fill="#0e2040" opacity=".6" rx="2"></rect><text x="10" y="154" font-size="8.5" fill="#2d3f60" font-family="&#39;DM Mono&#39;,monospace" letter-spacing="1.5">CAPA DE SERVICIOS</text><rect x="0" y="263" width="1050" height="60" fill="#0a1a30" opacity=".6" rx="2"></rect><text x="10" y="276" font-size="8.5" fill="#2d3f60" font-family="&#39;DM Mono&#39;,monospace" letter-spacing="1.5">CAPA DE DATOS</text><line x1="525" y1="55" x2="130" y2="85" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"></line><line x1="525" y1="55" x2="295" y2="85" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"></line><line x1="525" y1="55" x2="460" y2="85" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"></line><line x1="525" y1="55" x2="630" y2="85" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"></line><line x1="295" y1="129" x2="200" y2="175" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"></line><line x1="295" y1="129" x2="370" y2="175" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"></line><line x1="630" y1="129" x2="200" y2="175" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"></line><line x1="630" y1="129" x2="370" y2="175" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"></line><line x1="200" y1="219" x2="600" y2="175" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"></line><line x1="370" y1="219" x2="600" y2="175" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"></line><line x1="790" y1="129" x2="295" y2="85" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"></line><line x1="920" y1="129" x2="295" y2="85" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"></line><line x1="200" y1="219" x2="270" y2="270" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"></line><line x1="370" y1="219" x2="270" y2="270" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"></line><rect x="460" y="10" width="130" height="46" rx="4" fill="#00d4ff10" stroke="#00d4ff" stroke-width="1.4"></rect><text x="525" y="26" text-anchor="middle" font-size="14">🌐</text><text x="525" y="39" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e2e8f0">Nginx</text><text x="525" y="51" text-anchor="middle" font-size="8.5" fill="#475569" font-family="&#39;DM Mono&#39;,monospace">WAF · Rate-Limit · SSL</text><rect x="65" y="84" width="130" height="46" rx="4" fill="#7c3aed10" stroke="#7c3aed" stroke-width="1.4"></rect><text x="130" y="100" text-anchor="middle" font-size="14">🖥️</text><text x="130" y="113" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e2e8f0">Frontend SPA</text><text x="130" y="125" text-anchor="middle" font-size="8.5" fill="#475569" font-family="&#39;DM Mono&#39;,monospace">React/Vue/Svelte</text><rect x="235" y="84" width="120" height="46" rx="4" fill="#00d4ff10" stroke="#00d4ff" stroke-width="1.4"></rect><text x="295" y="100" text-anchor="middle" font-size="14">⚙️</text><text x="295" y="113" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e2e8f0">Backend API</text><text x="295" y="125" text-anchor="middle" font-size="8.5" fill="#475569" font-family="&#39;DM Mono&#39;,monospace">FastAPI + FHIR</text><rect x="402.5" y="84" width="115" height="46" rx="4" fill="#10b98110" stroke="#10b981" stroke-width="1.4"></rect><text x="460" y="100" text-anchor="middle" font-size="14">⚕️</text><text x="460" y="113" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e2e8f0">HAPI FHIR R4</text><text x="460" y="125" text-anchor="middle" font-size="8.5" fill="#475569" font-family="&#39;DM Mono&#39;,monospace">HL7 Server</text><rect x="570" y="84" width="120" height="46" rx="4" fill="#f59e0b10" stroke="#f59e0b" stroke-width="1.4"></rect><text x="630" y="100" text-anchor="middle" font-size="14">🎛️</text><text x="630" y="113" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e2e8f0">Orchestrator</text><text x="630" y="125" text-anchor="middle" font-size="8.5" fill="#475569" font-family="&#39;DM Mono&#39;,monospace">Async Queue ×4</text><rect x="737.5" y="84" width="105" height="46" rx="4" fill="#7c3aed10" stroke="#7c3aed" stroke-width="1.4"></rect><text x="790" y="100" text-anchor="middle" font-size="14">📊</text><text x="790" y="113" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e2e8f0">MLflow</text><text x="790" y="125" text-anchor="middle" font-size="8.5" fill="#475569" font-family="&#39;DM Mono&#39;,monospace">Model Tracking</text><rect x="872.5" y="84" width="95" height="46" rx="4" fill="#00d4ff10" stroke="#00d4ff" stroke-width="1.4"></rect><text x="920" y="100" text-anchor="middle" font-size="14">📧</text><text x="920" y="113" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e2e8f0">Mailhog</text><text x="920" y="125" text-anchor="middle" font-size="8.5" fill="#475569" font-family="&#39;DM Mono&#39;,monospace">SMTP Alerts</text><rect x="142.5" y="174" width="115" height="46" rx="4" fill="#f43f5e10" stroke="#f43f5e" stroke-width="1.4"></rect><text x="200" y="190" text-anchor="middle" font-size="14">🤖</text><text x="200" y="203" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e2e8f0">ML Service</text><text x="200" y="215" text-anchor="middle" font-size="8.5" fill="#475569" font-family="&#39;DM Mono&#39;,monospace">ONNX Tabular</text><rect x="312.5" y="174" width="115" height="46" rx="4" fill="#f43f5e10" stroke="#f43f5e" stroke-width="1.4"></rect><text x="370" y="190" text-anchor="middle" font-size="14">🧠</text><text x="370" y="203" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e2e8f0">DL Service</text><text x="370" y="215" text-anchor="middle" font-size="8.5" fill="#475569" font-family="&#39;DM Mono&#39;,monospace">INT8/ONNX Img</text><rect x="535" y="174" width="130" height="46" rx="4" fill="#10b98110" stroke="#10b981" stroke-width="1.4"></rect><text x="600" y="190" text-anchor="middle" font-size="14">📦</text><text x="600" y="203" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e2e8f0">MinIO S3</text><text x="600" y="215" text-anchor="middle" font-size="8.5" fill="#475569" font-family="&#39;DM Mono&#39;,monospace">Imágenes + GradCAM</text><rect x="757.5" y="174" width="105" height="46" rx="4" fill="#33446810" stroke="#334468" stroke-width="1.4"></rect><text x="810" y="190" text-anchor="middle" font-size="14">🖼️</text><text x="810" y="203" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e2e8f0">Orthanc</text><text x="810" y="215" text-anchor="middle" font-size="8.5" fill="#475569" font-family="&#39;DM Mono&#39;,monospace">PACS (opcional)</text><rect x="210" y="269" width="120" height="46" rx="4" fill="#6366f110" stroke="#6366f1" stroke-width="1.4"></rect><text x="270" y="285" text-anchor="middle" font-size="14">🐘</text><text x="270" y="298" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e2e8f0">PostgreSQL</text><text x="270" y="310" text-anchor="middle" font-size="8.5" fill="#475569" font-family="&#39;DM Mono&#39;,monospace">Render (externo)</text></svg></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ct">📋 Recursos FHIR R4 Requeridos</div>
+      <ul class="l">
+        <li><strong>Patient</strong> — demografía + <code>identification_doc</code> cifrado. <code>active=false</code> = soft-delete.</li>
+        <li><strong>Observation</strong> — signos vitales y laboratorio con código LOINC + unidad UCUM. Paginado.</li>
+        <li><strong>Media</strong> — imagen JPG/PNG; <code>content.url</code> = URL presignada MinIO; campo <code>modality</code> (FUNDUS, XRAY, DERM…)</li>
+        <li><strong>DiagnosticReport</strong> — resultado DL: <code>conclusion</code> + <code>conclusionCode</code> SNOMED/ICD-10 + referencia a <code>ImagingStudy</code></li>
+        <li><strong>RiskAssessment</strong> — resultado ML/DL: <code>prediction[].probability</code> calibrada, <code>qualitativeRisk</code> SNOMED, <code>basis</code>, <code>performer</code> (médico firmante)</li>
+        <li><strong>AuditEvent</strong> — log FHIR inmutable: tipo, agente, entidad, fecha, resultado</li>
+        <li><strong>Practitioner</strong> — médico con especialidad, ID y referencia a <code>Organization</code></li>
+        <li><strong>Consent</strong> — Habeas Data: <code>status=active</code>, <code>scope</code> patient-privacy, <code>dateTime</code>, IP</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="ct">🗄️ Esquema de Tablas Nuevas (PostgreSQL)</div>
+      <div class="co" style="font-size:10px">
+<span class="cm">-- risk_reports: RiskReport firmado por médico</span>
+<span class="kw">CREATE TABLE</span> risk_reports (
+  id UUID <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  patient_id UUID <span class="kw">REFERENCES</span> patients(id),
+  model_type VARCHAR(<span class="nu">20</span>),  <span class="cm">-- 'ML','DL','MULTIMODAL'</span>
+  risk_score NUMERIC(<span class="nu">5</span>,<span class="nu">4</span>), risk_category VARCHAR(<span class="nu">20</span>), is_critical BOOLEAN,
+  prediction_enc BYTEA,    <span class="cm">-- AES-256 cifrado</span>
+  shap_json JSONB,         <span class="cm">-- SHAP values o GradCAM URL MinIO</span>
+  fhir_risk_id TEXT,
+  doctor_action VARCHAR(<span class="nu">20</span>), <span class="cm">-- NULL=sin firmar | 'ACCEPTED' | 'REJECTED'</span>
+  doctor_notes TEXT,       <span class="cm">-- observaciones obligatorias ≥ 30 chars</span>
+  rejection_reason TEXT,   <span class="cm">-- obligatorio si REJECTED ≥ 20 chars</span>
+  signed_by UUID <span class="kw">REFERENCES</span> users(id),
+  signed_at TIMESTAMPTZ,   <span class="cm">-- NULL = pendiente de firma médica</span>
+  created_at TIMESTAMPTZ <span class="kw">DEFAULT</span> NOW());
+
+<span class="cm">-- images: referencias a MinIO (clave cifrada)</span>
+<span class="kw">CREATE TABLE</span> images (
+  id UUID <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  patient_id UUID <span class="kw">REFERENCES</span> patients(id),
+  minio_key BYTEA <span class="kw">NOT NULL</span>, <span class="cm">-- cifrado pgcrypto</span>
+  modality VARCHAR(<span class="nu">50</span>), fhir_media_id TEXT,
+  uploaded_by UUID, created_at TIMESTAMPTZ <span class="kw">DEFAULT</span> NOW(),
+  deleted_at TIMESTAMPTZ);  <span class="cm">-- soft-delete</span>
+
+<span class="cm">-- inference_queue: cola de inferencias concurrentes</span>
+<span class="kw">CREATE TABLE</span> inference_queue (
+  id UUID <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  patient_id UUID, model_type VARCHAR(<span class="nu">20</span>),
+  status VARCHAR(<span class="nu">20</span>) <span class="kw">DEFAULT</span> <span class="str">'PENDING'</span>,
+  requested_by UUID, created_at TIMESTAMPTZ <span class="kw">DEFAULT</span> NOW(),
+  completed_at TIMESTAMPTZ, result_id UUID, error_msg TEXT);
+
+<span class="cm">-- audit_log: INSERT-ONLY — jamás UPDATE ni DELETE</span>
+<span class="kw">CREATE TABLE</span> audit_log (
+  id BIGSERIAL <span class="kw">PRIMARY KEY</span>, ts TIMESTAMPTZ <span class="kw">DEFAULT</span> NOW(),
+  user_id UUID, role VARCHAR(<span class="nu">20</span>), action VARCHAR(<span class="nu">80</span>),
+  resource_type VARCHAR(<span class="nu">40</span>), resource_id UUID, ip_address INET,
+  result VARCHAR(<span class="nu">20</span>), detail JSONB);
+
+<span class="cm">-- consent: Habeas Data aceptado</span>
+<span class="kw">CREATE TABLE</span> consent (
+  id UUID <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  user_id UUID <span class="kw">REFERENCES</span> users(id),
+  policy_version VARCHAR(<span class="nu">20</span>) <span class="kw">DEFAULT</span> <span class="str">'1.0'</span>,
+  accepted_at TIMESTAMPTZ <span class="kw">DEFAULT</span> NOW(), ip_address INET);
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 04 DATOS ════════════ -->
+<section class="sec" id="tab-datos">
+  <div class="stit"><div class="sico">🗄️</div>
+    <div><h2>Estrategia de Datos — Pacientes Sintéticos desde Datasets</h2>
+    <p>Cada caso del dataset se convierte en un paciente FHIR con observaciones e imagen en MinIO</p></div>
+  </div>
+
+  <div class="al ali"><strong>Concepto clave:</strong> No se inventan datos. Cada fila del dataset tabular (ej. PIMA Diabetes) se convierte en un <strong>paciente FHIR</strong> con sus features como Observations LOINC, y la imagen correspondiente del dataset DL (ej. APTOS 2019) se sube a MinIO como recurso <code>Media</code> vinculado al mismo paciente. El sistema tiene datos clínicos reales desde el primer <code>docker compose up</code>.</div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ct">🗺️ Mapeo Dataset → FHIR</div>
+      <ul class="l">
+        <li><strong>Una fila = un paciente</strong> — nombre y datos demográficos generados con <code>Faker('es_CO')</code></li>
+        <li><strong>Feature tabular</strong> → <code>Observation</code> FHIR con código LOINC + unidad UCUM (una Observation por feature)</li>
+        <li><strong>Imagen del dataset DL</strong> → subida a MinIO como <code>patients/{id}/image.png</code> → recurso FHIR <code>Media</code></li>
+        <li><strong>Etiqueta ground_truth</strong> → campo oculto en BD para evaluación del modelo (NO visible al paciente en el frontend)</li>
+        <li>Mínimo: <strong>30 pacientes</strong> con datos tabulares + <strong>15 con imagen vinculada</strong></li>
+        <li>Script: <code>python scripts/seed_patients.py</code> — ejecutable cuando el sistema está levantado</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="ct">📦 Datasets Recomendados</div>
+      <ul class="l">
+        <li><strong>PIMA Indians Diabetes</strong> — UCI ML · 768 casos · 8 features (Glucose, BMI, Insulin, BloodPressure…) · target binario</li>
+        <li><strong>APTOS 2019</strong> — Kaggle · 3662 imágenes fondo de ojo JPG · 5 clases retinopatía (0–4)</li>
+        <li><strong>Heart Disease Cleveland</strong> — UCI ML · 303 casos · 13 features · binario</li>
+        <li><strong>RSNA Pneumonia Detection</strong> — Kaggle · radiografías torácicas · binario</li>
+        <li><strong>Chest X-Ray NIH</strong> — 14 enfermedades pulmonares · PNG</li>
+        <li>El equipo elige la combinación tabular + imagen y justifica la pertinencia clínica en el informe</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">🌱 Script seed_patients.py — Implementación de Referencia</div>
+    <div class="co" style="font-size:10.5px">
+<span class="cm"># scripts/seed_patients.py — Poblar sistema con pacientes sintéticos desde dataset</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd, pathlib, requests
+<span class="kw">from</span> faker <span class="kw">import</span> Faker
+<span class="kw">from</span> minio <span class="kw">import</span> Minio
+
+faker = Faker(<span class="str">'es_CO'</span>)
+df    = pd.read_csv(<span class="str">'datasets/diabetes.csv'</span>)          <span class="cm"># PIMA Diabetes</span>
+imgs  = sorted(pathlib.Path(<span class="str">'datasets/aptos/train'</span>).glob(<span class="str">'*.png'</span>))
+mc    = Minio(<span class="str">"minio:9000"</span>, access_key=..., secret_key=..., secure=<span class="kw">False</span>)
+
+<span class="cm"># Mapeo features → LOINC (codificación estándar)</span>
+LOINC = {<span class="str">'Glucose'</span>:<span class="str">'2339-0'</span>, <span class="str">'BloodPressure'</span>:<span class="str">'55284-4'</span>, <span class="str">'BMI'</span>:<span class="str">'39156-5'</span>,
+         <span class="str">'Insulin'</span>:<span class="str">'14749-6'</span>, <span class="str">'Age'</span>:<span class="str">'21612-7'</span>, <span class="str">'Pregnancies'</span>:<span class="str">'11996-6'</span>}
+
+<span class="kw">for</span> i, row <span class="kw">in</span> df.iterrows():
+    <span class="cm"># [PASO 1] Crear paciente FHIR con ground_truth oculto</span>
+    p = requests.post(<span class="str">f"{API}/fhir/Patient"</span>, headers=H, json={
+        <span class="str">"resourceType"</span>:<span class="str">"Patient"</span>, <span class="str">"name"</span>:faker.name(),
+        <span class="str">"birthDate"</span>:str(faker.date_of_birth(minimum_age=<span class="nu">20</span>, maximum_age=<span class="nu">70</span>)),
+        <span class="str">"identification_doc"</span>:faker.numerify(<span class="str">'##########'</span>),  <span class="cm"># se cifrará en backend</span>
+        <span class="str">"ground_truth"</span>:int(row[<span class="str">'Outcome'</span>])               <span class="cm"># oculto al rol Paciente</span>
+    }).json()
+    pid = p[<span class="str">'id'</span>]
+
+    <span class="cm"># [PASO 2] Crear Observations (una por feature, código LOINC)</span>
+    <span class="kw">for</span> col, loinc <span class="kw">in</span> LOINC.items():
+        <span class="kw">if</span> col <span class="kw">in</span> row <span class="kw">and</span> pd.notna(row[col]):
+            requests.post(<span class="str">f"{API}/fhir/Observation"</span>, headers=H, json={
+                <span class="str">"resourceType"</span>:<span class="str">"Observation"</span>, <span class="str">"subject"</span>:pid, <span class="str">"status"</span>:<span class="str">"final"</span>,
+                <span class="str">"code"</span>:{<span class="str">"system"</span>:<span class="str">"http://loinc.org"</span>, <span class="str">"code"</span>:loinc},
+                <span class="str">"valueQuantity"</span>:{<span class="str">"value"</span>:float(row[col])}})
+
+    <span class="cm"># [PASO 3] Subir imagen a MinIO y crear recurso Media FHIR</span>
+    <span class="kw">if</span> i &lt; len(imgs):
+        key = <span class="str">f"patients/{pid}/retina.png"</span>
+        mc.fput_object(<span class="str">"clinical-images"</span>, key, str(imgs[i]))
+        requests.post(<span class="str">f"{API}/fhir/Media"</span>, headers=H, json={
+            <span class="str">"resourceType"</span>:<span class="str">"Media"</span>, <span class="str">"subject"</span>:pid, <span class="str">"status"</span>:<span class="str">"completed"</span>,
+            <span class="str">"minio_key"</span>:key, <span class="str">"modality"</span>:<span class="str">"FUNDUS"</span>})
+
+print(<span class="str">f"✅ {len(df)} pacientes sintéticos creados con Observations LOINC e imágenes MinIO"</span>)
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 05 FRONTEND ════════════ -->
+<section class="sec" id="tab-frontend">
+  <div class="stit"><div class="sico">🖥️</div>
+    <div><h2>Frontend Clínico — Estético, Robusto y Profesional</h2>
+    <p>SPA tipo PACS/RIS — sin Streamlit, sin Gradio — con UX de sistema HIS real</p></div>
+  </div>
+
+  <div class="forb">
+    <div class="fico">🚫</div>
+    <div class="ftxt">
+      <strong>Prohibido:</strong> Streamlit · Gradio · Panel · Dash · Jupyter como interfaz de usuario.<br>
+      <span class="ok">Recomendado:</span> React 18 · Vue 3 · Svelte/SvelteKit · AntiGravity · Astro · HTML5 creativo.<br>
+      El frontend debe ser <strong>estético, robosto y memorable</strong>: layouts inesperados, tipografía distintiva, animaciones con propósito clínico, visor de imágenes médicas integrado, diseño oscuro de alta calidad. Debe poder compararse con sistemas HIS comerciales como Carestream, Philips Vue PACS o Epic.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">📱 Pantallas Obligatorias — Flujo Completo</div>
+    <div class="g2">
+      <div>
+        <div class="scr">
+          <div class="scr-title">🔐 1. Login — Pantalla Completa</div>
+          <div class="scr-desc">
+            • Formulario X-Access-Key + X-Permission-Key con validación en tiempo real<br>
+            • Animación de transición al autenticarse (fade, morphing, reveal cinético)<br>
+            • <strong>Modal obligatorio de Habeas Data</strong> en primer acceso: texto completo de la política de privacidad según Ley 1581/2012, casilla de aceptación, no se puede saltar; <code>accepted_at</code> + IP guardados en tabla <code>consent</code> y recurso FHIR <code>Consent</code><br>
+            • Indicador visual del rol autenticado (ícono + color diferenciado)<br>
+            • Diseño de pantalla completa, no un widget pequeño flotante
+          </div>
+        </div>
+        <div class="scr">
+          <div class="scr-title">👥 2. Dashboard — Lista de Pacientes (tipo PACS/RIS)</div>
+          <div class="scr-desc">
+            • Tabla paginada con paginación limit/offset heredada del Corte 1<br>
+            • Columnas: ID, nombre, edad, última visita, estado RiskReport (🔴 pendiente firma / 🟢 firmado / ⚪ sin análisis), nivel de riesgo (color codificado)<br>
+            • <strong>Clic en fila → abre Ficha Clínica completa</strong> (nueva vista/ruta, no modal pequeño)<br>
+            • Búsqueda por nombre o ID · filtros por estado y riesgo<br>
+            • Vista diferenciada por rol: Admin=todos, Médico=asignados, Paciente=solo el propio<br>
+            • Indicadores de alertas críticas pendientes (badge rojo)
+          </div>
+        </div>
+        <div class="scr">
+          <div class="scr-title">⚙️ 3. Panel Admin</div>
+          <div class="scr-desc">
+            • CRUD de usuarios: crear admin, médico, desactivar<br>
+            • Asignación y revocación de API-Keys<br>
+            • Audit log filtrable por acción, usuario, fecha, resultado<br>
+            • Exportar log en CSV y JSON<br>
+            • Estadísticas: inferencias totales, tasa de aceptación/rechazo de modelos
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="scr">
+          <div class="scr-title">📋 4. Ficha Clínica — Vista Dedicada <span class="b bc">Ruta propia</span></div>
+          <div class="scr-desc">
+            • <strong>Abre en ruta propia</strong> al hacer clic en el paciente (ej. <code>/patients/:id</code>)<br>
+            • Secciones: Datos FHIR Patient · Gráficas de Observations (Plotly.js/Recharts con tendencia temporal) · <strong>Visor de imágenes</strong> (zoom, pan, contraste) · Historial de RiskReports previos<br>
+            • Outliers en rojo con tooltip clínico (Glucosa &gt;600, Temp &gt;45°C, PA sistólica &gt;200)<br>
+            • Banner rojo si hay RiskReport pendiente: "Debe firmar antes de continuar"<br>
+            • <strong>Panel de análisis integrado</strong>: selector ML / DL / Multimodal → botón de ejecución
+          </div>
+        </div>
+        <div class="scr">
+          <div class="scr-title">🤖 5. Panel de Análisis / Inferencia</div>
+          <div class="scr-desc">
+            • Selector de tipo: <strong>Tabular ML</strong> · <strong>Imagen DL</strong> · <strong>Multimodal</strong> (si implementado)<br>
+            • Botón "Ejecutar análisis" → POST orquestador → task_id → polling 3s<br>
+            • Spinner o barra de progreso durante ejecución<br>
+            • Resultado: risk_score + risk_category + SHAP barras (ML) o Grad-CAM superpuesto (DL)<br>
+            • <strong>Si CRITICAL</strong>: modal rojo bloqueante inmediato; no se puede cerrar sin gestionar<br>
+            • Disclaimer IA visible: "Resultado de apoyo diagnóstico. No reemplaza criterio médico."
+          </div>
+        </div>
+        <div class="scr">
+          <div class="scr-title">✍️ 6. Firma del RiskReport <span class="b br">Bloqueo de cierre</span></div>
+          <div class="scr-desc">
+            • Campo observaciones clínicas: obligatorio ≥ 30 caracteres<br>
+            • Botones: <strong>✅ Aceptar diagnóstico</strong> / <strong>❌ Rechazar diagnóstico</strong><br>
+            • Si rechaza: campo de justificación obligatorio ≥ 20 chars<br>
+            • Botón "Cerrar paciente" — <strong>deshabilitado y bloqueado</strong> mientras no haya firma<br>
+            • Solo con <code>signed_at IS NOT NULL</code> el botón se habilita y el médico puede navegar
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ct">🎨 Estándares de Calidad Visual</div>
+      <ul class="l">
+        <li><strong>Tipografía distintiva</strong> — no usar Inter/Arial/Roboto. Usar DM Sans, IBM Plex, Syne, Space Grotesk, Outfit, Manrope u otras con personalidad</li>
+        <li><strong>Sistema de diseño cohesivo</strong> — paleta, espaciado y componentes consistentes en todas las vistas; CSS variables o design tokens</li>
+        <li><strong>Micro-interacciones</strong> — estados hover, loading, success y error animados con CSS o Framer Motion</li>
+        <li><strong>Visor de imágenes integrado</strong> — zoom, pan, ajuste de brillo/contraste básico; imagen original vs Grad-CAM lado a lado</li>
+        <li><strong>Responsive</strong> — funciona en desktop 1920px (mínimo) y tablet 768px</li>
+        <li><strong>Accesibilidad</strong> — contraste WCAG AA, etiquetas aria, navegación por teclado</li>
+        <li><strong>Footer persistente</strong> — "Protegido bajo Ley 1581/2012 · Datos cifrados AES-256 · Sistema auditado"</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="ct">⚠️ Alertas y Notificaciones Obligatorias</div>
+      <ul class="l">
+        <li><strong>Modal Habeas Data</strong> — primer login, no se puede saltar, guardado en BD</li>
+        <li><strong>Banner anti-cierre</strong> — si médico navega fuera del paciente con RiskReport pendiente: advertencia de bloqueo</li>
+        <li><strong>Modal de alerta crítica</strong> — rojo, bloqueante, si <code>risk_category=CRITICAL</code>: datos del paciente + resultado + SHAP/Grad-CAM; opciones aceptar/rechazar; no se cierra sin gestionar</li>
+        <li><strong>Email Mailhog</strong> — disparo automático al médico responsable en diagnóstico crítico</li>
+        <li><strong>WebSocket en tiempo real</strong> — estado de inferencia (PENDING→RUNNING→DONE) + alertas críticas sin polling</li>
+        <li><strong>Toast notifications</strong> — guardados, errores de red, sesión por expirar</li>
+        <li><strong>Validación de outliers</strong> — observaciones extremas en rojo con tooltip explicativo</li>
+        <li><strong>Disclaimer IA</strong> — visible en cada panel de resultado de modelo</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 06 MODELOS ════════════ -->
+<section class="sec" id="tab-modelos">
+  <div class="stit"><div class="sico">🤖</div>
+    <div><h2>Microservicios de IA — ML Tabular + DL Imagen + Orquestador</h2>
+    <p>Cuantizados para CPU · Calibrados · SHAP + Grad-CAM · RiskReport FHIR · Concurrencia mínima 4</p></div>
+  </div>
+
+  <div class="al ald"><strong>Restricción de hardware (no negociable):</strong> La VPS de deploy tiene <strong>solo CPU y RAM — sin GPU, sin CUDA</strong>. Los modelos deben estar cuantizados (ONNX o INT8) antes de empaquetar en Docker. Si el contenedor lanza <code>RuntimeError: CUDA not available</code> en la demo, ese componente queda en <strong>0 pts</strong>. Prueben con GPU desactivada antes de entregar.</div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ct">📊 ML Service — Datos Tabulares <span class="b bc">Obligatorio</span></div>
+      <ul class="l">
+        <li><strong>Algoritmo:</strong> XGBoost / Gradient Boosting / Random Forest — elegir uno, justificar con métricas</li>
+        <li><strong>Calibración:</strong> <code>CalibratedClassifierCV(method='isotonic', cv=5)</code> — probabilidades clínicamente fiables</li>
+        <li><strong>Exportación:</strong> <code>skl2onnx</code> → archivo <code>ml_model.onnx</code> (alternativa: <code>onnxmltools</code>)</li>
+        <li><strong>Inferencia CPU:</strong> <code>onnxruntime.InferenceSession(providers=['CPUExecutionProvider'])</code></li>
+        <li><strong>SHAP:</strong> <code>TreeExplainer</code> → valores por feature incluidos en respuesta JSON del endpoint</li>
+        <li><strong>Métricas obligatorias en README:</strong> F1-score, AUC-ROC, Precision, Recall — no solo accuracy</li>
+        <li><strong>Endpoints:</strong> <code>POST /ml/predict</code> · <code>POST /ml/feedback</code> · <code>GET /ml/version</code></li>
+        <li><strong>Resultado:</strong> guardado como FHIR <code>RiskAssessment</code> + fila en <code>risk_reports</code> (signed_at = NULL)</li>
+        <li><strong>Tiempo máximo CPU:</strong> &lt; 3 segundos</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="ct">🧠 DL Service — Imágenes <span class="b bc">Obligatorio</span></div>
+      <ul class="l">
+        <li><strong>Arquitectura:</strong> EfficientNet-B0 o MobileNetV3 (más ligeras para CPU) fine-tuned sobre el dataset elegido</li>
+        <li><strong>Cuantización PyTorch:</strong> <code>torch.quantization.quantize_dynamic(model, {nn.Linear, nn.Conv2d}, dtype=torch.qint8)</code></li>
+        <li><strong>Alternativa ONNX:</strong> <code>torch.onnx.export</code> → <code>onnxruntime CPUExecutionProvider</code></li>
+        <li><strong>Endpoint:</strong> <code>POST /dl/predict</code> — acepta <code>multipart/form-data</code> (imagen) o <code>{"minio_key": "..."}</code></li>
+        <li><strong>Grad-CAM:</strong> mapa de calor generado y guardado en MinIO como <code>gradcam/{patient_id}_{ts}.jpg</code></li>
+        <li><strong>Resultado:</strong> clase predicha, probabilidades por clase, URL Grad-CAM, FHIR <code>DiagnosticReport</code></li>
+        <li><strong>Endpoints:</strong> <code>POST /dl/predict</code> · <code>POST /dl/feedback</code> · <code>GET /dl/version</code></li>
+        <li><strong>Tiempo máximo CPU:</strong> &lt; 15 segundos</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">⚡ Cuantización — Código de Referencia</div>
+    <div class="g2">
+      <div class="co" style="font-size:10px">
+<span class="cm"># ML tabular → ONNX CPU-only</span>
+<span class="kw">from</span> sklearn.calibration <span class="kw">import</span> CalibratedClassifierCV
+<span class="kw">from</span> xgboost <span class="kw">import</span> XGBClassifier
+<span class="kw">import</span> skl2onnx, onnxruntime <span class="kw">as</span> ort
+
+base  = XGBClassifier(n_estimators=<span class="nu">200</span>, tree_method=<span class="str">'hist'</span>)
+model = CalibratedClassifierCV(base, method=<span class="str">'isotonic'</span>, cv=<span class="nu">5</span>)
+model.fit(X_train, y_train)
+
+<span class="cm"># Exportar a ONNX</span>
+initial = [(<span class="str">'float_input'</span>,
+  skl2onnx.common.data_types.FloatTensorType([<span class="kw">None</span>, X_train.shape[<span class="nu">1</span>]]))]
+onnx_m = skl2onnx.convert_sklearn(model, initial_types=initial)
+<span class="kw">with</span> open(<span class="str">'models/ml_model.onnx'</span>,<span class="str">'wb'</span>) <span class="kw">as</span> f:
+    f.write(onnx_m.SerializeToString())
+
+<span class="cm"># Inferencia en FastAPI (CPUExecutionProvider)</span>
+sess  = ort.InferenceSession(<span class="str">'models/ml_model.onnx'</span>,
+        providers=[<span class="str">'CPUExecutionProvider'</span>])
+proba = sess.run(<span class="kw">None</span>, {<span class="str">'float_input'</span>: X.astype(<span class="str">'float32'</span>)})[<span class="nu">1</span>]
+<span class="cm"># proba[0][1] = P(diabetes) calibrada isotónica</span>
+      </div>
+      <div class="co" style="font-size:10px">
+<span class="cm"># DL imagen → INT8 CPU-only</span>
+<span class="kw">import</span> torch
+<span class="kw">from</span> torchvision <span class="kw">import</span> models
+
+model = models.efficientnet_b0(weights=<span class="kw">None</span>)
+model.classifier[<span class="nu">1</span>] = torch.nn.Linear(
+    model.classifier[<span class="nu">1</span>].in_features, NUM_CLASSES)
+model.load_state_dict(torch.load(<span class="str">'dl_trained.pth'</span>,
+    map_location=<span class="str">'cpu'</span>))
+model.eval()
+
+<span class="cm"># Cuantización dinámica INT8</span>
+model_q8 = torch.quantization.quantize_dynamic(
+    model, {torch.nn.Linear, torch.nn.Conv2d},
+    dtype=torch.qint8)
+torch.save(model_q8.state_dict(), <span class="str">'models/dl_q8.pth'</span>)
+<span class="cm"># Reducción típica: 70 MB → 18 MB | Speedup CPU: 2–4×</span>
+
+<span class="cm"># Alternativa ONNX</span>
+dummy = torch.randn(<span class="nu">1</span>, <span class="nu">3</span>, <span class="nu">224</span>, <span class="nu">224</span>)
+torch.onnx.export(model, dummy, <span class="str">'models/dl_model.onnx'</span>,
+    input_names=[<span class="str">'image'</span>], output_names=[<span class="str">'logits'</span>],
+    dynamic_axes={<span class="str">'image'</span>: {<span class="nu">0</span>: <span class="str">'batch'</span>}})
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">🎛️ Orquestador — Concurrencia Mínima 4 Inferencias Simultáneas</div>
+    <div class="g2">
+      <div>
+        <ul class="l">
+          <li><strong>Patrón:</strong> <code>asyncio.Semaphore(MAX_WORKERS)</code> + <code>BackgroundTasks</code> FastAPI</li>
+          <li><code>MAX_WORKERS=4</code> — configurable por variable de entorno</li>
+          <li><code>POST /infer</code> → retorna <code>task_id</code> inmediatamente (no bloquea)</li>
+          <li><code>GET /infer/{task_id}</code> → <code>PENDING / RUNNING / DONE / ERROR</code></li>
+          <li>Si hay &gt;4 solicitudes: las restantes esperan en cola con estado <code>PENDING</code></li>
+          <li>Estado persistido en tabla <code>inference_queue</code> (PostgreSQL)</li>
+          <li>Timeout configurable 120s — si excede → <code>ERROR</code></li>
+          <li>Frontend: polling cada 3s (o WebSocket) hasta <code>DONE</code></li>
+        </ul>
+      </div>
+      <div class="co" style="font-size:10px">
+<span class="cm"># orchestrator/main.py</span>
+<span class="kw">import</span> asyncio, httpx, os
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI, BackgroundTasks
+
+app = FastAPI(title=<span class="str">"Inference Orchestrator"</span>)
+sem = asyncio.Semaphore(int(os.getenv(<span class="str">"MAX_WORKERS"</span>,<span class="str">"4"</span>)))
+
+<span class="kw">async def</span> <span class="fn">run_inference</span>(task_id, patient_id, model_type):
+    <span class="kw">async with</span> sem:            <span class="cm"># bloquea si ya hay 4 corriendo</span>
+        <span class="kw">await</span> set_status(task_id, <span class="str">"RUNNING"</span>)
+        <span class="kw">try</span>:
+            url = ML_URL <span class="kw">if</span> model_type==<span class="str">"ML"</span> <span class="kw">else</span> DL_URL
+            <span class="kw">async with</span> httpx.AsyncClient(timeout=<span class="nu">120</span>) <span class="kw">as</span> c:
+                r = <span class="kw">await</span> c.post(<span class="str">f"{url}/predict"</span>,
+                    json={<span class="str">"patient_id"</span>: patient_id})
+            rid = <span class="kw">await</span> save_risk_report(patient_id, r.json())
+            <span class="kw">await</span> set_status(task_id, <span class="str">"DONE"</span>, result_id=rid)
+        <span class="kw">except</span> Exception <span class="kw">as</span> e:
+            <span class="kw">await</span> set_status(task_id, <span class="str">"ERROR"</span>, error_msg=str(e))
+
+<span class="kw">@app.post</span>(<span class="str">"/infer"</span>)
+<span class="kw">async def</span> <span class="fn">request_inference</span>(body: InferReq, bg: BackgroundTasks):
+    tid = <span class="kw">await</span> create_queue_entry(body.patient_id, body.model_type)
+    bg.add_task(run_inference, tid, body.patient_id, body.model_type)
+    <span class="kw">return</span> {<span class="str">"task_id"</span>: tid, <span class="str">"status"</span>: <span class="str">"PENDING"</span>}
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-style:dashed;border-color:var(--gold)">
+    <div class="ct">🔮 Análisis Multimodal <span class="b bgo">Opcional — Bono +0.5 pts</span></div>
+    <ul class="l">
+      <li><strong>Concepto:</strong> fusión tardía — el orquestador llama a ML y DL en paralelo con <code>asyncio.gather()</code> y concatena sus embeddings para una predicción combinada final</li>
+      <li><strong>Endpoint:</strong> <code>POST /multimodal/predict</code> — recibe <code>patient_id</code> (que debe tener datos tabulares e imagen); el sistema los busca automáticamente</li>
+      <li><strong>Frontend:</strong> muestra SHAP tabular + Grad-CAM imagen lado a lado en el resultado del análisis multimodal</li>
+      <li><strong>Modelos pre-entrenados alternativos:</strong> si el equipo encuentra un modelo que maneje datos tabulares e imágenes de forma nativa (ej. BioViL-T, FLAVA adaptado), suma puntos de innovación adicionales</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════════ 07 FLUJO CLÍNICO ════════════ -->
+<section class="sec" id="tab-flujo">
+  <div class="stit"><div class="sico">🔄</div>
+    <div><h2>Flujo Clínico Completo — Login → Cierre Firmado</h2>
+    <p>Cada paso está auditado — el médico no puede cerrar sin firmar el RiskReport</p></div>
+  </div>
+
+  <div class="card">
+    <div class="tl">
+      <div class="tli"><div class="tldot"></div>
+        <div class="tlnum">Paso 1</div>
+        <div class="tltit">🔐 Login con Doble API-Key + Habeas Data</div>
+        <div class="tldsc">El médico ingresa X-Access-Key + X-Permission-Key → backend valida ambas → JWT retornado. Si es primer acceso del usuario: modal obligatorio de Habeas Data (Ley 1581/2012 versión 1.0) — no se puede saltar → timestamp + IP guardados en tabla <code>consent</code> + FHIR <code>Consent</code>. Audit log: <code>LOGIN</code>, <code>HABEAS_DATA_ACCEPTED</code>.</div>
+      </div>
+      <div class="tli"><div class="tldot v"></div>
+        <div class="tlnum">Paso 2</div>
+        <div class="tltit">👥 Dashboard — Lista de Pacientes Paginada</div>
+        <div class="tldsc"><code>GET /fhir/Patient?limit=10&amp;offset=0</code> → tabla tipo PACS con estado del RiskReport. Admin ve todos, Médico ve los asignados, Paciente ve solo el propio. Audit log: <code>LIST_PATIENTS</code>.</div>
+      </div>
+      <div class="tli"><div class="tldot e"></div>
+        <div class="tlnum">Paso 3</div>
+        <div class="tltit">📋 Apertura de Ficha Clínica</div>
+        <div class="tldsc">Clic en paciente → ruta <code>/patients/:id</code> con datos FHIR Patient, Observations en gráficas Plotly.js, imágenes MinIO, historial de RiskReports firmados. Banner rojo si hay pendiente. Audit log: <code>VIEW_PATIENT</code>.</div>
+      </div>
+      <div class="tli"><div class="tldot a"></div>
+        <div class="tlnum">Paso 4</div>
+        <div class="tltit">🤖 Solicitud de Análisis al Orquestador</div>
+        <div class="tldsc">Médico selecciona tipo (ML / DL / Multimodal) → <code>POST /infer</code> → <code>task_id</code> inmediato → frontend polling o WebSocket cada 3s → spinner de progreso. Mínimo 4 análisis simultáneos sin error. Audit log: <code>RUN_INFERENCE</code>.</div>
+      </div>
+      <div class="tli"><div class="tldot"></div>
+        <div class="tlnum">Paso 5</div>
+        <div class="tltit">📊 Visualización del Resultado</div>
+        <div class="tldsc">risk_score, risk_category, SHAP barras (ML) o Grad-CAM superpuesto (DL). Resultado guardado como FHIR <code>RiskAssessment</code> con <code>signed_at = NULL</code>. Disclaimer IA visible. Si <code>is_critical = true</code> → Paso 6. Audit log: <code>INFERENCE_COMPLETED</code>.</div>
+      </div>
+      <div class="tli"><div class="tldot r"></div>
+        <div class="tlnum">Paso 6 (condicional)</div>
+        <div class="tltit">🚨 Gestión de Alerta Crítica</div>
+        <div class="tldsc">Modal rojo bloqueante — no se puede navegar sin resolver. Email automático Mailhog al médico responsable. Médico revisa SHAP/Grad-CAM y debe seleccionar: Confirmar o Rechazar (justificación ≥ 20 chars si rechaza). Audit log: <code>CRITICAL_ALERT_TRIGGERED</code>, <code>CRITICAL_ALERT_RESOLVED</code>.</div>
+      </div>
+      <div class="tli"><div class="tldot v"></div>
+        <div class="tlnum">Paso 7</div>
+        <div class="tltit">✍️ Firma Obligatoria del RiskReport</div>
+        <div class="tldsc">Médico escribe observaciones clínicas (≥ 30 chars) y selecciona Aceptar o Rechazar. <code>PATCH /fhir/RiskAssessment/{id}/sign</code> → <code>signed_by</code> y <code>signed_at</code> registrados en BD y FHIR. Retroalimentación guardada en <code>model_feedback</code>. Audit log: <code>SIGN_REPORT</code>.</div>
+      </div>
+      <div class="tli"><div class="tldot e"></div>
+        <div class="tlnum">Paso 8</div>
+        <div class="tltit">✅ Cierre del Paciente — Bloqueado hasta firma</div>
+        <div class="tldsc">Backend valida <code>SELECT * FROM risk_reports WHERE patient_id=$1 AND signed_at IS NULL</code>. Si hay pendientes → error 409 "PENDING_SIGNATURE". Solo con firma completa el botón de cerrar se habilita. Audit log: <code>CLOSE_PATIENT</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">🔒 Endpoint de Bloqueo de Cierre</div>
+    <div class="co" style="font-size:11px">
+<span class="cm"># backend/routers/patients.py</span>
+<span class="kw">@router.get</span>(<span class="str">"/fhir/Patient/{pid}/can-close"</span>)
+<span class="kw">async def</span> <span class="fn">can_close_patient</span>(pid: str, doctor=Depends(require_medico), db=Depends(get_db)):
+    <span class="cm"># Verificar RiskReports sin firma para este paciente</span>
+    pending = <span class="kw">await</span> db.fetch(
+        <span class="str">"""SELECT id FROM risk_reports
+           WHERE patient_id = $1::uuid
+             AND signed_at IS NULL
+             AND deleted_at IS NULL"""</span>, pid)
+    <span class="kw">if</span> pending:
+        <span class="kw">raise</span> HTTPException(
+            status_code=<span class="nu">409</span>,
+            detail={<span class="str">"error"</span>:<span class="str">"PENDING_SIGNATURE"</span>,
+                    <span class="str">"message"</span>:<span class="str">"Debe firmar el RiskReport antes de cerrar el paciente"</span>,
+                    <span class="str">"pending_count"</span>:len(pending)})
+    <span class="kw">await</span> log_audit(doctor.id, <span class="str">"CLOSE_PATIENT"</span>, <span class="str">"Patient"</span>, pid, <span class="str">"SUCCESS"</span>)
+    <span class="kw">return</span> {<span class="str">"can_close"</span>:<span class="kw">True</span>, <span class="str">"message"</span>:<span class="str">"Paciente puede ser cerrado"</span>}
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 08 SEGURIDAD ════════════ -->
+<section class="sec" id="tab-seguridad">
+  <div class="stit"><div class="sico">🔒</div>
+    <div><h2>Seguridad, Privacidad y Cumplimiento Normativo</h2>
+    <p>Anti-DDoS · Cifrado en reposo y tránsito · RBAC · Habeas Data · Normativa colombiana</p></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ct">🛡️ Protección Anti-DDoS</div>
+      <ul class="l">
+        <li><strong>Nginx como único punto de entrada</strong> — todos los servicios en red Docker interna, sin puertos directamente expuestos al exterior</li>
+        <li><strong>Rate-limiting Nginx:</strong> <code>limit_req_zone</code> — 100 req/min/IP en auth; 500 req/min/IP en API; 10 inferencias/min/key</li>
+        <li><strong>Auto-ban:</strong> bloqueo de IP tras 10 intentos fallidos de autenticación en 5 minutos; Error 429 con <code>Retry-After</code></li>
+        <li><strong>Headers HTTP de seguridad:</strong> <code>X-Frame-Options: DENY</code> · <code>X-Content-Type-Options: nosniff</code> · <code>Strict-Transport-Security</code> · <code>Content-Security-Policy</code> · <code>Referrer-Policy</code></li>
+        <li><strong>CORS restrictivo:</strong> solo orígenes en <code>ALLOWED_ORIGINS</code> del <code>.env</code></li>
+        <li><strong>Tamaño máximo de payload:</strong> <code>client_max_body_size 10M</code> (imágenes médicas)</li>
+        <li><strong>Timeouts anti-Slowloris:</strong> <code>client_body_timeout 10s</code>, <code>send_timeout 10s</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="ct">🔐 Autenticación y Autorización</div>
+      <ul class="l">
+        <li><strong>Doble API-Key (herencia C1)</strong> — X-Access-Key + X-Permission-Key en todos los endpoints sin excepción</li>
+        <li><strong>JWT Bearer</strong> — para la SPA; expiración 8h; refresh token con rotación; blacklist al logout</li>
+        <li><strong>bcrypt</strong> — hashing de contraseñas, work factor ≥ 12</li>
+        <li><strong>RBAC en backend</strong> — decoradores <code>@require_medico</code>, <code>@require_admin</code> en cada endpoint FastAPI; el frontend nunca es la única barrera de seguridad</li>
+        <li><strong>Paciente = solo su información</strong> — query siempre incluye <code>WHERE owner_id = current_user</code></li>
+        <li><strong>Política de contraseñas:</strong> mínimo 10 chars, mayúscula, número, símbolo</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ct">🔒 Cifrado de Datos</div>
+      <ul class="l">
+        <li><strong>En tránsito:</strong> HTTPS/TLS — self-signed en dev; Let's Encrypt en producción</li>
+        <li><strong>En reposo (PostgreSQL):</strong> <code>pgcrypto.encrypt(value, key, 'aes')</code> — campos: <code>identification_doc</code>, <code>medical_summary</code>, <code>risk_prediction</code>, <code>minio_key</code></li>
+        <li><strong>MinIO SSE:</strong> Server-Side Encryption activado para todas las imágenes médicas</li>
+        <li><strong>Secretos en <code>.env</code>:</strong> credenciales nunca en código fuente ni en commits</li>
+        <li><strong>Logs seguros:</strong> nunca registrar contraseñas, tokens, API-Keys ni PHI en texto plano</li>
+        <li><strong><code>.gitignore</code> obligatorio:</strong> <code>.env</code>, <code>*.onnx</code>, <code>*.pth</code>, carpeta <code>datasets/</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="ct">📋 Soft-Delete + Audit Log INSERT-ONLY</div>
+      <ul class="l">
+        <li><strong>Soft-delete:</strong> columna <code>deleted_at TIMESTAMPTZ</code> en todas las entidades; todas las queries filtran <code>WHERE deleted_at IS NULL</code>; DELETE endpoint → <code>UPDATE SET deleted_at = NOW()</code></li>
+        <li><strong>Restaurar:</strong> solo Admin puede restaurar con <code>PATCH /{id}/restore</code></li>
+        <li><strong>Audit log INSERT-ONLY:</strong> jamás UPDATE ni DELETE en la tabla <code>audit_log</code></li>
+        <li>Acciones mínimas auditadas: <code>LOGIN · LOGOUT · LIST_PATIENTS · VIEW_PATIENT · UPLOAD_IMAGE · RUN_INFERENCE · INFERENCE_COMPLETED · SIGN_REPORT · CRITICAL_ALERT_TRIGGERED · CRITICAL_ALERT_RESOLVED · CREATE_USER · DELETE_USER · HABEAS_DATA_ACCEPTED · CLOSE_PATIENT</code></li>
+        <li>También como FHIR <code>AuditEvent</code></li>
+        <li>Admin: ver, filtrar y exportar CSV/JSON</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">⚖️ Normativa Colombiana y Habeas Data</div>
+    <div class="g2">
+      <div>
+        <ul class="l">
+          <li><strong>Ley 1581/2012</strong> — Protección de datos personales; dato de salud = dato sensible; consentimiento informado previo y explícito</li>
+          <li><strong>Ley 2015/2020</strong> — Historia Clínica Electrónica Interoperable; unicidad, portabilidad, confidencialidad</li>
+          <li><strong>Resolución 866/2021 (MIAS)</strong> — adopción de HL7 FHIR R4 para interoperabilidad semántica en el sistema de salud colombiano</li>
+          <li><strong>Resolución 1995/1999</strong> — retención de HC mínimo 15 años; política de retención documentada en README</li>
+          <li><strong>Derechos ARCO:</strong> flujo de solicitud de acceso, rectificación, cancelación y oposición; soft-delete + anonimización</li>
+          <li><strong>Disclaimer IA obligatorio:</strong> "Resultado generado por IA de apoyo diagnóstico. No reemplaza criterio médico. Sujeto a revisión clínica."</li>
+        </ul>
+      </div>
+      <div class="co" style="font-size:10px">
+<span class="cm"># FHIR Consent — Habeas Data (Ley 1581/2012)</span>
+{
+  <span class="str">"resourceType"</span>: <span class="str">"Consent"</span>,
+  <span class="str">"status"</span>: <span class="str">"active"</span>,
+  <span class="str">"scope"</span>: {
+    <span class="str">"coding"</span>: [{
+      <span class="str">"system"</span>:<span class="str">"http://terminology.hl7.org/CodeSystem/consentscope"</span>,
+      <span class="str">"code"</span>: <span class="str">"patient-privacy"</span>
+    }]
+  },
+  <span class="str">"category"</span>: [{ <span class="str">"coding"</span>: [{ <span class="str">"code"</span>:<span class="str">"IDSCL"</span> }] }],
+  <span class="str">"patient"</span>: { <span class="str">"reference"</span>: <span class="str">"Patient/{id}"</span> },
+  <span class="str">"dateTime"</span>: <span class="str">"2026-04-07T00:00:00Z"</span>,
+  <span class="str">"policyRule"</span>: {
+    <span class="str">"coding"</span>: [{
+      <span class="str">"system"</span>:<span class="str">"http://terminology.hl7.org/CodeSystem/v3-ActCode"</span>,
+      <span class="str">"code"</span>: <span class="str">"OPTIN"</span>
+    }]
+  },
+  <span class="str">"sourceReference"</span>: {
+    <span class="str">"display"</span>: <span class="str">"Política Privacidad v1.0 — Ley 1581/2012 Colombia"</span>
+  }
+}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 09 INTEROPERABILIDAD ════════════ -->
+<section class="sec" id="tab-interop">
+  <div class="stit"><div class="sico">🔌</div>
+    <div><h2>Interoperabilidad Semántica HL7 FHIR R4</h2>
+    <p>Codificaciones estándar · Terminologías clínicas · Flujo de mensajes</p></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ct">📚 Terminologías y Codificaciones Requeridas</div>
+      <ul class="l">
+        <li><strong>LOINC</strong> — códigos para Observations (signos vitales, laboratorio). Ej: <code>2339-0</code> = Glucosa, <code>55284-4</code> = Presión Arterial, <code>39156-5</code> = BMI, <code>14749-6</code> = Insulina</li>
+        <li><strong>SNOMED CT</strong> — diagnósticos en <code>RiskAssessment.qualitativeRisk</code> y <code>DiagnosticReport.conclusionCode</code>. Ej: <code>73211009</code> = Diabetes mellitus</li>
+        <li><strong>ICD-10</strong> — código diagnóstico secundario en <code>DiagnosticReport.conclusion</code></li>
+        <li><strong>UCUM</strong> — unidades en Observations. Ej: mg/dL, mmHg, kg/m2</li>
+        <li><strong>RxNorm</strong> — medicamentos si se incluye historial farmacológico</li>
+        <li><strong>Sistema de URLs FHIR:</strong> <code>http://loinc.org</code>, <code>http://snomed.info/sct</code>, <code>http://hl7.org/fhir/sid/icd-10</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="ct">🔄 Flujo de Interoperabilidad</div>
+      <ul class="l">
+        <li><strong>Dataset → FHIR:</strong> script seed mapea features a Observations LOINC → POST al servidor HAPI FHIR R4</li>
+        <li><strong>Imagen → FHIR:</strong> upload a MinIO → URL presignada → recurso Media en HAPI FHIR</li>
+        <li><strong>ML Result → FHIR:</strong> predicción → <code>RiskAssessment</code> con probability calibrada + <code>qualitativeRisk</code> SNOMED</li>
+        <li><strong>DL Result → FHIR:</strong> clasificación → <code>DiagnosticReport</code> con <code>conclusionCode</code> SNOMED/ICD-10 + referencia a Grad-CAM en MinIO</li>
+        <li><strong>Firma médica → FHIR:</strong> acción del médico actualiza <code>RiskAssessment.performer</code> y <code>basis</code></li>
+        <li><strong>Acción de usuario → FHIR:</strong> cada acción clínica genera un recurso <code>AuditEvent</code></li>
+        <li><strong>SMART on FHIR (bono):</strong> si implementan autenticación basada en SMART on FHIR con JWT estándar FHIR</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">📡 Protocolos de Comunicación Requeridos</div>
+    <div class="g2">
+      <div>
+        <ul class="l">
+          <li><strong>FHIR RESTful API</strong> — CRUD con parámetros de búsqueda FHIR (<code>?subject=Patient/{id}</code>, <code>?date=gt2024</code>, <code>?code=2339-0</code>)</li>
+          <li><strong>S3 API (MinIO)</strong> — upload multipart + URL presignada válida 1h para servir imágenes en el frontend</li>
+          <li><strong>ONNX Runtime CPU</strong> — estándar de interoperabilidad de modelos entre plataformas</li>
+          <li><strong>WebSocket</strong> — notificaciones tiempo real: estado de inferencia + alertas críticas sin polling</li>
+          <li><strong>SMTP (Mailhog)</strong> — alertas críticas al médico por email</li>
+          <li><strong>JWT Bearer (RFC 7519)</strong> — autenticación stateless entre frontend y microservicios</li>
+          <li><strong>OpenAPI 3.0 (Swagger)</strong> — documentación automática en cada FastAPI (<code>/docs</code>)</li>
+          <li><strong>WADO-RS (Orthanc)</strong> — si se implementa el bono PACS: recuperación DICOM por URL</li>
+        </ul>
+      </div>
+      <div class="co" style="font-size:10.5px">
+<span class="cm"># Ejemplo: crear RiskAssessment FHIR R4 desde resultado ML</span>
+<span class="kw">def</span> <span class="fn">ml_result_to_fhir_risk</span>(patient_id: str, risk_score: float,
+                              risk_category: str, signed_by: str | <span class="kw">None</span>) -&gt; dict:
+    snomed_map = {
+        <span class="str">"LOW"</span>:<span class="str">"281414001"</span>, <span class="str">"MEDIUM"</span>:<span class="str">"281415000"</span>,
+        <span class="str">"HIGH"</span>:<span class="str">"281416004"</span>, <span class="str">"CRITICAL"</span>:<span class="str">"24484000"</span>}
+    <span class="kw">return</span> {
+        <span class="str">"resourceType"</span>: <span class="str">"RiskAssessment"</span>,
+        <span class="str">"status"</span>: <span class="str">"final"</span>,
+        <span class="str">"subject"</span>: {<span class="str">"reference"</span>: <span class="str">f"Patient/{patient_id}"</span>},
+        <span class="str">"prediction"</span>: [{
+            <span class="str">"probabilityDecimal"</span>: round(risk_score, <span class="nu">4</span>),
+            <span class="str">"qualitativeRisk"</span>: {
+                <span class="str">"coding"</span>: [{
+                    <span class="str">"system"</span>: <span class="str">"http://snomed.info/sct"</span>,
+                    <span class="str">"code"</span>: snomed_map[risk_category],
+                    <span class="str">"display"</span>: risk_category
+                }]
+            }
+        }],
+        <span class="str">"performer"</span>: {<span class="str">"reference"</span>: <span class="str">f"Practitioner/{signed_by}"</span>}
+                    <span class="kw">if</span> signed_by <span class="kw">else</span> <span class="kw">None</span>
+    }
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 10 RÚBRICA ════════════ -->
+<section class="sec" id="tab-rubrica">
+  <div class="stit"><div class="sico">📊</div>
+    <div><h2>Rúbrica de Evaluación</h2>
+    <p>5.0 puntos base + bonos — evaluación durante la presentación en vivo</p></div>
+  </div>
+
+  <div class="sbox">
+    <div class="sr"><div class="sl">1 · Infraestructura Docker + PostgreSQL + MinIO + Nginx</div><div class="sv">0.7 pt</div></div>
+    <div class="sr"><div class="sl">2 · Herencia Corte 1 (doble API-Key, roles, FHIR-Lite, paginación, rate-limit, cifrado)</div><div class="sv">0.6 pt</div></div>
+    <div class="sr"><div class="sl">3 · Pacientes sintéticos desde dataset real (seed script funcional, ≥ 30 pacientes)</div><div class="sv">0.4 pt</div></div>
+    <div class="sr"><div class="sl">4 · Frontend SPA profesional y estético (sin Streamlit/Gradio, todas las pantallas)</div><div class="sv">1.0 pt</div></div>
+    <div class="sr"><div class="sl">5 · ML Service tabular cuantizado ONNX (calibrado, SHAP, RiskAssessment FHIR)</div><div class="sv">0.7 pt</div></div>
+    <div class="sr"><div class="sl">6 · DL Service imagen cuantizado (INT8/ONNX, Grad-CAM MinIO, DiagnosticReport FHIR)</div><div class="sv">0.7 pt</div></div>
+    <div class="sr"><div class="sl">7 · Orquestador de inferencias (≥ 4 concurrentes, cola, polling/WebSocket)</div><div class="sv">0.3 pt</div></div>
+    <div class="sr"><div class="sl">8 · RiskReport firmado + bloqueo de cierre (backend valida signed_at con error 409)</div><div class="sv">0.4 pt</div></div>
+    <div class="sr"><div class="sl">9 · Seguridad completa (Nginx anti-DDoS, cifrado, RBAC backend, Habeas Data, audit log)</div><div class="sv">0.2 pt</div></div>
+    <div class="sr tot"><div class="sl">TOTAL BASE</div><div class="sv">5.0 pts</div></div>
+    <div class="sr bono"><div class="sl">🎁 Frontend con UX/UI excepcional y creativo (AntiGravity, animaciones, visor avanzado)</div><div class="sv">+0.3</div></div>
+    <div class="sr bono"><div class="sl">🎁 Análisis multimodal funcional (fusión tabular + imagen en una sola inferencia)</div><div class="sv">+0.5</div></div>
+    <div class="sr bono"><div class="sl">🎁 Orthanc PACS + WADO-RS integrado en el visor del frontend</div><div class="sv">+0.3</div></div>
+    <div class="sr bono"><div class="sl">🎁 WebSocket tiempo real para inferencias + alertas (no solo polling HTTP)</div><div class="sv">+0.2</div></div>
+  </div>
+
+  <div class="card">
+    <div class="ct">📋 Criterios Detallados por Componente</div>
+    <table class="rt">
+      <thead><tr>
+        <th style="width:20%">Componente</th><th style="width:6%">Pts</th>
+        <th style="width:18%"><span class="s5">● Excelente (5)</span></th>
+        <th style="width:18%"><span class="s4">● Bueno (4)</span></th>
+        <th style="width:18%"><span class="s3">● Aceptable (3)</span></th>
+        <th style="width:20%"><span class="s1">● Insuficiente (&lt;3)</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="comp">🐳 Infraestructura Docker</td><td class="pts">0.7</td>
+          <td><span class="s5">compose up sin errores. Todos los servicios healthy. MinIO con bucket. Nginx con rate-limit y headers de seguridad. Volúmenes persistentes.</span></td>
+          <td><span class="s4">Compose levanta. MinIO OK. Nginx sin rate-limit ni headers.</span></td>
+          <td><span class="s3">Solo backend + BD del C1. Sin MinIO ni Nginx.</span></td>
+          <td><span class="s1">Compose falla, BD no persiste o servicios de IA ausentes.</span></td></tr>
+        <tr><td class="comp">🔗 Herencia Corte 1</td><td class="pts">0.6</td>
+          <td><span class="s5">Doble API-Key, 3 roles, FHIR Patient+Observation, paginación, 429, cifrado pgcrypto — todos en endpoints nuevos y viejos.</span></td>
+          <td><span class="s4">Todo C1 funciona excepto cifrado o rate-limit.</span></td>
+          <td><span class="s3">FHIR y roles OK. Paginación o cifrado rotos.</span></td>
+          <td><span class="s1">Backend C1 no responde o roles sin validación en backend.</span></td></tr>
+        <tr><td class="comp">🌱 Pacientes sintéticos</td><td class="pts">0.4</td>
+          <td><span class="s5">Script crea ≥ 30 pacientes con Observations LOINC + ≥ 15 con imagen en MinIO + Media FHIR. Datos coherentes con el dataset real.</span></td>
+          <td><span class="s4">≥ 20 pacientes con Observations. Sin Media FHIR.</span></td>
+          <td><span class="s3">Pacientes manuales o sin imágenes vinculadas.</span></td>
+          <td><span class="s1">Datos inventados a mano sin relación con el dataset.</span></td></tr>
+        <tr><td class="comp">🖥️ Frontend SPA</td><td class="pts">1.0</td>
+          <td><span class="s5">React/Vue/Svelte estético. Login animado. Habeas Data. Lista paginada tipo PACS. Ficha clínica completa. Visor imágenes. Panel de análisis con SHAP/Grad-CAM. Firma. Alerta crítica. Diseño memorable.</span></td>
+          <td><span class="s4">Login, lista paginada, ficha y firma funcionales. Sin Grad-CAM visual o sin visor de imágenes. Diseño aceptable.</span></td>
+          <td><span class="s3">Login y lista. Sin ficha clínica con análisis integrado.</span></td>
+          <td><span class="s1">Streamlit/Gradio (−1.5 pts automáticos) o SPA que no conecta con el backend.</span></td></tr>
+        <tr><td class="comp">🤖 ML Tabular</td><td class="pts">0.7</td>
+          <td><span class="s5">ONNX en CPU. Calibrado isotónico. SHAP visualizado en frontend. RiskAssessment FHIR completo. Métricas F1/AUC en README. &lt; 3s CPU.</span></td>
+          <td><span class="s4">ONNX funciona en CPU. Sin calibración o sin SHAP. RiskAssessment parcial.</span></td>
+          <td><span class="s3">Predice sin cuantizar (lento). Sin RiskAssessment FHIR.</span></td>
+          <td><span class="s1">No responde o requiere GPU para ejecutarse.</span></td></tr>
+        <tr><td class="comp">🧠 DL Imagen</td><td class="pts">0.7</td>
+          <td><span class="s5">INT8/ONNX en CPU. Grad-CAM guardado en MinIO. DiagnosticReport FHIR. Feedback endpoint. &lt; 15s CPU. Visor frontend: original vs Grad-CAM lado a lado.</span></td>
+          <td><span class="s4">Cuantizado funciona. Grad-CAM generado. Sin DiagnosticReport FHIR.</span></td>
+          <td><span class="s3">Inferencia básica en CPU sin Grad-CAM.</span></td>
+          <td><span class="s1">No procesa imágenes o el modelo requiere GPU.</span></td></tr>
+        <tr><td class="comp">🎛️ Orquestador</td><td class="pts">0.3</td>
+          <td><span class="s5">4 solicitudes simultáneas sin error. Cola PENDING/RUNNING/DONE/ERROR. Polling o WebSocket funcional. Estado en BD.</span></td>
+          <td><span class="s4">4 concurrentes OK. Sin persistencia de estado en BD.</span></td>
+          <td><span class="s3">Secuencial. Sin concurrencia real.</span></td>
+          <td><span class="s1">Falla con 2 o más solicitudes simultáneas.</span></td></tr>
+        <tr><td class="comp">✍️ RiskReport firmado</td><td class="pts">0.4</td>
+          <td><span class="s5">Firma obligatoria. Justificación al rechazar. Backend retorna 409 si no firmado. signed_by + signed_at en BD y FHIR. Feedback en model_feedback.</span></td>
+          <td><span class="s4">Firma funciona. Sin bloqueo real en backend (solo frontend).</span></td>
+          <td><span class="s3">Botón de firma presente pero sin bloqueo de cierre.</span></td>
+          <td><span class="s1">Sin flujo de firma o RiskReport sin persistir.</span></td></tr>
+        <tr><td class="comp">🔒 Seguridad completa</td><td class="pts">0.2</td>
+          <td><span class="s5">Nginx anti-DDoS + headers. Cifrado en reposo. RBAC en backend. Habeas Data con persistencia en BD. Audit log ≥ 10 tipos de evento. Soft-delete en todas las entidades.</span></td>
+          <td><span class="s4">Nginx y cifrado. RBAC parcial. Habeas Data sin BD.</span></td>
+          <td><span class="s3">Rate-limit o cifrado pero no ambos. Sin Habeas Data.</span></td>
+          <td><span class="s1">Sin seguridad real o credenciales en el repositorio.</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="border-color:var(--rose)">
+    <div class="ct">❌ Penalizaciones Automáticas</div>
+    <div class="g2">
+      <div>
+        <div class="pen"><span class="plab">Usar Streamlit o Gradio como frontend</span><span class="pval">−1.5 pts</span></div>
+        <div class="pen"><span class="plab">Modelos requieren GPU para ejecutarse</span><span class="pval">−0.8 pts</span></div>
+        <div class="pen"><span class="plab">docker compose up falla en la demo</span><span class="pval">−1.0 pt</span></div>
+        <div class="pen"><span class="plab">Credenciales en código o en el repositorio</span><span class="pval">−0.5 pts</span></div>
+      </div>
+      <div>
+        <div class="pen"><span class="plab">Paciente puede ver datos de otros pacientes</span><span class="pval">−0.5 pts</span></div>
+        <div class="pen"><span class="plab">Sin soft-delete en entidades nuevas</span><span class="pval">−0.2 pts</span></div>
+        <div class="pen"><span class="plab">Sin colección Postman actualizada</span><span class="pval">−0.2 pts</span></div>
+        <div class="pen"><span class="plab">Demo en vivo no funcional</span><span class="pval">−0.5 pts</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 11 ENTREGA ════════════ -->
+<section class="sec" id="tab-entrega">
+  <div class="stit"><div class="sico">📦</div>
+    <div><h2>Instructivo de Entrega</h2>
+    <p>Repositorio · URLs · Colección Postman · Video · Protocolo de presentación</p></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ct">📁 Estructura del Repositorio</div>
+      <div class="co" style="font-size:10.5px">
+📦 proyecto-salud-digital-c2/
+├── README.md               <span class="cm"># despliegue + credenciales de prueba por rol</span>
+├── docker-compose.yml
+├── .env.example            <span class="cm"># plantilla sin valores reales</span>
+├── .gitignore              <span class="cm"># .env · *.onnx · *.pth · datasets/</span>
+│
+├── nginx/
+│   ├── Dockerfile
+│   └── nginx.conf          <span class="cm"># rate-limit + headers + SSL</span>
+│
+├── backend/                <span class="cm"># FastAPI — herencia C1 + FHIR extendido</span>
+│   ├── Dockerfile
+│   └── routers/
+│       ├── fhir.py         <span class="cm"># Patient,Observation,Media,RiskAssessment,AuditEvent,Consent</span>
+│       ├── auth.py         <span class="cm"># doble API-Key + JWT + RBAC</span>
+│       └── admin.py        <span class="cm"># CRUD usuarios, audit log, estadísticas</span>
+│
+├── frontend/               <span class="cm"># SPA React/Vue/Svelte — interfaz clínica estética</span>
+│   ├── Dockerfile
+│   └── src/
+│       ├── views/          <span class="cm"># Login, Dashboard, PatientDetail, Admin</span>
+│       ├── components/     <span class="cm"># ImageViewer, RiskReportForm, InferencePanel, HabeasModal</span>
+│       └── services/       <span class="cm"># api.js, fhir.js, minio.js, websocket.js</span>
+│
+├── ml-service/             <span class="cm"># FastAPI + models/ml_model.onnx</span>
+│   └── Dockerfile
+├── dl-service/             <span class="cm"># FastAPI + models/dl_model.onnx o dl_q8.pth</span>
+│   └── Dockerfile
+├── orchestrator/           <span class="cm"># FastAPI async queue — asyncio.Semaphore(4)</span>
+│   └── main.py
+│
+├── scripts/
+│   └── seed_patients.py    <span class="cm"># genera 30+ pacientes desde dataset</span>
+│
+├── datasets/
+│   └── README_datasets.md  <span class="cm"># cómo descargar — NO incluir los datos en el repo</span>
+│
+└── postman/
+    └── corte2.json         <span class="cm"># colección Postman actualizada</span>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="ct">📋 Entregables Obligatorios</div>
+        <ul class="l">
+          <li><strong>URL GitHub/GitLab</strong> — historial de commits (mínimo 1 commit significativo por integrante)</li>
+          <li><strong>URL Backend Render</strong> — FastAPI respondiendo con Swagger en <code>/docs</code></li>
+          <li><strong>URL Frontend deployado</strong> — Vercel / Netlify / Render Static / otro (NO Streamlit Cloud)</li>
+          <li><strong>Colección Postman</strong> — inferencia ML, DL, firma RiskReport, audit log filtrado, paginación</li>
+          <li><strong>Video demo 5–8 min</strong> — flujo completo: login → Habeas Data → paciente → análisis ML y DL → alerta crítica → firma → cierre</li>
+          <li><strong>Credenciales de prueba en README</strong> — Admin, Médico 1, Médico 2, Paciente</li>
+          <li><strong>README de datasets</strong> — cómo descargar cada uno, sin incluir los archivos en el repo</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="ct">🎤 Protocolo de Presentación (20 min)</div>
+        <div class="tl">
+          <div class="tli"><div class="tldot"></div>
+            <div class="tlnum">0 – 3 min</div>
+            <div class="tltit">Arquitectura y decisiones técnicas</div>
+            <div class="tldsc">Diagrama docker-compose. Dataset elegido y justificación clínica. Estrategia de cuantización (demostrar tamaño antes/después del modelo).</div>
+          </div>
+          <div class="tli"><div class="tldot v"></div>
+            <div class="tlnum">3 – 10 min</div>
+            <div class="tltit">Demo en vivo del flujo completo</div>
+            <div class="tldsc">Login → Habeas Data → lista paginada → ficha clínica → análisis ML y DL → alerta crítica → firma del RiskReport → cierre del paciente.</div>
+          </div>
+          <div class="tli"><div class="tldot e"></div>
+            <div class="tlnum">10 – 14 min</div>
+            <div class="tltit">Profundización técnica</div>
+            <div class="tldsc">Métricas de los modelos (F1/AUC). 4 inferencias concurrentes en vivo. Audit log. Cifrado en BD. Nginx rate-limit.</div>
+          </div>
+          <div class="tli"><div class="tldot a"></div>
+            <div class="tlnum">14 – 20 min</div>
+            <div class="tltit">Preguntas individuales del docente</div>
+            <div class="tldsc">Cada integrante responde por el módulo que desarrolló. El docente puede pedir modificar código en vivo o ejecutar casos de prueba específicos.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="al als"><strong>División sugerida del trabajo:</strong> Integrante 1 → backend (herencia C1 + FHIR extendido + auth) · Integrante 2 → frontend SPA (todas las vistas) · Integrante 3 → ML service + orquestador + seed script · Integrante 4 → DL service + MinIO + MLflow. <strong>Todos deben poder explicar el sistema completo en la presentación.</strong></div>
+  <div class="al alw"><strong>Prueba crítica antes de entregar:</strong> Desactiven la GPU de su máquina local (o usen una VM sin GPU) y ejecuten <code>docker compose up -d</code> seguido de <code>python scripts/seed_patients.py</code>. Realicen una inferencia ML y una DL completa. Si algo falla sin CUDA, el evaluador verá exactamente lo mismo.</div>
+</section>
+
+<script>
+// Tab navigation
+function T(name){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('a'));
+  document.querySelectorAll('.nt').forEach(t=>t.classList.remove('a'));
+  const sec=document.getElementById('tab-'+name);
+  if(sec){sec.classList.add('a')}
+  event.target.classList.add('a');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// Architecture diagram
+(function buildArch(){
+  const c=document.getElementById('arch-svg');
+  if(!c)return;
+  const W=1050, H=330;
+  const bands=[
+    {y:5,h:58,lbl:'INTERNET / USUARIO FINAL',col:'#0a1525'},
+    {y:73,h:58,lbl:'CAPA PROXY — Nginx (único punto expuesto)',col:'#0c1d38'},
+    {y:141,h:112,lbl:'CAPA DE SERVICIOS',col:'#0e2040'},
+    {y:263,h:60,lbl:'CAPA DE DATOS',col:'#0a1a30'},
+  ];
+  const nodes=[
+    // row1: proxy
+    {x:525,y:33,ico:'🌐',n:'Nginx',s:'WAF · Rate-Limit · SSL',col:'#00d4ff',w:130},
+    // row2: frontend + backend + fhir + orchestrator
+    {x:130,y:107,ico:'🖥️',n:'Frontend SPA',s:'React/Vue/Svelte',col:'#7c3aed',w:130},
+    {x:295,y:107,ico:'⚙️',n:'Backend API',s:'FastAPI + FHIR',col:'#00d4ff',w:120},
+    {x:460,y:107,ico:'⚕️',n:'HAPI FHIR R4',s:'HL7 Server',col:'#10b981',w:115},
+    {x:630,y:107,ico:'🎛️',n:'Orchestrator',s:'Async Queue ×4',col:'#f59e0b',w:120},
+    {x:790,y:107,ico:'📊',n:'MLflow',s:'Model Tracking',col:'#7c3aed',w:105},
+    {x:920,y:107,ico:'📧',n:'Mailhog',s:'SMTP Alerts',col:'#00d4ff',w:95},
+    // row3: ML + DL + MinIO
+    {x:200,y:197,ico:'🤖',n:'ML Service',s:'ONNX Tabular',col:'#f43f5e',w:115},
+    {x:370,y:197,ico:'🧠',n:'DL Service',s:'INT8/ONNX Img',col:'#f43f5e',w:115},
+    {x:600,y:197,ico:'📦',n:'MinIO S3',s:'Imágenes + GradCAM',col:'#10b981',w:130},
+    {x:810,y:197,ico:'🖼️',n:'Orthanc',s:'PACS (opcional)',col:'#334468',w:105},
+    // row4: DB
+    {x:270,y:292,ico:'🐘',n:'PostgreSQL',s:'Render (externo)',col:'#6366f1',w:120},
+  ];
+  const edges=[[0,1],[0,2],[0,3],[0,4],[2,7],[2,8],[4,7],[4,8],[7,9],[8,9],[5,2],[6,2],[7,11],[8,11]];
+  let svg=`<svg viewBox="0 0 ${W} ${H+10}" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:'Outfit',sans-serif">`;
+  svg+=`<defs><marker id="ar2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3z" fill="#1c3870"/></marker></defs>`;
+  // bands
+  bands.forEach(b=>{
+    svg+=`<rect x="0" y="${b.y}" width="${W}" height="${b.h}" fill="${b.col}" opacity=".6" rx="2"/>`;
+    svg+=`<text x="10" y="${b.y+13}" font-size="8.5" fill="#2d3f60" font-family="'DM Mono',monospace" letter-spacing="1.5">${b.lbl}</text>`;
+  });
+  // edges
+  edges.forEach(([a,b])=>{
+    const s=nodes[a],e=nodes[b];
+    svg+=`<line x1="${s.x}" y1="${s.y+22}" x2="${e.x}" y2="${e.y-22}" stroke="#1c3870" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#ar2)"/>`;
+  });
+  // nodes
+  nodes.forEach(n=>{
+    const hw=n.w/2;
+    svg+=`<rect x="${n.x-hw}" y="${n.y-23}" width="${n.w}" height="46" rx="4" fill="${n.col}10" stroke="${n.col}" stroke-width="1.4"/>`;
+    svg+=`<text x="${n.x}" y="${n.y-7}" text-anchor="middle" font-size="14">${n.ico}</text>`;
+    svg+=`<text x="${n.x}" y="${n.y+6}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e2e8f0">${n.n}</text>`;
+    svg+=`<text x="${n.x}" y="${n.y+18}" text-anchor="middle" font-size="8.5" fill="#475569" font-family="'DM Mono',monospace">${n.s}</text>`;
+  });
+  svg+='</svg>';
+  c.innerHTML=svg;
+})();
+</script>
+
+
+<div id="CF3701F7-F629-C374-0C44-FB5781E1BF44"></div></body></html>
