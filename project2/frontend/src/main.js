@@ -3,7 +3,7 @@
    Three layouts: Landing (public) · Auth (login) · App (authed)
    ================================================================ */
 
-const API = localStorage.getItem("apiBase") || "http://localhost:8000";
+const API = localStorage.getItem("apiBase") || import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const state = {
   route: location.hash.replace("#", "") || "/",
@@ -75,7 +75,11 @@ window.login = async () => {
     localStorage.setItem("permissionKey", state.permissionKey);
     await loadDataStatus(false);
     await loadPatients(false);
-    go("/dashboard");
+    if (!localStorage.getItem("habeasDataAccepted")) {
+      go("/habeas-data");
+    } else {
+      go("/dashboard");
+    }
   } catch (err) {
     alert("Acceso denegado: " + err.message);
   }
@@ -88,6 +92,26 @@ window.logout = () => {
   localStorage.removeItem("accessKey");
   localStorage.removeItem("permissionKey");
   go("/");
+};
+
+window.acceptHabeasData = async () => {
+  try {
+    const patientId = state.principal?.patient_id;
+    if (patientId) {
+      await api("/consents", {
+        method: "POST",
+        body: JSON.stringify({ patient_id: patientId, scope: "HABEAS_DATA_LEY1581", granted: true }),
+      });
+    }
+    localStorage.setItem("habeasDataAccepted", "1");
+    go("/dashboard");
+  } catch (err) {
+    alert("Error al registrar consentimiento: " + err.message);
+  }
+};
+
+window.declineHabeasData = () => {
+  logout();
 };
 
 /* ── Data loaders ───────────────────────────────────────────────── */
@@ -113,6 +137,7 @@ async function refreshPatientData(patientId) {
 }
 
 window.openPatient = async (id) => {
+  state._imagingLoadedFor = null;
   await refreshPatientData(id);
   go("/patient");
 };
@@ -371,21 +396,21 @@ $ minio.bucket ${bucket}<br>
 function viewImagingReal() {
   const imgs = state.media.length
     ? state.media.map(m => {
-      const contentType = m.content?.contentType || "";
+      const contentType = m.content?.contentType || "image/svg+xml";
       const url = m.content?.url || "";
-      const isImage = contentType.startsWith("image/");
+      const isImage = contentType.startsWith("image/") || !contentType;
       const study = m.extension?.find(e => e.url?.includes("mimic-study"))?.valueString || m.id?.slice(0,8);
+      const errSrc = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 140'%3E%3Crect fill='%23040a12' width='300' height='140'/%3E%3Ctext fill='%23445566' x='50%25' y='42%25' text-anchor='middle' font-family='monospace' font-size='11'%3EECG preview unavailable%3C/text%3E%3Ctext fill='%23334455' x='50%25' y='62%25' text-anchor='middle' font-family='monospace' font-size='10'%3EUse ↗ link to open in browser%3C/text%3E%3C/svg%3E";
       return `
       <figure>
-        ${isImage
-          ? `<img src="${url}" alt="Clinical media from MinIO"
-              onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 300 300\\'><rect fill=\\'%23111\\' width=\\'300\\' height=\\'300\\'/><text fill=\\'%23666\\' x=\\'50%\\' y=\\'50%\\' text-anchor=\\'middle\\' font-family=\\'monospace\\' font-size=\\'12\\'>Signed URL expired</text></svg>'">`
-          : `<div style="height:220px;display:flex;align-items:center;justify-content:center;background:#101923;color:#7eaace;font-family:var(--mono);font-size:12px">
-              ${contentType || "WFDB ECG"} · MinIO object
+        ${url && isImage
+          ? `<img src="${url}" alt="MIMIC-IV ECG from MinIO" onerror="this.onerror=null;this.src='${errSrc}'">`
+          : `<div style="height:220px;display:flex;align-items:center;justify-content:center;background:#040a12;color:#7eaace;font-family:var(--mono);font-size:12px;border-radius:6px">
+              ${contentType || "ECG"} · MinIO
             </div>`}
         <figcaption>
-          ${m.modality?.coding?.[0]?.code || "ECG"} - ${study}
-          ${url ? `<a href="${url}" target="_blank" style="color:#7eaace;margin-left:8px">Open signed URL</a>` : ""}
+          ${m.modality?.coding?.[0]?.code || "ECG"} — ${study}
+          ${url ? `<a href="${url}" target="_blank" style="color:#7eaace;margin-left:8px">↗ Open SVG</a>` : ""}
         </figcaption>
       </figure>`;
     }).join("")
@@ -427,6 +452,68 @@ function viewImagingReal() {
 /* ================================================================
    AUTH PAGE  (split dark/light, no sidebar)
    ================================================================ */
+function renderHabeasData() {
+  return `
+<div class="auth-page">
+  <div class="auth-dark">
+    <div class="ad-brand"><span class="dot"></span>Novena Health Systems</div>
+    <h2>Habeas Data</h2>
+    <p style="color:rgba(255,255,255,.65);font-size:13px;line-height:1.7">
+      Ley 1581 de 2012 · Decreto 1377 de 2013<br/>
+      Protección de Datos Personales — Colombia
+    </p>
+    <div class="auth-security" style="margin-top:24px">
+      <div>Datos almacenados con cifrado AES-256</div>
+      <div>Acceso restringido por rol y llave API</div>
+      <div>Audit trail persistido en base de datos</div>
+      <div>Revocable en cualquier momento</div>
+    </div>
+  </div>
+
+  <div class="auth-form-panel" style="overflow-y:auto;max-height:100vh;padding:40px 48px">
+    <span class="af-sub">ÁREA 01 · CONSENTIMIENTO INFORMADO</span>
+    <h2 style="margin-bottom:20px">Autorización de tratamiento de datos</h2>
+
+    <p style="color:var(--muted);font-size:13.5px;line-height:1.75;margin-bottom:16px">
+      De conformidad con la <strong style="color:var(--text)">Ley 1581 de 2012</strong> y el
+      <strong style="color:var(--text)">Decreto 1377 de 2013</strong>, Novena Health Systems solicita
+      su autorización para recolectar, almacenar y tratar los datos personales y clínicos ingresados
+      en esta plataforma con los siguientes fines:
+    </p>
+
+    <ul style="color:var(--muted);font-size:13px;line-height:2;padding-left:20px;margin-bottom:20px">
+      <li>Gestión de historia clínica electrónica (HCE).</li>
+      <li>Generación de reportes de riesgo asistidos por IA para apoyo diagnóstico.</li>
+      <li>Interoperabilidad con sistemas FHIR R4 autorizados.</li>
+      <li>Trazabilidad y auditoría de accesos para cumplimiento regulatorio.</li>
+    </ul>
+
+    <p style="color:var(--muted);font-size:13px;line-height:1.7;margin-bottom:24px">
+      Los datos <strong style="color:var(--text)">no serán compartidos con terceros</strong> sin
+      autorización expresa. Usted puede ejercer sus derechos de acceso, rectificación, supresión,
+      portabilidad y oposición contactando al responsable del tratamiento. Esta autorización queda
+      registrada en el registro de auditoría de la plataforma con fecha, hora y rol del autorizante.
+    </p>
+
+    <div style="background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.2);border-radius:8px;padding:16px;margin-bottom:28px;font-size:13px;color:var(--muted)">
+      <strong style="color:var(--blue)">Responsable del tratamiento:</strong> Novena Health Systems · UAO<br/>
+      <strong style="color:var(--blue)">Finalidad:</strong> Plataforma clínica FHIR R4 — Corte 2, Salud Digital<br/>
+      <strong style="color:var(--blue)">Base legal:</strong> Ley 1581/2012, Decreto 1377/2013<br/>
+      <strong style="color:var(--blue)">Conservación:</strong> Durante la vigencia del registro clínico activo
+    </div>
+
+    <div style="display:flex;gap:12px;flex-direction:column">
+      <button class="btn primary" onclick="acceptHabeasData()" style="width:100%;justify-content:center;font-size:14px;padding:14px">
+        Acepto el tratamiento de mis datos personales
+      </button>
+      <button class="btn ghost" onclick="declineHabeasData()" style="width:100%;justify-content:center;font-size:13px;color:var(--muted)">
+        No acepto — cerrar sesión
+      </button>
+    </div>
+  </div>
+</div>`;
+}
+
 function renderAuth() {
   return `
 <div class="auth-page">
@@ -977,11 +1064,26 @@ function render() {
   if (route === "/")     return (app.innerHTML = renderLanding());
   if (route === "/auth") return (app.innerHTML = renderAuth());
 
+  // Habeas Data consent gate (logged in but not yet accepted)
+  if (route === "/habeas-data") {
+    if (!state.principal) return (app.innerHTML = renderAuth());
+    return (app.innerHTML = renderHabeasData());
+  }
+
   // Auth guard
   if (!state.principal && PROTECTED_ROUTES.includes(route)) {
     state.route = "/auth";
     location.hash = "/auth";
     return (app.innerHTML = renderAuth());
+  }
+
+  // Auto-load media when entering imaging with a selected patient
+  if (route === "/imaging" && state.selectedPatient) {
+    const pid = state.selectedPatient.id;
+    if (!state._imagingLoadedFor || state._imagingLoadedFor !== pid) {
+      state._imagingLoadedFor = pid;
+      refreshPatientData(pid).then(() => render());
+    }
   }
 
   // Authenticated app shell

@@ -50,6 +50,7 @@ class Patient(Base):
     medical_summary_encrypted: Mapped[str | None] = mapped_column(Text, nullable=True)
     fhir_json: Mapped[dict] = mapped_column(JSON, default=dict)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     observations: Mapped[list["Observation"]] = relationship("Observation", back_populates="patient")

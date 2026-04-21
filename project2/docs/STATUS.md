@@ -263,14 +263,73 @@ Implementado:
 - Objetos ECG:
 
 ```text
+patients/{patient_id}/mimic-iv-ecg-demo/{study_id}/preview.svg
 patients/{patient_id}/mimic-iv-ecg-demo/{study_id}/{study_id}.hea
 patients/{patient_id}/mimic-iv-ecg-demo/{study_id}/{study_id}.dat
 ```
 
-Los reportes FHIR incluyen URL presignada en:
+El archivo `preview.svg` se genera desde la senal WFDB real (`.hea` + `.dat`)
+del MIMIC-IV-ECG Demo. No se usa una imagen fija ni inventada: el script lee el
+header, separa las 12 derivaciones del binario `int16` intercalado, dibuja la
+waveform en una grilla ECG y la sube a MinIO antes de crear la fila
+`imaging_studies`.
+
+Los reportes FHIR incluyen URL presignada hacia el `preview.svg` en:
 
 - `Media.content.url`
 - `DiagnosticReport.presentedForm[].url`
+
+Verificacion local actual:
+
+| Campo | Valor |
+|---|---:|
+| Objetos MinIO | 90 |
+| ECG previews SVG | 30 |
+| Headers WFDB `.hea` | 30 |
+| Senales WFDB `.dat` | 30 |
+
+La estructura final por estudio queda asi:
+
+```text
+patients/{patient_uuid}/mimic-iv-ecg-demo/{study_id}/
+  preview.svg
+  {study_id}.hea
+  {study_id}.dat
+```
+
+`preview.svg` es el objeto usado por la vista Imaging y por los informes. Los
+archivos `.hea` y `.dat` quedan preservados como fuente trazable del dataset.
+
+## Supabase - carga clinica remota
+
+Aplicado mediante MCP de Supabase:
+
+- 30 pacientes reales del MIMIC-IV FHIR Demo.
+- 30 encounters enlazados por FK a pacientes.
+- 30 `imaging_studies` ECG enlazados por FK a pacientes.
+- 30 `diagnostic_reports` generados desde `imaging_studies`.
+- 30 consentimientos `PHYSIONET_OPEN_ACCESS_DEMO`.
+- 5 usuarios/API keys de prueba restaurados.
+- Usuario `paciente` enlazado a un paciente importado.
+
+Conteo remoto verificado:
+
+| Tabla / chequeo | Valor |
+|---|---:|
+| `users` | 5 |
+| `api_keys` | 5 |
+| `patients` | 30 |
+| `encounters` | 30 |
+| `imaging_studies` | 30 |
+| `imaging_studies` con `preview.svg` | 30 |
+| `diagnostic_reports` | 30 |
+| `consents` | 30 |
+| Usuario paciente enlazado | true |
+
+Pendiente especifico de Supabase remoto: importar tambien las 240 observaciones
+tabulares locales. La importacion local esta lista y verificada; la carga remota
+de observaciones queda separada porque el canal MCP por chunks es lento y se
+debe preferir `supabase db query` cuando haya `SUPABASE_ACCESS_TOKEN` activo.
 
 ## Backend y frontend
 
@@ -283,6 +342,46 @@ Implementado:
 - Los endpoints FHIR siguen exponiendo `Patient`, `Observation`,
   `DiagnosticReport`, `Media`, `Consent`, `AuditEvent`, `RiskAssessment`.
 
+## Nginx y Docker Compose
+
+Implementado:
+
+- Servicio `nginx` en `docker-compose.yml` con imagen `nginx:alpine`.
+- Puerto publico local: `http://localhost/`.
+- Reverse proxy:
+  - `/` -> `frontend:5173`
+  - `/api/` -> `backend:8000`
+  - `/ml/` -> `ml-service:8011`
+  - `/dl/` -> `dl-service:8012`
+- Rate limiting anti-DoS en Nginx:
+  - `limit_req_zone $binary_remote_addr zone=api_limit:10m rate=120r/m`
+  - `limit_req_status 429`
+  - `limit_req` aplicado a `/api/`, `/ml/` y `/dl/`.
+- Headers de seguridad:
+  - `X-Frame-Options: DENY`
+  - `X-Content-Type-Options: nosniff`
+  - `Content-Security-Policy`
+  - `Referrer-Policy`
+  - `Permissions-Policy`
+- Healthchecks activos en:
+  - `minio`
+  - `backend`
+  - `ml-service`
+  - `dl-service`
+  - `frontend`
+  - `nginx`
+
+Verificacion local:
+
+| Chequeo | Resultado |
+|---|---|
+| `docker compose config` | valido |
+| `docker compose ps` | servicios propios healthy |
+| `GET http://localhost/` | 200 + headers de seguridad |
+| `GET http://localhost/api/health` | backend ok |
+| `GET http://localhost/ml/health` | ML ok |
+| `GET http://localhost/dl/health` | DL ok |
+
 ## Hecho
 
 - [x] Datasets publicos copiados a `project2/datasets/`.
@@ -292,20 +391,26 @@ Implementado:
 - [x] `.env.example` actualizado con variables de demos PhysioNet.
 - [x] Backend reconoce dataset FHIR demo + ECG demo.
 - [x] MinIO acepta `.hea` como `text/plain` y `.dat` como binario.
+- [x] MinIO almacena `preview.svg` generado desde WFDB real.
 - [x] Frontend muestra media ECG con enlace firmado desde MinIO.
 - [x] Supabase mantiene schema relacional, RLS e indices.
 - [x] Seed publico ejecutado localmente con 30 pacientes, 240 observaciones y
   30 ECGs enlazados.
 - [x] `/data/status` verificado con `ready=true`.
+- [x] Supabase remoto tiene 30 pacientes, 30 ECG SVG, 30 reportes y 30
+  consentimientos asociados.
+- [x] Nginx agregado al compose con proxy `/api`, `/ml`, `/dl`.
+- [x] Rate-limit 429 configurado en Nginx.
+- [x] Headers de seguridad configurados en Nginx.
+- [x] Healthchecks verificados para Nginx, frontend, backend, ML, DL y MinIO.
+- [x] Supabase verificado con `pgcrypto` activo y 11 tablas publicas esperadas.
 
 ## Pendiente
 
-- [ ] Configurar `DATABASE_URL` real de Supabase en `project2/.env` si se quiere
-  importar directo a Supabase en vez de SQLite local.
-- [ ] Repetir `docker compose --profile seed run --rm seed` apuntando a Supabase
-  cuando se actualice `DATABASE_URL`.
-- [ ] Verificar conteos con `GET /data/status` contra Supabase remoto.
-- [ ] Verificar objetos `.hea` y `.dat` en MinIO despues del seed definitivo.
+- [ ] Importar a Supabase remoto las 240 observaciones tabulares locales.
+- [ ] Configurar `DATABASE_URL` real de Supabase en `project2/.env` para que el
+  backend local lea directamente la base remota.
+- [ ] Verificar `GET /data/status` contra Supabase remoto desde el backend.
 - [ ] Ejecutar Postman end-to-end con el dataset demo publico.
 - [ ] Ajustar ML/DL para inferencia ECG/tabular real o dejarlo declarado como
   adaptador academico.

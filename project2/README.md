@@ -12,6 +12,7 @@ rate limiting, frontend SPA y flujos de inferencia clinica.
 - Frontend: SPA Vite desplegable en Vercel, Netlify o Render Static.
 - Servicios IA: `ml-service` y `dl-service` CPU-first, con adaptadores listos para ONNX.
 - Imagenes: MinIO S3-compatible, bucket `clinical-images`.
+- Reverse proxy: Nginx con rate-limit, headers de seguridad y rutas `/api/`, `/ml/`, `/dl/`.
 - Dataset objetivo: MIMIC-IV FHIR Demo v2.1.0 + MIMIC-IV-ECG Demo v0.1.
 
 ## Arranque Local
@@ -26,10 +27,17 @@ Backend:
 
 - Health: `http://localhost:8000/health`
 - Swagger: `http://localhost:8000/docs`
+- Via Nginx: `http://localhost/api/health`
 
 Frontend:
 
 - Local: `http://localhost:5173`
+- Via Nginx: `http://localhost/`
+
+Servicios IA via Nginx:
+
+- ML: `http://localhost/ml/health`
+- DL: `http://localhost/dl/health`
 
 ## Usuarios de Prueba
 

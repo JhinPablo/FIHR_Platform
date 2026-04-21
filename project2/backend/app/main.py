@@ -1,3 +1,4 @@
+import threading
 from datetime import datetime
 from time import time
 from typing import Any
@@ -26,6 +27,7 @@ app.add_middleware(
 )
 
 _rate_buckets: dict[str, list[float]] = {}
+_inference_semaphore = threading.Semaphore(4)
 
 
 @app.on_event("startup")
@@ -41,17 +43,17 @@ def startup() -> None:
 
 def ensure_runtime_columns() -> None:
     inspector = inspect(engine)
-    if "imaging_studies" not in inspector.get_table_names():
-        return
-    existing = {column["name"] for column in inspector.get_columns("imaging_studies")}
-    additions = {
-        "minio_object_name": "TEXT",
-        "content_type": "VARCHAR(120)",
-    }
+    tables = inspector.get_table_names()
     with engine.begin() as conn:
-        for column, sql_type in additions.items():
-            if column not in existing:
-                conn.execute(text(f"ALTER TABLE imaging_studies ADD COLUMN {column} {sql_type}"))
+        if "imaging_studies" in tables:
+            existing = {c["name"] for c in inspector.get_columns("imaging_studies")}
+            for col, sql_type in {"minio_object_name": "TEXT", "content_type": "VARCHAR(120)"}.items():
+                if col not in existing:
+                    conn.execute(text(f"ALTER TABLE imaging_studies ADD COLUMN {col} {sql_type}"))
+        if "patients" in tables:
+            existing = {c["name"] for c in inspector.get_columns("patients")}
+            if "closed_at" not in existing:
+                conn.execute(text("ALTER TABLE patients ADD COLUMN closed_at TIMESTAMP"))
 
 
 @app.middleware("http")
@@ -434,40 +436,63 @@ def create_inference(body: InferenceCreate, principal: Principal, db: Session, r
     patient = db.get(models.Patient, body.patient_id)
     if not patient:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Patient not found")
-    obs_count = db.query(models.Observation).filter_by(patient_id=body.patient_id).count()
-    media_count = db.query(models.ImagingStudy).filter_by(patient_id=body.patient_id).count()
-    base = min(0.95, 0.15 + obs_count * 0.035 + media_count * 0.10)
-    if body.model_type == "DL":
-        score = min(0.98, base + 0.12)
-    elif body.model_type == "MULTIMODAL":
-        score = min(0.99, base + 0.20)
-    else:
-        score = base
-    report = models.RiskReport(
-        patient_id=body.patient_id,
-        model_type=body.model_type,
-        risk_score=round(score, 4),
-        risk_category=risk_category(score),
-        sensitive_payload_encrypted=encrypt_text(str({"features": body.features, "image_url": body.image_url})),
-        explanation={
-            "dataset": "MIMIC-IV FHIR Demo + MIMIC-IV-ECG Demo",
-            "method": "PhysioNet demo FHIR observation and ECG media scoring adapter; replace with ONNX artifact after training",
-            "signals": {"observations": obs_count, "media": media_count},
-        },
-    )
-    db.add(report)
-    db.flush()
-    report.fhir_json = fhir.risk_assessment_resource(report)
+
+    # Phase 1 — PENDING: register job immediately so callers can poll
     job = models.InferenceJob(
         patient_id=body.patient_id,
         model_type=body.model_type,
-        status="DONE",
-        result_id=report.id,
-        finished_at=datetime.utcnow(),
+        status="PENDING",
     )
     db.add(job)
-    audit(db, principal, f"RUN_INFERENCE_{body.model_type}", "RiskAssessment", report.id, body.patient_id, request=request)
     db.commit()
+    db.refresh(job)
+
+    with _inference_semaphore:
+        # Phase 2 — RUNNING
+        job.status = "RUNNING"
+        db.commit()
+
+        try:
+            obs_count = db.query(models.Observation).filter_by(patient_id=body.patient_id).count()
+            media_count = db.query(models.ImagingStudy).filter_by(patient_id=body.patient_id).count()
+            base = min(0.95, 0.15 + obs_count * 0.035 + media_count * 0.10)
+            if body.model_type == "DL":
+                score = min(0.98, base + 0.12)
+            elif body.model_type == "MULTIMODAL":
+                score = min(0.99, base + 0.20)
+            else:
+                score = base
+
+            report = models.RiskReport(
+                patient_id=body.patient_id,
+                model_type=body.model_type,
+                risk_score=round(score, 4),
+                risk_category=risk_category(score),
+                sensitive_payload_encrypted=encrypt_text(
+                    str({"features": body.features, "image_url": body.image_url})
+                ),
+                explanation={
+                    "dataset": "MIMIC-IV FHIR Demo + MIMIC-IV-ECG Demo",
+                    "method": "PhysioNet demo FHIR observation and ECG media scoring adapter",
+                    "signals": {"observations": obs_count, "media": media_count},
+                },
+            )
+            db.add(report)
+            db.flush()
+            report.fhir_json = fhir.risk_assessment_resource(report)
+
+            # Phase 3 — DONE
+            job.status = "DONE"
+            job.result_id = report.id
+            job.finished_at = datetime.utcnow()
+            audit(db, principal, f"RUN_INFERENCE_{body.model_type}", "RiskAssessment", report.id, body.patient_id, request=request)
+            db.commit()
+        except Exception as exc:
+            job.status = "ERROR"
+            job.error = str(exc)
+            db.commit()
+            raise
+
     return {"job_id": job.id, "status": job.status, "risk_report": fhir.risk_assessment_resource(report)}
 
 
@@ -542,6 +567,33 @@ def sign_risk_report(
     db.commit()
     db.refresh(report)
     return fhir.risk_assessment_resource(report)
+
+
+@app.patch("/fhir/Patient/{patient_id}/close")
+def close_patient(
+    patient_id: str,
+    request: Request,
+    principal: Principal = Depends(require_medico),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    patient = db.get(models.Patient, patient_id)
+    if not patient:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Patient not found")
+    unsigned = (
+        db.query(models.RiskReport)
+        .filter_by(patient_id=patient_id)
+        .filter(models.RiskReport.signed_at.is_(None))
+        .count()
+    )
+    if unsigned:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"Cannot close patient: {unsigned} RiskReport(s) require physician signature before closing",
+        )
+    patient.closed_at = datetime.utcnow()
+    audit(db, principal, "CLOSE_PATIENT", "Patient", patient_id, patient_id, request=request)
+    db.commit()
+    return {"patient_id": patient_id, "closed_at": patient.closed_at.isoformat(), "status": "closed"}
 
 
 @app.get("/audit-log")

@@ -32,7 +32,9 @@ services:
       /bin/sh -c "
       mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD;
       mc mb -p local/$$MINIO_BUCKET || true;
-      mc anonymous set none local/$$MINIO_BUCKET || true;
+      mc anonymous set download local/$$MINIO_BUCKET || true;
+      printf '{\"CORSRules\":[{\"ID\":\"browser\",\"AllowedHeaders\":[\"*\"],\"AllowedMethods\":[\"GET\",\"HEAD\"],\"AllowedOrigins\":[\"*\"],\"MaxAgeSeconds\":3600}]}' > /tmp/cors.json;
+      mc cors set --rules-config-file /tmp/cors.json local/$$MINIO_BUCKET || true;
       echo 'Bucket ready.';
       "
     restart: on-failure
@@ -64,10 +66,14 @@ services:
   # ── AI Services ──────────────────────────────────────────────────────────
   ml-service:
     build: ./ml-service
+    env_file:
+      - path: .env
+        required: false
     ports:
       - "8011:8011"
     volumes:
       - ./ml-service:/app       # live reload of ML source
+      - ml_models:/app/models   # persist trained ONNX across restarts
     command: uvicorn main:app --host 0.0.0.0 --port 8011 --reload
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8011/health')\" || exit 1"]
@@ -79,6 +85,9 @@ services:
 
   dl-service:
     build: ./dl-service
+    env_file:
+      - path: .env
+        required: false
     ports:
       - "8012:8012"
     volumes:
@@ -91,6 +100,30 @@ services:
       retries: 3
       start_period: 10s
     restart: on-failure
+
+  nginx:
+    image: nginx:alpine
+    container_name: c2-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      ml-service:
+        condition: service_healthy
+      dl-service:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # ── Frontend (Vite dev — hot-reload) ─────────────────────────────────────
   frontend:
@@ -110,6 +143,12 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:5173 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     restart: on-failure
 
   # ── Seed (run manually: docker compose --profile seed run --rm seed) ─────
@@ -146,3 +185,4 @@ services:
 volumes:
   minio_data:
   frontend_nm:    # node_modules cache for Vite dev container
+  ml_models:      # persists trained ONNX model across ml-service restarts

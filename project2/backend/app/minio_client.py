@@ -90,7 +90,7 @@ def put_bytes(object_name: str, raw: bytes, content_type: str) -> tuple[str, str
     return object_name, content_type
 
 
-def presigned_url(object_name: str, expires_seconds: int = 300) -> str:
+def presigned_url(object_name: str, expires_seconds: int = 3600) -> str:
     settings = get_settings()
     public = urlparse(settings.minio_public_endpoint.rstrip("/"))
     signer = Minio(

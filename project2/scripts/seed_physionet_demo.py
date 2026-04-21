@@ -338,8 +338,8 @@ def build_ecg_preview_svg(hea_path: Path, dat_path: Path, subject_id: str, study
     .meta {{ fill: #8aa9bd; font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; }}
   </style>
   <rect class="bg" width="100%" height="100%"/>
-  <text x="24" y="30" class="title">MIMIC-IV-ECG Demo · 12-lead diagnostic ECG</text>
-  <text x="24" y="50" class="meta">subject_id={subject_id} · study_id={study_id} · {sample_rate} Hz · {sample_count} samples</text>
+  <text x="24" y="30" class="title">MIMIC-IV-ECG Demo - 12-lead diagnostic ECG</text>
+  <text x="24" y="50" class="meta">subject_id={subject_id} - study_id={study_id} - {sample_rate} Hz - {sample_count} samples</text>
   {"".join(grid)}
   {"".join(traces)}
 </svg>"""
