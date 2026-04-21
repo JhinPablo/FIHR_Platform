@@ -90,7 +90,7 @@ def risk_assessment_resource(report: models.RiskReport) -> dict[str, Any]:
                 "qualitativeRisk": {"text": report.risk_category},
             }
         ],
-        "basis": [{"display": "MIMIC-IV observations and MIMIC-CXR imaging"}],
+        "basis": [{"display": "MIMIC-IV FHIR demo observations and MIMIC-IV-ECG demo media"}],
         "performer": {"reference": f"Practitioner/{report.signed_by}"} if report.signed_by else None,
         "extension": [
             {"url": "urn:uao:model-type", "valueString": report.model_type},

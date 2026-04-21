@@ -15,7 +15,7 @@ def _env_principals() -> list[tuple[str, str, Principal]]:
         (
             settings.access_key_admin,
             settings.permission_key_admin,
-            Principal(user_id="env-admin", username="admin", display_name="Admin Demo", role="admin"),
+            Principal(user_id="env-admin", username="admin", display_name="Admin Test User", role="admin"),
         ),
         (
             settings.access_key_medico_1,
@@ -30,7 +30,7 @@ def _env_principals() -> list[tuple[str, str, Principal]]:
         (
             settings.access_key_patient,
             settings.permission_key_patient,
-            Principal(user_id="env-patient", username="paciente", display_name="Paciente Demo", role="paciente"),
+            Principal(user_id="env-patient", username="paciente", display_name="Patient Test User", role="paciente"),
         ),
     ]
 

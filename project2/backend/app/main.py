@@ -115,9 +115,54 @@ def risk_category(score: float) -> str:
     return "LOW"
 
 
+def database_label() -> str:
+    return "local SQLite (development only)" if settings.database_url.startswith("sqlite") else "Supabase PostgreSQL"
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "database": "supabase-postgresql-ready", "dataset": "MIMIC-IV + MIMIC-CXR-JPG"}
+    return {"status": "ok", "database": database_label(), "dataset": "MIMIC-IV FHIR Demo + MIMIC-IV-ECG Demo"}
+
+
+@app.get("/data/status")
+def data_status(
+    principal: Principal = Depends(require_reader),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Operational view of the real MIMIC -> Supabase -> MinIO pipeline."""
+    media_with_objects = (
+        db.query(models.ImagingStudy)
+        .filter(models.ImagingStudy.minio_object_name.isnot(None))
+        .count()
+    )
+    latest_media = (
+        db.query(models.ImagingStudy)
+        .filter(models.ImagingStudy.minio_object_name.isnot(None))
+        .order_by(models.ImagingStudy.created_at.desc())
+        .first()
+    )
+    sample_url = minio_client.presigned_url(latest_media.minio_object_name) if latest_media else None
+    return {
+        "dataset": "MIMIC-IV FHIR Demo v2.1.0 + MIMIC-IV-ECG Demo v0.1",
+        "storage": {
+            "database": database_label(),
+            "image_bucket": settings.minio_bucket,
+            "media_provider": "MinIO S3-compatible",
+        },
+        "counts": {
+            "patients": db.query(models.Patient).filter_by(active=True).count(),
+            "encounters": db.query(models.Encounter).count(),
+            "observations": db.query(models.Observation).count(),
+            "media": db.query(models.ImagingStudy).count(),
+            "media_with_minio_objects": media_with_objects,
+            "diagnostic_reports": db.query(models.DiagnosticReport).count(),
+            "risk_reports": db.query(models.RiskReport).count(),
+            "consents": db.query(models.Consent).count(),
+        },
+        "latest_image_url": sample_url,
+        "ready": media_with_objects > 0,
+        "principal": {"role": principal.role, "username": principal.username},
+    }
 
 
 @app.post("/auth/validate-keys")
@@ -405,8 +450,8 @@ def create_inference(body: InferenceCreate, principal: Principal, db: Session, r
         risk_category=risk_category(score),
         sensitive_payload_encrypted=encrypt_text(str({"features": body.features, "image_url": body.image_url})),
         explanation={
-            "dataset": "MIMIC-IV + MIMIC-CXR-JPG",
-            "method": "MIMIC-derived observation/media scoring adapter; replace with ONNX artifact after training",
+            "dataset": "MIMIC-IV FHIR Demo + MIMIC-IV-ECG Demo",
+            "method": "PhysioNet demo FHIR observation and ECG media scoring adapter; replace with ONNX artifact after training",
             "signals": {"observations": obs_count, "media": media_count},
         },
     )

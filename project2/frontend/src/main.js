@@ -17,6 +17,7 @@ const state = {
   media: [],
   audit: [],
   consents: [],
+  dataStatus: null,
   lastInference: null,
   message: "",
   loading: false,
@@ -72,6 +73,7 @@ window.login = async () => {
     state.principal = data.principal;
     localStorage.setItem("accessKey", state.accessKey);
     localStorage.setItem("permissionKey", state.permissionKey);
+    await loadDataStatus(false);
     await loadPatients(false);
     go("/dashboard");
   } catch (err) {
@@ -95,6 +97,12 @@ async function loadPatients(shouldRender = true) {
   if (shouldRender) render();
 }
 window.loadPatients = loadPatients;
+
+async function loadDataStatus(shouldRender = true) {
+  state.dataStatus = await api("/data/status");
+  if (shouldRender) render();
+}
+window.loadDataStatus = loadDataStatus;
 
 async function refreshPatientData(patientId) {
   state.selectedPatient = await api(`/fhir/Patient/${patientId}`);
@@ -152,10 +160,10 @@ window.uploadImage = async () => {
   if (!file) return alert("Selecciona una imagen (SVG, JPG o PNG).");
   const form = new FormData();
   form.append("patient_id", state.selectedPatient.id);
-  form.append("source_study_id", document.querySelector("#studyId").value || `LOCAL-${Date.now()}`);
-  form.append("source_dicom_id", document.querySelector("#dicomId").value || `LOCAL-DICOM-${Date.now()}`);
+  form.append("source_study_id", document.querySelector("#studyId").value || `MIMIC-MANUAL-${Date.now()}`);
+  form.append("source_dicom_id", document.querySelector("#dicomId").value || `MIMIC-MANUAL-DICOM-${Date.now()}`);
   form.append("modality", document.querySelector("#modality").value || "CR");
-  form.append("conclusion", document.querySelector("#conclusion").value || "Local image pending review.");
+  form.append("conclusion", document.querySelector("#conclusion").value || "Authorized MIMIC-IV-ECG media pending review.");
   form.append("conclusion_code", "404684003");
   form.append("file", file);
   const res = await fetch(`${API}/images`, { method: "POST", headers: headers(false), body: form });
@@ -296,6 +304,126 @@ function renderLanding() {
 </div>`;
 }
 
+function viewDashboardReal() {
+  const counts = state.dataStatus?.counts || {};
+  const total = counts.patients ?? state.patients.length;
+  const mediaObjects = counts.media_with_minio_objects ?? counts.media ?? state.media.length;
+  const observations = counts.observations ?? 0;
+  const reports = counts.diagnostic_reports ?? 0;
+  const bucket = state.dataStatus?.storage?.image_bucket || "clinical-images";
+  const database = state.dataStatus?.storage?.database || "Supabase PostgreSQL";
+  const readyLabel = state.dataStatus?.ready ? "PhysioNet demo imported" : "run seed_physionet_demo.py";
+  const readyMark = state.dataStatus?.ready ? "OK" : "PENDING";
+
+  return `
+<span class="section-sub">AREA 02 - Operational dashboard</span>
+<div class="section-title">Clinical command surface</div>
+
+<div class="stats-row">
+  <div class="stat">
+    <div class="k">Active patients</div>
+    <div class="v">${total || "-"}</div>
+    <div class="trend">${total ? "loaded from Supabase/FHIR" : "MIMIC import pending"}</div>
+  </div>
+  <div class="stat">
+    <div class="k">ECG media in MinIO</div>
+    <div class="v">${mediaObjects || "-"}</div>
+    <div class="trend">${bucket}</div>
+  </div>
+  <div class="stat">
+    <div class="k">Observations</div>
+    <div class="v">${observations || "-"}</div>
+    <div class="trend">MIMIC-IV labevents</div>
+  </div>
+  <div class="stat">
+    <div class="k">Diagnostic reports</div>
+    <div class="v">${reports || "-"}</div>
+    <div class="trend">linked to ECG media</div>
+  </div>
+</div>
+
+<div class="two-col">
+  <div class="worklist">
+    <h3>Data pipeline status</h3>
+    ${[
+      "OK FHIR gateway - Patient, Observation, Media",
+      `OK MinIO bucket - ${bucket}`,
+      `OK ${database} - normalized clinical tables`,
+      "OK ML service - MIMIC-IV FHIR adapter",
+      "OK DL service - MIMIC-IV-ECG adapter",
+      `${readyMark} Supabase/MinIO data - ${readyLabel}`,
+    ].map(x =>
+      `<p><span class="status-dot" style="background:${x.startsWith("PENDING") ? "#d97706" : "#16a34a"}"></span>${x}</p>`).join("")}
+  </div>
+  <div class="terminal">
+$ data.status<br>
+&gt; dataset: ${state.dataStatus?.dataset || "MIMIC-IV FHIR Demo + MIMIC-IV-ECG Demo"}<br>
+&gt; patients: ${total || 0} - observations: ${observations || 0}<br>
+&gt; minio_objects: ${mediaObjects || 0} - reports: ${reports || 0}<br>
+$ fhir.get Patient?_count=50<br>
+&gt; ${state.patients.length} resources loaded for current role<br>
+$ minio.bucket ${bucket}<br>
+&gt; signed URLs refreshed by backend
+  </div>
+</div>`;
+}
+
+function viewImagingReal() {
+  const imgs = state.media.length
+    ? state.media.map(m => {
+      const contentType = m.content?.contentType || "";
+      const url = m.content?.url || "";
+      const isImage = contentType.startsWith("image/");
+      const study = m.extension?.find(e => e.url?.includes("mimic-study"))?.valueString || m.id?.slice(0,8);
+      return `
+      <figure>
+        ${isImage
+          ? `<img src="${url}" alt="Clinical media from MinIO"
+              onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 300 300\\'><rect fill=\\'%23111\\' width=\\'300\\' height=\\'300\\'/><text fill=\\'%23666\\' x=\\'50%\\' y=\\'50%\\' text-anchor=\\'middle\\' font-family=\\'monospace\\' font-size=\\'12\\'>Signed URL expired</text></svg>'">`
+          : `<div style="height:220px;display:flex;align-items:center;justify-content:center;background:#101923;color:#7eaace;font-family:var(--mono);font-size:12px">
+              ${contentType || "WFDB ECG"} · MinIO object
+            </div>`}
+        <figcaption>
+          ${m.modality?.coding?.[0]?.code || "ECG"} - ${study}
+          ${url ? `<a href="${url}" target="_blank" style="color:#7eaace;margin-left:8px">Open signed URL</a>` : ""}
+        </figcaption>
+      </figure>`;
+    }).join("")
+    : `<div style="display:flex;align-items:center;justify-content:center;height:280px;color:#7eaace;font-family:var(--mono);font-size:12px">
+        Select a patient imported from the ECG demo to view real MinIO media.
+      </div>`;
+
+  return `
+<div class="page-head">
+  <div>
+    <span class="section-sub">AREA 05 - Imaging</span>
+    <div class="section-title">MIMIC-IV-ECG media from MinIO</div>
+  </div>
+  ${state.selectedPatient ? `<span style="font-family:var(--mono);font-size:12px;color:var(--muted)">${patientName(state.selectedPatient)}</span>` : ""}
+</div>
+
+<div class="two-col">
+  <div class="viewer">${imgs}</div>
+  <div class="panel">
+    <h3>Storage flow</h3>
+    <p style="color:var(--muted);font-size:13px;line-height:1.6">
+      MIMIC-IV-ECG Demo is imported by <span class="mono-cell">scripts/seed_physionet_demo.py</span>.
+      WFDB header/signal files are uploaded to MinIO bucket <span class="mono-cell">${state.dataStatus?.storage?.image_bucket || "clinical-images"}</span>,
+      while Supabase stores normalized <span class="mono-cell">imaging_studies</span> and
+      <span class="mono-cell">diagnostic_reports</span> rows.
+    </p>
+    <div class="worklist" style="margin-top:14px">
+      <p><span class="status-dot"></span>DB media rows: ${state.dataStatus?.counts?.media || 0}</p>
+      <p><span class="status-dot"></span>MinIO objects indexed: ${state.dataStatus?.counts?.media_with_minio_objects || 0}</p>
+      <p><span class="status-dot"></span>DiagnosticReport rows: ${state.dataStatus?.counts?.diagnostic_reports || 0}</p>
+    </div>
+    <button class="btn" onclick="loadDataStatus()" style="width:100%;justify-content:center;margin-top:12px">
+      Refresh storage status
+    </button>
+  </div>
+</div>`;
+}
+
 /* ================================================================
    AUTH PAGE  (split dark/light, no sidebar)
    ================================================================ */
@@ -337,7 +465,7 @@ function renderAuth() {
       Sign in to clinical console
     </button>
 
-    <div class="auth-demo">
+    <div class="auth-access">
       <div class="ad-title">Production access</div>
       <p style="margin:0;color:var(--muted);font-size:13px;line-height:1.5">
         Use the API keys assigned by the administrator. Keys are validated by the backend
@@ -427,8 +555,11 @@ function renderApp(content) {
    VIEW — DASHBOARD
    ================================================================ */
 function viewDashboard() {
-  const total = state.patients.length;
-  const withMedia = state.media.length;
+  const counts = state.dataStatus?.counts || {};
+  const total = counts.patients ?? state.patients.length;
+  const withMedia = counts.media_with_minio_objects ?? counts.media ?? state.media.length;
+  const observations = counts.observations ?? 0;
+  const reports = counts.diagnostic_reports ?? 0;
   const lastRole = state.principal?.role || "—";
 
   return `
@@ -439,17 +570,17 @@ function viewDashboard() {
   <div class="stat">
     <div class="k">Active patients</div>
     <div class="v">${total || "—"}</div>
-    <div class="trend">${total ? "loaded from FHIR" : "seed data pending"}</div>
+    <div class="trend">${total ? "loaded from Supabase/FHIR" : "MIMIC import pending"}</div>
   </div>
   <div class="stat">
-    <div class="k">CXR media</div>
+    <div class="k">ECG media in MinIO</div>
     <div class="v">${withMedia || "—"}</div>
-    <div class="trend">in MinIO bucket</div>
+    <div class="trend">${state.dataStatus?.storage?.image_bucket || "clinical-images"}</div>
   </div>
   <div class="stat">
-    <div class="k">Role</div>
-    <div class="v" style="font-size:22px">${lastRole}</div>
-    <div class="trend">active session</div>
+    <div class="k">Observations</div>
+    <div class="v">${observations || "â€”"}</div>
+    <div class="trend">MIMIC-IV labevents</div>
   </div>
   <div class="stat">
     <div class="k">Pending inferences</div>
@@ -466,8 +597,8 @@ function viewDashboard() {
     ${["✓ FHIR gateway — Patient, Observation, Media",
        "✓ MinIO bucket — clinical-images",
        "✓ Audit writer — AuditEvent active",
-       "✓ ML service — MIMIC-IV tabular adapter",
-       "✓ DL service — MIMIC-CXR-JPG adapter",
+       "✓ ML service — MIMIC-IV FHIR adapter",
+       "✓ DL service — MIMIC-IV-ECG adapter",
        "⚙  Supabase PostgreSQL — connect DATABASE_URL"].map(x =>
       `<p><span class="status-dot" style="background:${x.startsWith("⚙") ? "#d97706" : "#16a34a"}"></span>${x}</p>`).join("")}
   </div>
@@ -570,7 +701,7 @@ function viewPatient() {
 
 <div class="grid-4" style="margin-bottom:22px">
   <div class="stat"><div class="k">Observations</div><div class="v">${state.observations.length}</div></div>
-  <div class="stat"><div class="k">CXR studies</div><div class="v">${state.media.length}</div></div>
+  <div class="stat"><div class="k">ECG studies</div><div class="v">${state.media.length}</div></div>
   <div class="stat"><div class="k">Reports</div><div class="v">${state.reports.length}</div></div>
   <div class="stat"><div class="k">Consents</div><div class="v">${state.consents.length}</div></div>
 </div>
@@ -615,7 +746,7 @@ function viewImaging() {
     ? state.media.map(m => `
       <figure>
         <img src="${m.content?.url}"
-          alt="CXR study"
+          alt="ECG media"
           onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 300 300\\'><rect fill=\\'%23111\\' width=\\'300\\' height=\\'300\\'/><text fill=\\'%23666\\' x=\\'50%\\' y=\\'50%\\' text-anchor=\\'middle\\' font-family=\\'monospace\\' font-size=\\'12\\'>Image unavailable</text></svg>'">
         <figcaption>
           ${m.modality?.coding?.[0]?.code || "CR"} · ${m.extension?.[0]?.valueString || m.id?.slice(0,8)}
@@ -630,7 +761,7 @@ function viewImaging() {
 <div class="page-head">
   <div>
     <span class="section-sub">AREA 05 · Imaging</span>
-    <div class="section-title">CXR media storage</div>
+    <div class="section-title">ECG media storage</div>
   </div>
   ${state.selectedPatient ? `<span style="font-family:var(--mono);font-size:12px;color:var(--muted)">${patientName(state.selectedPatient)}</span>` : ""}
 </div>
@@ -646,7 +777,7 @@ function viewImaging() {
     </div>
     <div class="form-group">
       <label>DICOM ID</label>
-      <input id="dicomId" placeholder="e.g. MIMIC-CXR dicom_id">
+      <input id="dicomId" placeholder="e.g. MIMIC-IV-ECG study_id">
     </div>
     <div class="form-group">
       <label>Modality</label>
@@ -685,9 +816,9 @@ ${!hasPatient ? `<div class="disclaimer">Select a patient in Patients tab before
 
 <div class="infer-grid">
   ${[
-    ["ML",         "MIMIC-IV tabular",    "XGBoost → ONNX · calibrated probabilities · SHAP explanations"],
-    ["DL",         "MIMIC-CXR imaging",   "EfficientNet-B0 INT8 · Grad-CAM overlay · DiagnosticReport"],
-    ["MULTIMODAL", "Tabular + CXR fusion","Late fusion · combined risk score · end-to-end triage"],
+    ["ML",         "MIMIC-IV FHIR tabular", "XGBoost → ONNX · calibrated probabilities · SHAP explanations"],
+    ["DL",         "MIMIC-IV-ECG waveform", "Compact ECG classifier · WFDB media · DiagnosticReport"],
+    ["MULTIMODAL", "FHIR + ECG fusion",     "Late fusion · combined risk score · end-to-end triage"],
   ].map(([type, sub, desc]) => `
     <button class="infer-card" onclick="runInference('${type}')" ${!hasPatient ? "disabled style='opacity:.45;cursor:not-allowed'" : ""}>
       <b>${type}</b>
@@ -751,7 +882,7 @@ function viewReport() {
         <div style="margin-bottom:10px">
           <a class="image-link" href="${img.url}" target="_blank"
             style="color:var(--navy);font-family:var(--mono);font-size:12px">
-            ↗ ${img.title || img.contentType || "CXR image"}
+            ↗ ${img.title || img.contentType || "ECG media"}
           </a>
         </div>`).join("")}
     </div>` : ""}
@@ -829,10 +960,10 @@ function viewAudit() {
 const PROTECTED_ROUTES = ["/dashboard", "/patients", "/patient", "/imaging", "/ai", "/report", "/audit"];
 
 const APP_VIEWS = {
-  "/dashboard": viewDashboard,
+  "/dashboard": viewDashboardReal,
   "/patients":  viewPatients,
   "/patient":   viewPatient,
-  "/imaging":   viewImaging,
+  "/imaging":   viewImagingReal,
   "/ai":        viewAI,
   "/report":    viewReport,
   "/audit":     viewAudit,

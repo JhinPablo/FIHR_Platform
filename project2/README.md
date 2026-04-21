@@ -12,7 +12,7 @@ rate limiting, frontend SPA y flujos de inferencia clinica.
 - Frontend: SPA Vite desplegable en Vercel, Netlify o Render Static.
 - Servicios IA: `ml-service` y `dl-service` CPU-first, con adaptadores listos para ONNX.
 - Imagenes: MinIO S3-compatible, bucket `clinical-images`.
-- Dataset real objetivo: MIMIC-IV + MIMIC-CXR-JPG.
+- Dataset objetivo: MIMIC-IV FHIR Demo v2.1.0 + MIMIC-IV-ECG Demo v0.1.
 
 ## Arranque Local
 
@@ -35,10 +35,11 @@ Frontend:
 
 ```bash
 cd project2
-python scripts/create_demo_users.py
+python scripts/create_test_users.py
 ```
 
-Estas llaves son credenciales academicas de prueba, no datos clinicos demo:
+Estas llaves son credenciales academicas de prueba para operadores. No crean ni
+simulan datos clinicos; los pacientes deben venir del seed MIMIC autorizado.
 
 | Rol | X-Access-Key | X-Permission-Key |
 |---|---|---|
@@ -50,47 +51,47 @@ Estas llaves son credenciales academicas de prueba, no datos clinicos demo:
 En produccion, estas llaves deben generarse como secretos y persistirse en
 Supabase. No se deben committear `.env` ni llaves reales.
 
-## Dataset Real
+## Dataset Publico
 
-El proyecto queda orientado a datos reales autorizados: MIMIC-IV y
-MIMIC-CXR-JPG. El repositorio no incluye esos archivos por restricciones de
-PhysioNet/DUA/CITI. Deben colocarse localmente fuera de Git en:
+El proyecto usa demos publicos de PhysioNet, disponibles sin credenciales:
 
-```text
-project2/datasets/mimic-iv/
-project2/datasets/mimic-cxr-jpg/
-```
+- MIMIC-IV Clinical Database Demo on FHIR v2.1.0.
+- MIMIC-IV-ECG Demo v0.1.
+
+Las carpetas locales de referencia quedan fuera de Git en:
 
 Estructura esperada:
 
 ```text
-project2/datasets/mimic-iv/
-  hosp/
-    patients.csv.gz
-    admissions.csv.gz
-    labevents.csv.gz
-    d_labitems.csv.gz
-
-project2/datasets/mimic-cxr-jpg/
-  files/
-    p10/
+project2/datasets/
+  mimic-iv-fhir-demo-2.1.0/
+    fhir/
+      MimicPatient.ndjson.gz
+      MimicEncounter.ndjson.gz
+      MimicObservationLabevents.ndjson.gz
+  mimic-iv-ecg-demo-0.1/
+    record_list.csv
+    files/
       p10000032/
-        s50414267/
-          <dicom_id>.jpg
-  mimic-cxr-2.0.0-metadata.csv.gz
-  mimic-cxr-2.0.0-chexpert.csv.gz
+        s107143276/
+          107143276.hea
+          107143276.dat
 ```
 
-Para cargar un subset real autorizado:
+Para cargar un subset demo publico:
 
 ```bash
 docker compose --profile seed run --rm seed
 ```
 
-El seed real esta en `scripts/seed_mimic.py`. Si faltan archivos, falla con un
-mensaje explicito en lugar de crear informacion demo. El flujo crea pacientes
-desde MIMIC-IV, observaciones desde `labevents`, sube imagenes JPG reales de
-MIMIC-CXR-JPG a MinIO y enlaza `Media`/`DiagnosticReport` con URL presignada.
+El seed principal esta en `scripts/seed_physionet_demo.py`. Si faltan archivos,
+falla con un mensaje explicito. El flujo crea pacientes/encuentros/observaciones
+desde el FHIR demo, sube ECG WFDB reales (`.hea` y `.dat`) a MinIO y enlaza
+`Media`/`DiagnosticReport` con URL presignada. La seleccion prioriza sujetos que
+tengan ECG disponible. El dashboard valida el resultado mediante
+`GET /data/status`.
+
+Ver citas y licencia en `docs/datasets.md`.
 
 ## Funcionalidades Cubiertas
 
@@ -107,7 +108,8 @@ MIMIC-CXR-JPG a MinIO y enlaza `Media`/`DiagnosticReport` con URL presignada.
 | Audit log filtrado | Cumplido |
 | Inferencia ML/DL y firma RiskReport | Implementacion inicial |
 | MinIO bucket `clinical-images` | Cumplido en Docker Compose |
-| Imagenes reales en informes FHIR | `DiagnosticReport.presentedForm` enlaza MinIO |
+| Objetos ECG reales en informes FHIR | `DiagnosticReport.presentedForm` enlaza MinIO |
+| Estado operativo del flujo MIMIC/Supabase/MinIO | `GET /data/status` |
 | README datasets sin subir datos | Cumplido en `docs/datasets.md` |
 | Postman | `postman/FHIR_Platform_Corte2.postman_collection.json` |
 

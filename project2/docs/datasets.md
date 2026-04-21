@@ -1,98 +1,126 @@
-# Datasets: MIMIC-IV + MIMIC-CXR-JPG
+# Datasets: demos publicos de PhysioNet
 
-Este proyecto usa datasets reales autorizados de PhysioNet:
+Este proyecto usa datasets demo de acceso abierto, disponibles sin credenciales
+en PhysioNet:
 
-- **MIMIC-IV** para pacientes, admisiones y eventos clinicos tabulares.
-- **MIMIC-CXR-JPG** para estudios de radiografia de torax en JPG y metadata.
+- **MIMIC-IV Clinical Database Demo on FHIR v2.1.0** para pacientes,
+  encuentros, observaciones, medicamentos y otros recursos FHIR ya convertidos.
+- **MIMIC-IV-ECG Demo v0.1** para ECG diagnosticos de 12 derivaciones en
+  formato WFDB (`.hea` + `.dat`), enlazables por `subject_id`.
 
-El repositorio no incluye datasets, imagenes, dumps ni muestras sinteticas. Los
-datos deben descargarse con acceso autorizado y permanecer fuera de Git.
+Estos demos reemplazan el requisito anterior de usar datasets MIMIC completos
+con acceso controlado durante el desarrollo academico. El sistema conserva
+la arquitectura de interoperabilidad: Supabase PostgreSQL para datos
+normalizados, MinIO para objetos clinicos y FHIR-Lite/FHIR R4 para la API.
 
-## Problema Que Resuelve
+## Acceso y licencia
 
-Los datos clinicos reales estan fragmentados: el EHR guarda demografia,
-admisiones, diagnosticos y laboratorios; el sistema de imagenes guarda estudios
-y objetos JPG/DICOM; los reportes radiologicos viven como texto o etiquetas; y
-los modelos de IA producen predicciones fuera del HIS.
+Ambos recursos estan publicados como **Open Access** en PhysioNet. Las paginas
+oficiales indican que cualquiera puede acceder a los archivos siempre que cumpla
+los terminos de la licencia, y ambos usan **Open Data Commons Open Database
+License v1.0**.
 
-FHIR crea una capa interoperable:
+Fuentes oficiales:
 
-- `Patient` para el paciente pseudonimizado.
-- `Encounter` para admisiones/hospitalizaciones.
-- `Observation` para laboratorios y signos.
-- `Media` o `ImagingStudy` para imagenes CXR.
-- `DiagnosticReport` para conclusiones radiologicas.
-- `RiskAssessment` para predicciones ML/DL.
-- `AuditEvent` y `Consent` para trazabilidad y cumplimiento.
+- MIMIC-IV-ECG Demo v0.1:
+  <https://physionet.org/content/mimic-iv-ecg-demo/0.1/>
+- MIMIC-IV Clinical Database Demo on FHIR v2.1.0:
+  <https://physionet.org/content/mimic-iv-fhir-demo/2.1.0/>
 
-## Descarga Autorizada
+## Citas requeridas
 
-1. Crear cuenta en PhysioNet.
-2. Completar el entrenamiento CITI requerido.
-3. Firmar el Data Use Agreement correspondiente.
-4. Solicitar acceso a:
-   - MIMIC-IV.
-   - MIMIC-CXR-JPG.
-5. Descargar solo el subset necesario para la entrega.
+Para el informe legal/metodologico, citar:
 
-## Estructura Esperada
+1. Gow, B., Pollard, T., Nathanson, L. A., Moody, B., Johnson, A.,
+   Moukheiber, D., Greenbaum, N., Berkowitz, S., Eslami, P., Herbst, E.,
+   Mark, R., & Horng, S. (2022). *MIMIC-IV-ECG Demo - Diagnostic
+   Electrocardiogram Matched Subset Demo* (version 0.1). PhysioNet.
+   <https://doi.org/10.13026/4eqn-kt76>
+2. Bennett, A., Ulrich, H., Wiedekopf, J., Szul, P., Grimes, J.,
+   & Johnson, A. (2025). *MIMIC-IV Clinical Database Demo on FHIR*
+   (version 2.1.0). PhysioNet. RRID:SCR_007345.
+3. Bennett, A. M., Ulrich, H., van Damme, P., Wiedekopf, J., &
+   Johnson, A. E. W. (2023). MIMIC-IV on FHIR: converting a decade of
+   in-patient data into an exchangeable, interoperable format. *Journal of
+   the American Medical Informatics Association*, 30(4), 718-725.
+   <https://doi.org/10.1093/jamia/ocac203>
+4. Goldberger, A. L., Amaral, L. A. N., Glass, L., Hausdorff, J. M.,
+   Ivanov, P. C., Mark, R. G., Mietus, J. E., Moody, G. B., Peng, C. K.,
+   & Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet:
+   Components of a new research resource for complex physiologic signals.
+   *Circulation*, 101(23), e215-e220.
 
-No committear esta carpeta:
+## Estructura local esperada
+
+Los datasets se dejaron localmente para referencia en:
 
 ```text
 project2/datasets/
-  mimic-iv/
-    hosp/
-      patients.csv.gz
-      admissions.csv.gz
-      labevents.csv.gz
-      d_labitems.csv.gz
-  mimic-cxr-jpg/
+  mimic-iv-fhir-demo-2.1.0/
+    LICENSE.txt
+    README_DEMO.md
+    SHA256SUMS.txt
+    fhir/
+      MimicPatient.ndjson.gz
+      MimicEncounter.ndjson.gz
+      MimicObservationLabevents.ndjson.gz
+      ...
+  mimic-iv-ecg-demo-0.1/
+    LICENSE.txt
+    RECORDS
+    record_list.csv
+    SHA256SUMS.txt
     files/
-      p10/
-        p10000032/
-          s50414267/
-            <dicom_id>.jpg
-    mimic-cxr-2.0.0-metadata.csv.gz
-    mimic-cxr-2.0.0-chexpert.csv.gz
+      p10000032/
+        s107143276/
+          107143276.hea
+          107143276.dat
 ```
 
-`mimic-cxr-2.0.0-chexpert.csv.gz` es opcional. Si no existe, el seed crea
-`DiagnosticReport` indicando que la imagen esta disponible pero las etiquetas no
-fueron cargadas.
+`project2/datasets/` sigue ignorado por Git para evitar subir datos y archivos
+pesados al repositorio, aunque estos demos sean publicos.
 
-## Seed Real
+## Seed publico
 
-Con el stack arriba:
+Con Docker:
 
 ```bash
 cd project2
 docker compose --profile seed run --rm seed
 ```
 
-O sin Docker:
+Sin Docker:
 
 ```bash
-python scripts/seed_mimic.py \
-  --mimic-iv-root datasets/mimic-iv \
-  --mimic-cxr-root datasets/mimic-cxr-jpg \
+python scripts/seed_physionet_demo.py \
+  --fhir-root datasets/mimic-iv-fhir-demo-2.1.0 \
+  --ecg-root datasets/mimic-iv-ecg-demo-0.1 \
   --limit-subjects 30 \
-  --max-labs-per-subject 8 \
-  --max-images 30
+  --max-observations-per-subject 8 \
+  --max-ecg-records 30
 ```
 
 El script:
 
-- Lee `patients.csv.gz` y crea `Patient`.
-- Lee `admissions.csv.gz` y crea `Encounter`.
-- Lee `labevents.csv.gz` + `d_labitems.csv.gz` y crea `Observation`.
-- Lee metadata MIMIC-CXR-JPG y sube JPG reales a MinIO.
-- Crea `Media` y `DiagnosticReport` enlazados por `subject_id` y `study_id`.
-- Falla si faltan archivos requeridos, en vez de crear informacion demo.
+- Lee `MimicPatient.ndjson.gz` y crea `patients`.
+- Lee `MimicEncounter.ndjson.gz` y crea `encounters`.
+- Lee `MimicObservationLabevents.ndjson.gz` y crea `observations`.
+- Lee `record_list.csv` del ECG demo y prioriza pacientes con ECG real.
+- Sube `.hea` y `.dat` WFDB reales a MinIO.
+- Crea `Media`/`ImagingStudy` con modalidad `ECG`.
+- Crea `DiagnosticReport` enlazado a cada ECG.
+- Crea `Consent` academico `PHYSIONET_OPEN_ACCESS_DEMO`.
+- Enlaza el usuario `paciente` de prueba al primer paciente importado.
 
-## Restricciones
+## Validacion
 
-- MIMIC esta desidentificado, pero sigue siendo dato clinico sensible.
-- No redistribuir archivos.
-- No subir `datasets/`, imagenes, ONNX entrenados con MIMIC ni dumps a GitHub.
-- Documentar version, fecha de descarga y subset usado.
+Despues del seed:
+
+```bash
+curl http://localhost:8000/data/status \
+  -H "X-Access-Key: dev-access-admin" \
+  -H "X-Permission-Key: dev-permission-admin"
+```
+
+El dashboard consume ese endpoint y muestra conteos reales de Supabase/SQLite
+local y objetos indexados en MinIO.

@@ -1,4 +1,4 @@
-{
+﻿{
   "info": {
     "name": "FHIR Platform Corte 2",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -36,6 +36,17 @@
       }
     },
     {
+      "name": "Data - Status Supabase MinIO",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-Access-Key", "value": "{{access_key}}" },
+          { "key": "X-Permission-Key", "value": "{{permission_key}}" }
+        ],
+        "url": "{{base_url}}/data/status"
+      }
+    },
+    {
       "name": "FHIR - Create Patient",
       "request": {
         "method": "POST",
@@ -46,7 +57,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\"resourceType\":\"Patient\",\"name\":\"Paciente MIMIC Demo\",\"gender\":\"female\",\"birthDate\":\"1975-01-01\",\"identification_doc\":\"demo-doc\",\"medical_summary\":\"Resumen clinico cifrado\",\"source_subject_id\":\"postman-demo\"}"
+          "raw": "{\"resourceType\":\"Patient\",\"name\":\"MIMIC subject from authorized seed\",\"gender\":\"female\",\"birthDate\":\"1975-01-01\",\"identification_doc\":\"mimic-subject-id\",\"medical_summary\":\"Resumen clinico cifrado\",\"source_subject_id\":\"replace-with-real-subject-id\"}"
         },
         "url": "{{base_url}}/fhir/Patient"
       }
@@ -68,7 +79,7 @@
       }
     },
     {
-      "name": "Images - Upload to MinIO",
+      "name": "Media - Upload ECG Header to MinIO",
       "request": {
         "method": "POST",
         "header": [
@@ -79,12 +90,12 @@
           "mode": "formdata",
           "formdata": [
             { "key": "patient_id", "value": "{{patient_id}}", "type": "text" },
-            { "key": "source_study_id", "value": "50414267", "type": "text" },
-            { "key": "source_dicom_id", "value": "local-demo-dicom", "type": "text" },
-            { "key": "modality", "value": "CR", "type": "text" },
-            { "key": "conclusion", "value": "Local CXR image uploaded to MinIO and linked to DiagnosticReport.", "type": "text" },
-            { "key": "conclusion_code", "value": "404684003", "type": "text" },
-            { "key": "file", "type": "file", "src": "project2/datasets/local-demo/mimic-cxr-jpg/images/cxr-demo-10000032.svg" }
+            { "key": "source_study_id", "value": "107143276", "type": "text" },
+            { "key": "source_dicom_id", "value": "107143276", "type": "text" },
+            { "key": "modality", "value": "ECG", "type": "text" },
+            { "key": "conclusion", "value": "MIMIC-IV-ECG demo WFDB header uploaded to MinIO and linked to DiagnosticReport.", "type": "text" },
+            { "key": "conclusion_code", "value": "164847006", "type": "text" },
+            { "key": "file", "type": "file", "src": "project2/datasets/mimic-iv-ecg-demo-0.1/files/p10000032/s107143276/107143276.hea" }
           ]
         },
         "url": "{{base_url}}/images"
@@ -112,7 +123,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\"patient_id\":\"{{patient_id}}\",\"model_type\":\"MULTIMODAL\",\"features\":{\"hemoglobin\":10.2},\"image_url\":\"https://example.org/cxr.jpg\"}"
+          "raw": "{\"patient_id\":\"{{patient_id}}\",\"model_type\":\"MULTIMODAL\",\"features\":{\"hemoglobin\":10.2},\"image_url\":\"https://example.org/minio/ecg-header.hea\"}"
         },
         "url": "{{base_url}}/infer"
       }
@@ -146,3 +157,4 @@
     }
   ]
 }
+

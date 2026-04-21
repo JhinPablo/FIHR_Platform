@@ -120,22 +120,22 @@ services:
         required: false
     environment:
       API_BASE_URL:       http://backend:8000
-      MIMIC_IV_ROOT:      /datasets/mimic-iv
-      MIMIC_CXR_ROOT:     /datasets/mimic-cxr-jpg
-      SEED_LIMIT_SUBJECTS: ${SEED_LIMIT_SUBJECTS:-30}
-      SEED_MAX_IMAGES:    ${SEED_MAX_IMAGES:-30}
-      SEED_MAX_LABS_PER_SUBJECT: ${SEED_MAX_LABS_PER_SUBJECT:-8}
+      MIMIC_FHIR_DEMO_DIR: /datasets/mimic-iv-fhir-demo-2.1.0
+      MIMIC_ECG_DEMO_DIR:  /datasets/mimic-iv-ecg-demo-0.1
+      PHYSIONET_DEMO_SAMPLE_SIZE: ${PHYSIONET_DEMO_SAMPLE_SIZE:-30}
+      PHYSIONET_DEMO_ECG_LIMIT: ${PHYSIONET_DEMO_ECG_LIMIT:-30}
+      PHYSIONET_DEMO_OBS_PER_PATIENT: ${PHYSIONET_DEMO_OBS_PER_PATIENT:-8}
     volumes:
       - ./backend:/app
       - ./scripts:/scripts:ro
       - ./datasets:/datasets:ro
     command: >
-      python /scripts/seed_mimic.py
-      --mimic-iv-root /datasets/mimic-iv
-      --mimic-cxr-root /datasets/mimic-cxr-jpg
-      --limit-subjects ${SEED_LIMIT_SUBJECTS:-30}
-      --max-labs-per-subject ${SEED_MAX_LABS_PER_SUBJECT:-8}
-      --max-images ${SEED_MAX_IMAGES:-30}
+      python /scripts/seed_physionet_demo.py
+      --fhir-root /datasets/mimic-iv-fhir-demo-2.1.0
+      --ecg-root /datasets/mimic-iv-ecg-demo-0.1
+      --limit-subjects ${PHYSIONET_DEMO_SAMPLE_SIZE:-30}
+      --max-observations-per-subject ${PHYSIONET_DEMO_OBS_PER_PATIENT:-8}
+      --max-ecg-records ${PHYSIONET_DEMO_ECG_LIMIT:-30}
     depends_on:
       backend:
         condition: service_healthy

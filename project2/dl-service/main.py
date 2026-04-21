@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 
-app = FastAPI(title="MIMIC-CXR DL Inference Service", version="0.1.0")
+app = FastAPI(title="MIMIC-IV-ECG Inference Service", version="0.1.0")
 
 
 class DlRequest(BaseModel):
@@ -12,7 +12,7 @@ class DlRequest(BaseModel):
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "runtime": "mimic-cxr-jpg-adapter"}
+    return {"status": "ok", "runtime": "mimic-iv-ecg-adapter"}
 
 
 @app.post("/infer/dl")
@@ -22,7 +22,7 @@ def infer_dl(body: DlRequest) -> dict[str, object]:
         "patient_id": body.patient_id,
         "score": score,
         "category": "HIGH" if score >= 0.6 else "MODERATE",
-        "finding": "CXR abnormality risk",
+        "finding": "ECG clinical risk",
         "gradcam_url": None,
-        "dataset": "MIMIC-CXR-JPG",
+        "dataset": "MIMIC-IV-ECG Demo",
     }

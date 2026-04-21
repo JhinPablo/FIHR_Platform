@@ -35,6 +35,10 @@ def content_type_for(filename: str, fallback: str | None = None) -> str:
         return "image/jpeg"
     if lower.endswith(".svg"):
         return "image/svg+xml"
+    if lower.endswith(".hea"):
+        return "text/plain"
+    if lower.endswith(".dat"):
+        return "application/octet-stream"
     return fallback or "application/octet-stream"
 
 
@@ -71,6 +75,19 @@ def put_file(patient_id: str, path: Path, kind: str = "source", object_name: str
         content_type=ctype,
     )
     return target_name, ctype
+
+
+def put_bytes(object_name: str, raw: bytes, content_type: str) -> tuple[str, str]:
+    settings = get_settings()
+    ensure_bucket()
+    client().put_object(
+        settings.minio_bucket,
+        object_name,
+        BytesIO(raw),
+        length=len(raw),
+        content_type=content_type,
+    )
+    return object_name, content_type
 
 
 def presigned_url(object_name: str, expires_seconds: int = 300) -> str:

@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import csv
 import gzip
+import os
 import sys
 from collections import defaultdict
 from datetime import datetime
@@ -38,17 +39,18 @@ from pathlib import Path
 from typing import Iterable
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.append(str(ROOT / "backend"))
+BACKEND_DIR = Path(os.environ.get("BACKEND_DIR", "/app" if Path("/app/app").exists() else str(ROOT / "backend")))
+sys.path.append(str(BACKEND_DIR))
 
 from app import minio_client  # noqa: E402
 from app.crypto import encrypt_text  # noqa: E402
 from app.db import Base, SessionLocal, engine  # noqa: E402
 from app.fhir import diagnostic_report_resource, media_resource, observation_resource, patient_resource  # noqa: E402
-from app.models import Consent, DiagnosticReport, Encounter, ImagingStudy, Observation, Patient  # noqa: E402
+from app.models import Consent, DiagnosticReport, Encounter, ImagingStudy, Observation, Patient, User  # noqa: E402
 
 
-DEFAULT_MIMIC_IV = ROOT / "datasets" / "mimic-iv"
-DEFAULT_MIMIC_CXR = ROOT / "datasets" / "mimic-cxr-jpg"
+DEFAULT_MIMIC_IV = Path(os.environ.get("MIMIC_IV_DIR", str(ROOT / "datasets" / "mimic-iv")))
+DEFAULT_MIMIC_CXR = Path(os.environ.get("MIMIC_CXR_JPG_DIR", str(ROOT / "datasets" / "mimic-cxr-jpg")))
 
 
 def open_text(path: Path):
@@ -107,12 +109,53 @@ def load_lab_dictionary(mimic_iv: Path) -> dict[str, dict[str, str]]:
     return dictionary
 
 
-def select_subjects(mimic_iv: Path, limit: int) -> list[dict[str, str]]:
+def discover_cxr_subjects(mimic_cxr: Path, limit_subjects: int, max_images: int) -> list[str]:
+    """Prefer subjects that have an actual JPG object on disk.
+
+    MIMIC-IV and MIMIC-CXR overlap by `subject_id`, but selecting the first N
+    rows from MIMIC-IV can easily produce a cohort with zero linked images.
+    This pass makes the sample clinically useful for the Corte 2 review: each
+    preferred subject has at least one local CXR JPG ready to upload to MinIO.
+    """
+    preferred: list[str] = []
+    seen: set[str] = set()
+    image_count = 0
+    for row in rows(required(mimic_cxr / "mimic-cxr-2.0.0-metadata.csv.gz")):
+        subject_id = row.get("subject_id")
+        study_id = row.get("study_id")
+        dicom_id = row.get("dicom_id")
+        if not subject_id or not study_id or not dicom_id:
+            continue
+        if not cxr_file_path(mimic_cxr, subject_id, study_id, dicom_id).exists():
+            continue
+        image_count += 1
+        if subject_id not in seen:
+            seen.add(subject_id)
+            preferred.append(subject_id)
+        if len(preferred) >= limit_subjects and image_count >= max_images:
+            break
+    if not preferred:
+        raise RuntimeError(
+            "No local MIMIC-CXR-JPG files were found from metadata. "
+            "Verify project2/datasets/mimic-cxr-jpg/files/pXX/pSUBJECT/sSTUDY/*.jpg."
+        )
+    return preferred
+
+
+def select_subjects(mimic_iv: Path, limit: int, preferred_subject_ids: list[str]) -> list[dict[str, str]]:
+    preferred = set(preferred_subject_ids)
     selected: list[dict[str, str]] = []
+    fallback: list[dict[str, str]] = []
     for row in rows(required(mimic_iv / "hosp" / "patients.csv.gz")):
-        selected.append(row)
+        if row.get("subject_id") in preferred:
+            selected.append(row)
+        elif len(fallback) < limit:
+            fallback.append(row)
         if len(selected) >= limit:
             break
+    if len(selected) < limit:
+        needed = limit - len(selected)
+        selected.extend(fallback[:needed])
     if not selected:
         raise RuntimeError("No subjects found in MIMIC-IV patients.csv.gz")
     return selected
@@ -302,13 +345,19 @@ def add_consent(db, patient: Patient) -> None:
         db.add(Consent(patient_id=patient.id, scope="RESEARCH_DUA", granted=True))
 
 
+def bind_patient_user(db, patient: Patient) -> None:
+    user = db.query(User).filter_by(username="paciente").first()
+    if user and not user.patient_id:
+        user.patient_id = patient.id
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Seed authorized MIMIC-IV + MIMIC-CXR-JPG records.")
     parser.add_argument("--mimic-iv-root", type=Path, default=DEFAULT_MIMIC_IV)
     parser.add_argument("--mimic-cxr-root", type=Path, default=DEFAULT_MIMIC_CXR)
-    parser.add_argument("--limit-subjects", type=int, default=30)
-    parser.add_argument("--max-labs-per-subject", type=int, default=8)
-    parser.add_argument("--max-images", type=int, default=30)
+    parser.add_argument("--limit-subjects", type=int, default=int(os.environ.get("MIMIC_SAMPLE_SIZE", "30")))
+    parser.add_argument("--max-labs-per-subject", type=int, default=int(os.environ.get("MIMIC_OBS_PER_PATIENT", "8")))
+    parser.add_argument("--max-images", type=int, default=int(os.environ.get("MIMIC_IMAGE_LIMIT", "15")))
     return parser.parse_args()
 
 
@@ -316,7 +365,8 @@ def main() -> None:
     args = parse_args()
     Base.metadata.create_all(bind=engine)
     lab_dict = load_lab_dictionary(args.mimic_iv_root)
-    subject_rows = select_subjects(args.mimic_iv_root, args.limit_subjects)
+    preferred_subjects = discover_cxr_subjects(args.mimic_cxr_root, args.limit_subjects, args.max_images)
+    subject_rows = select_subjects(args.mimic_iv_root, args.limit_subjects, preferred_subjects)
     subject_ids = {row["subject_id"] for row in subject_rows}
     admissions = load_first_admissions(args.mimic_iv_root, subject_ids)
     labs = load_labs(args.mimic_iv_root, subject_ids, lab_dict, args.max_labs_per_subject)
@@ -328,6 +378,8 @@ def main() -> None:
         patient_count = observation_count = image_count = 0
         for row in subject_rows:
             patient = upsert_patient(db, row)
+            if patient_count == 0:
+                bind_patient_user(db, patient)
             encounter = upsert_encounter(db, patient, admissions.get(row["subject_id"]))
             observation_count += add_observations(db, patient, encounter, labs.get(row["subject_id"], []))
             image_count += add_images(db, patient, cxr_images.get(row["subject_id"], []), cxr_labels)
@@ -343,4 +395,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except FileNotFoundError as exc:
+        raise SystemExit(str(exc)) from exc

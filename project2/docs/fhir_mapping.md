@@ -1,35 +1,37 @@
-# Mapeo MIMIC a FHIR
+# Mapeo PhysioNet demo a FHIR/DB local
 
-| MIMIC | FHIR | Tabla local |
+| Fuente demo | FHIR / media | Tabla local |
 |---|---|---|
-| `subject_id` | `Patient.id` / extension `urn:uao:mimic-subject-id` | `patients.source_subject_id` |
-| `hadm_id` | `Encounter` | `encounters.source_hadm_id` |
-| `labevents.itemid` | `Observation.code` | `observations.source_itemid` |
-| valor laboratorio | `Observation.valueQuantity` | `observations.value/unit` |
-| `study_id` | `ImagingStudy` / `Media.extension` | `imaging_studies.source_study_id` |
-| `dicom_id` | `Media.content.url` / extension | `imaging_studies.source_dicom_id` |
-| objeto MinIO | `Media.extension` / `DiagnosticReport.presentedForm.url` | `imaging_studies.minio_object_name` |
-| label/reporte CXR | `DiagnosticReport.conclusion` | `diagnostic_reports.conclusion` |
+| `MimicPatient.ndjson.gz` | `Patient` | `patients` |
+| `Patient.identifier` con `identifier/patient` | `Patient.identifier` / extension local | `patients.source_subject_id` |
+| `MimicEncounter.ndjson.gz` | `Encounter` | `encounters` |
+| `Encounter.identifier` con `encounter-hosp` | `Encounter.identifier` | `encounters.source_hadm_id` |
+| `MimicObservationLabevents.ndjson.gz` | `Observation` | `observations` |
+| `Observation.code.coding[0].code` | `Observation.code` | `observations.code` |
+| `Observation.valueQuantity` | `Observation.valueQuantity` | `observations.value/unit` |
+| `record_list.csv.subject_id` | enlace paciente ECG | `patients.source_subject_id` |
+| `record_list.csv.study_id` | `Media` / `ImagingStudy` modalidad `ECG` | `imaging_studies.source_study_id` |
+| WFDB `.hea` y `.dat` | objetos MinIO | `imaging_studies.minio_object_name` |
+| ECG importado | `DiagnosticReport.conclusion` | `diagnostic_reports.conclusion` |
 | salida ML/DL | `RiskAssessment.prediction` | `risk_reports` |
-| acción de usuario | `AuditEvent` | `audit_log` |
-| habeas data | `Consent` | `consents` |
+| accion de usuario | `AuditEvent` | `audit_log` |
+| licencia open access demo | `Consent` | `consents` |
 
-## Bundle de Paciente
+## Bundle de paciente
 
-Un paciente listo para demo debe tener:
+Un paciente sembrado desde los demos publicos debe tener:
 
-- 1 `Patient`
-- 1 o más `Encounter`
-- 5 o más `Observation`
-- 0 o más `Media` / `ImagingStudy`
-- 0 o más `DiagnosticReport`
-- 0 o más `RiskAssessment`
-- 1 `Consent` de tratamiento de datos
+- 1 `Patient`.
+- 0 o mas `Encounter`.
+- 0 o mas `Observation`.
+- 0 o mas `Media` / `ImagingStudy` de modalidad `ECG`.
+- 0 o mas `DiagnosticReport` enlazados a ECG.
+- 0 o mas `RiskAssessment`.
+- 1 `Consent` academico `PHYSIONET_OPEN_ACCESS_DEMO`.
 
-## Paginación
+## Paginacion
 
-Todos los listados deben aceptar `limit` y `offset`, devolviendo un `Bundle`
-con:
+Todos los listados aceptan `limit` y `offset`, devolviendo un `Bundle`:
 
 ```json
 {

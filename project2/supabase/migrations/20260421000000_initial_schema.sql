@@ -1,5 +1,5 @@
--- =============================================================
--- FHIR Platform Corte 2 — Initial Schema
+﻿-- =============================================================
+-- FHIR Platform Corte 2 â€” Initial Schema
 -- Target: Supabase PostgreSQL (public schema)
 -- =============================================================
 
@@ -7,7 +7,7 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- -------------------------------------------------------------
--- 1. patients  (created first — no outgoing FKs)
+-- 1. patients  (created first â€” no outgoing FKs)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS patients (
     id                           TEXT        PRIMARY KEY,
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS patients (
 CREATE INDEX IF NOT EXISTS ix_patients_source_subject_id ON patients(source_subject_id);
 
 -- -------------------------------------------------------------
--- 2. users  (FK → patients)
+-- 2. users  (FK â†’ patients)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS users (
     id           TEXT        PRIMARY KEY,
@@ -37,9 +37,10 @@ CREATE TABLE IF NOT EXISTS users (
     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS ix_users_patient_id ON users(patient_id);
 
 -- -------------------------------------------------------------
--- 3. api_keys  (FK → users)
+-- 3. api_keys  (FK â†’ users)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS api_keys (
     id             TEXT        PRIMARY KEY,
@@ -51,9 +52,10 @@ CREATE TABLE IF NOT EXISTS api_keys (
     created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_api_keys_role ON api_keys(role);
+CREATE INDEX IF NOT EXISTS ix_api_keys_user_id ON api_keys(user_id);
 
 -- -------------------------------------------------------------
--- 4. encounters  (FK → patients)
+-- 4. encounters  (FK â†’ patients)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS encounters (
     id             TEXT        PRIMARY KEY,
@@ -68,7 +70,7 @@ CREATE TABLE IF NOT EXISTS encounters (
 CREATE INDEX IF NOT EXISTS ix_encounters_patient_id ON encounters(patient_id);
 
 -- -------------------------------------------------------------
--- 5. observations  (FK → patients, encounters)
+-- 5. observations  (FK â†’ patients, encounters)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS observations (
     id             TEXT           PRIMARY KEY,
@@ -84,9 +86,10 @@ CREATE TABLE IF NOT EXISTS observations (
 );
 CREATE INDEX IF NOT EXISTS ix_observations_patient_id ON observations(patient_id);
 CREATE INDEX IF NOT EXISTS ix_observations_code       ON observations(code);
+CREATE INDEX IF NOT EXISTS ix_observations_encounter_id ON observations(encounter_id);
 
 -- -------------------------------------------------------------
--- 6. imaging_studies  (FK → patients)
+-- 6. imaging_studies  (FK â†’ patients)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS imaging_studies (
     id                TEXT        PRIMARY KEY,
@@ -102,9 +105,12 @@ CREATE TABLE IF NOT EXISTS imaging_studies (
 );
 CREATE INDEX IF NOT EXISTS ix_imaging_studies_patient_id     ON imaging_studies(patient_id);
 CREATE INDEX IF NOT EXISTS ix_imaging_studies_source_study_id ON imaging_studies(source_study_id);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_imaging_studies_source_dicom_id
+    ON imaging_studies(source_dicom_id)
+    WHERE source_dicom_id IS NOT NULL;
 
 -- -------------------------------------------------------------
--- 7. diagnostic_reports  (FK → patients, imaging_studies)
+-- 7. diagnostic_reports  (FK â†’ patients, imaging_studies)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS diagnostic_reports (
     id               TEXT        PRIMARY KEY,
@@ -117,9 +123,10 @@ CREATE TABLE IF NOT EXISTS diagnostic_reports (
     created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_diagnostic_reports_patient_id ON diagnostic_reports(patient_id);
+CREATE INDEX IF NOT EXISTS ix_diagnostic_reports_imaging_study_id ON diagnostic_reports(imaging_study_id);
 
 -- -------------------------------------------------------------
--- 8. risk_reports  (FK → patients, users)
+-- 8. risk_reports  (FK â†’ patients, users)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS risk_reports (
     id                         TEXT           PRIMARY KEY,
@@ -136,9 +143,10 @@ CREATE TABLE IF NOT EXISTS risk_reports (
     created_at                 TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_risk_reports_patient_id ON risk_reports(patient_id);
+CREATE INDEX IF NOT EXISTS ix_risk_reports_signed_by ON risk_reports(signed_by);
 
 -- -------------------------------------------------------------
--- 9. audit_log  (no FKs — intentionally standalone for resilience)
+-- 9. audit_log  (no FKs â€” intentionally standalone for resilience)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS audit_log (
     id          TEXT        PRIMARY KEY,
@@ -157,7 +165,7 @@ CREATE INDEX IF NOT EXISTS ix_audit_log_action     ON audit_log(action);
 CREATE INDEX IF NOT EXISTS ix_audit_log_patient_id ON audit_log(patient_id);
 
 -- -------------------------------------------------------------
--- 10. consents  (FK → patients)
+-- 10. consents  (FK â†’ patients)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS consents (
     id         TEXT        PRIMARY KEY,
@@ -170,7 +178,7 @@ CREATE TABLE IF NOT EXISTS consents (
 CREATE INDEX IF NOT EXISTS ix_consents_patient_id ON consents(patient_id);
 
 -- -------------------------------------------------------------
--- 11. inference_jobs  (FK → patients, risk_reports)
+-- 11. inference_jobs  (FK â†’ patients, risk_reports)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS inference_jobs (
     id          TEXT        PRIMARY KEY,
@@ -183,19 +191,20 @@ CREATE TABLE IF NOT EXISTS inference_jobs (
     finished_at TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS ix_inference_jobs_patient_id ON inference_jobs(patient_id);
+CREATE INDEX IF NOT EXISTS ix_inference_jobs_result_id ON inference_jobs(result_id);
 
 -- =============================================================
--- Demo seed data — users & API keys for local/staging testing
--- These match the defaults in .env.example
+-- Test operators and API keys for local/staging validation.
+-- These are not clinical records; patients must be loaded from authorized MIMIC files.
 -- =============================================================
 
 INSERT INTO users (id, username, display_name, role, active, created_at)
 VALUES
     ('00000000-0000-0000-0000-000000000001', 'admin',    'Platform Admin',   'admin',   TRUE, NOW()),
-    ('00000000-0000-0000-0000-000000000002', 'medico1',  'Dr. Demo Medico 1','medico',  TRUE, NOW()),
-    ('00000000-0000-0000-0000-000000000003', 'medico2',  'Dr. Demo Medico 2','medico',  TRUE, NOW()),
-    ('00000000-0000-0000-0000-000000000004', 'auditor1', 'Demo Auditor',     'auditor', TRUE, NOW()),
-    ('00000000-0000-0000-0000-000000000005', 'paciente', 'Paciente Demo',    'paciente', TRUE, NOW())
+    ('00000000-0000-0000-0000-000000000002', 'medico1',  'Medico Test User 1','medico',  TRUE, NOW()),
+    ('00000000-0000-0000-0000-000000000003', 'medico2',  'Medico Test User 2','medico',  TRUE, NOW()),
+    ('00000000-0000-0000-0000-000000000004', 'auditor1', 'Auditor Test User',     'auditor', TRUE, NOW()),
+    ('00000000-0000-0000-0000-000000000005', 'paciente', 'Patient Test User',    'paciente', TRUE, NOW())
 ON CONFLICT (username) DO NOTHING;
 
 INSERT INTO api_keys (id, user_id, access_key, permission_key, role, active, created_at)
@@ -230,3 +239,16 @@ ALTER TABLE risk_reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
 ALTER TABLE consents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE inference_jobs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY no_direct_access_patients ON patients FOR ALL USING (false) WITH CHECK (false);
+CREATE POLICY no_direct_access_users ON users FOR ALL USING (false) WITH CHECK (false);
+CREATE POLICY no_direct_access_api_keys ON api_keys FOR ALL USING (false) WITH CHECK (false);
+CREATE POLICY no_direct_access_encounters ON encounters FOR ALL USING (false) WITH CHECK (false);
+CREATE POLICY no_direct_access_observations ON observations FOR ALL USING (false) WITH CHECK (false);
+CREATE POLICY no_direct_access_imaging_studies ON imaging_studies FOR ALL USING (false) WITH CHECK (false);
+CREATE POLICY no_direct_access_diagnostic_reports ON diagnostic_reports FOR ALL USING (false) WITH CHECK (false);
+CREATE POLICY no_direct_access_risk_reports ON risk_reports FOR ALL USING (false) WITH CHECK (false);
+CREATE POLICY no_direct_access_audit_log ON audit_log FOR ALL USING (false) WITH CHECK (false);
+CREATE POLICY no_direct_access_consents ON consents FOR ALL USING (false) WITH CHECK (false);
+CREATE POLICY no_direct_access_inference_jobs ON inference_jobs FOR ALL USING (false) WITH CHECK (false);
+
