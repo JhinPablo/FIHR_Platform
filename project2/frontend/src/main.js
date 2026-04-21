@@ -63,11 +63,6 @@ window.go = (route) => {
 };
 
 /* ── Auth actions ───────────────────────────────────────────────── */
-window.fillDemo = (ak, pk) => {
-  document.querySelector("#accessKey").value = ak;
-  document.querySelector("#permissionKey").value = pk;
-};
-
 window.login = async () => {
   state.accessKey = document.querySelector("#accessKey").value.trim();
   state.permissionKey = document.querySelector("#permissionKey").value.trim();
@@ -305,13 +300,6 @@ function renderLanding() {
    AUTH PAGE  (split dark/light, no sidebar)
    ================================================================ */
 function renderAuth() {
-  const demoCredentials = [
-    { role: "ADMIN",    label: "Administrator",   ak: "dev-access-admin",     pk: "dev-permission-admin" },
-    { role: "MÉDICO 1", label: "Dr. Medico Uno",  ak: "dev-access-medico-1",  pk: "dev-permission-medico-1" },
-    { role: "MÉDICO 2", label: "Dr. Medico Dos",  ak: "dev-access-medico-2",  pk: "dev-permission-medico-2" },
-    { role: "PACIENTE", label: "Paciente Demo",   ak: "dev-access-patient",   pk: "dev-permission-patient" },
-  ];
-
   return `
 <div class="auth-page">
   <!-- Left dark panel -->
@@ -338,11 +326,11 @@ function renderAuth() {
     <h2>Practitioner access</h2>
 
     <label for="accessKey">X-Access-Key</label>
-    <input id="accessKey" type="text" placeholder="dev-access-medico-1"
+    <input id="accessKey" type="text" placeholder="Paste assigned access key"
       value="${state.accessKey}" autocomplete="off" spellcheck="false">
 
     <label for="permissionKey">X-Permission-Key</label>
-    <input id="permissionKey" type="password" placeholder="dev-permission-medico-1"
+    <input id="permissionKey" type="password" placeholder="Paste assigned permission key"
       value="${state.permissionKey}" autocomplete="off">
 
     <button class="btn primary" onclick="login()" style="width:100%;justify-content:center;margin-top:4px">
@@ -350,12 +338,11 @@ function renderAuth() {
     </button>
 
     <div class="auth-demo">
-      <div class="ad-title">Demo credentials — click to fill</div>
-      ${demoCredentials.map(c => `
-        <div class="auth-demo-row" onclick="fillDemo('${c.ak}','${c.pk}')">
-          <span class="role-pill">${c.role}</span>
-          <span class="keys">${c.ak} / ${c.pk}</span>
-        </div>`).join("")}
+      <div class="ad-title">Production access</div>
+      <p style="margin:0;color:var(--muted);font-size:13px;line-height:1.5">
+        Use the API keys assigned by the administrator. Keys are validated by the backend
+        and every access is written to AuditEvent.
+      </p>
     </div>
   </div>
 </div>`;
@@ -479,8 +466,8 @@ function viewDashboard() {
     ${["✓ FHIR gateway — Patient, Observation, Media",
        "✓ MinIO bucket — clinical-images",
        "✓ Audit writer — AuditEvent active",
-       "✓ ML service — ONNX CPU placeholder",
-       "✓ DL service — ONNX INT8 placeholder",
+       "✓ ML service — MIMIC-IV tabular adapter",
+       "✓ DL service — MIMIC-CXR-JPG adapter",
        "⚙  Supabase PostgreSQL — connect DATABASE_URL"].map(x =>
       `<p><span class="status-dot" style="background:${x.startsWith("⚙") ? "#d97706" : "#16a34a"}"></span>${x}</p>`).join("")}
   </div>
@@ -659,7 +646,7 @@ function viewImaging() {
     </div>
     <div class="form-group">
       <label>DICOM ID</label>
-      <input id="dicomId" placeholder="e.g. 02aa804e-bde0…">
+      <input id="dicomId" placeholder="e.g. MIMIC-CXR dicom_id">
     </div>
     <div class="form-group">
       <label>Modality</label>

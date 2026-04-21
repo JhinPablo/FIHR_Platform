@@ -189,32 +189,6 @@ CREATE INDEX IF NOT EXISTS ix_inference_jobs_patient_id ON inference_jobs(patien
 -- These match the defaults in .env.example
 -- =============================================================
 
-INSERT INTO patients (
-    id,
-    source_dataset,
-    source_subject_id,
-    name,
-    gender,
-    birth_date,
-    medical_summary_encrypted,
-    fhir_json,
-    active,
-    created_at
-)
-VALUES (
-    '20000000-0000-0000-0000-000000000004',
-    'MIMIC-IV local-demo',
-    'demo-patient-bound-user',
-    'Paciente Demo Vinculado',
-    'female',
-    '1970-01-01',
-    'encrypted-demo-placeholder',
-    '{}',
-    TRUE,
-    NOW()
-)
-ON CONFLICT (id) DO NOTHING;
-
 INSERT INTO users (id, username, display_name, role, active, created_at)
 VALUES
     ('00000000-0000-0000-0000-000000000001', 'admin',    'Platform Admin',   'admin',   TRUE, NOW()),
@@ -223,10 +197,6 @@ VALUES
     ('00000000-0000-0000-0000-000000000004', 'auditor1', 'Demo Auditor',     'auditor', TRUE, NOW()),
     ('00000000-0000-0000-0000-000000000005', 'paciente', 'Paciente Demo',    'paciente', TRUE, NOW())
 ON CONFLICT (username) DO NOTHING;
-
-UPDATE users
-SET patient_id = '20000000-0000-0000-0000-000000000004'
-WHERE username = 'paciente' AND patient_id IS NULL;
 
 INSERT INTO api_keys (id, user_id, access_key, permission_key, role, active, created_at)
 VALUES

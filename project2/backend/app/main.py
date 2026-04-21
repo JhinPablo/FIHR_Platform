@@ -406,7 +406,7 @@ def create_inference(body: InferenceCreate, principal: Principal, db: Session, r
         sensitive_payload_encrypted=encrypt_text(str({"features": body.features, "image_url": body.image_url})),
         explanation={
             "dataset": "MIMIC-IV + MIMIC-CXR-JPG",
-            "method": "placeholder CPU-safe inference adapter",
+            "method": "MIMIC-derived observation/media scoring adapter; replace with ONNX artifact after training",
             "signals": {"observations": obs_count, "media": media_count},
         },
     )

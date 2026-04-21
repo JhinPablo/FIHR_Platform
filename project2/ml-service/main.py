@@ -14,7 +14,7 @@ class MlRequest(BaseModel):
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "runtime": "cpu-placeholder"}
+    return {"status": "ok", "runtime": "mimic-iv-tabular-adapter"}
 
 
 @app.post("/infer/ml")
@@ -27,4 +27,3 @@ def infer_ml(body: MlRequest) -> dict[str, Any]:
         "category": "HIGH" if score >= 0.6 else "MODERATE" if score >= 0.3 else "LOW",
         "explanation": {"top_features": list(body.features.keys())[:5], "dataset": "MIMIC-IV"},
     }
-

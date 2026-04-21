@@ -1,5 +1,6 @@
 from datetime import timedelta
 from io import BytesIO
+from pathlib import Path
 from urllib.parse import urlparse
 
 from fastapi import UploadFile
@@ -53,6 +54,23 @@ async def put_upload(patient_id: str, upload: UploadFile, kind: str = "source") 
         content_type=ctype,
     )
     return object_name, ctype
+
+
+def put_file(patient_id: str, path: Path, kind: str = "source", object_name: str | None = None) -> tuple[str, str]:
+    settings = get_settings()
+    ensure_bucket()
+    safe_name = path.name.replace("\\", "_").replace("/", "_").replace(" ", "_")
+    target_name = object_name or f"patients/{patient_id}/{kind}/{safe_name}"
+    ctype = content_type_for(path.name)
+    raw = path.read_bytes()
+    client().put_object(
+        settings.minio_bucket,
+        target_name,
+        BytesIO(raw),
+        length=len(raw),
+        content_type=ctype,
+    )
+    return target_name, ctype
 
 
 def presigned_url(object_name: str, expires_seconds: int = 300) -> str:

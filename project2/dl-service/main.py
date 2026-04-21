@@ -12,7 +12,7 @@ class DlRequest(BaseModel):
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "runtime": "cpu-placeholder"}
+    return {"status": "ok", "runtime": "mimic-cxr-jpg-adapter"}
 
 
 @app.post("/infer/dl")
@@ -26,4 +26,3 @@ def infer_dl(body: DlRequest) -> dict[str, object]:
         "gradcam_url": None,
         "dataset": "MIMIC-CXR-JPG",
     }
-

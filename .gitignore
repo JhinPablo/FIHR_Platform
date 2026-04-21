@@ -4,9 +4,6 @@
 !.env.example
 datasets/
 **/datasets/
-!project2/datasets/
-!project2/datasets/local-demo/
-!project2/datasets/local-demo/**
 __pycache__/
 .pytest_cache/
 node_modules/

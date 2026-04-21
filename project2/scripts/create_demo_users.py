@@ -1,4 +1,4 @@
-"""Create demo users and API keys for local or Supabase PostgreSQL.
+"""Create local test users and API keys for local or Supabase PostgreSQL.
 
 Run from project2:
     python scripts/create_demo_users.py
@@ -41,17 +41,12 @@ def main():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
-        patient = db.query(Patient).filter_by(source_subject_id="demo-patient").first()
-        if not patient:
-            patient = Patient(
-                source_subject_id="demo-patient",
-                source_dataset="MIMIC-IV demo",
-                name="Paciente Demo",
-                gender="female",
-                birth_date="1978-01-01",
-            )
-            db.add(patient)
-            db.flush()
+        first_real_patient = (
+            db.query(Patient)
+            .filter(Patient.source_dataset == "MIMIC-IV + MIMIC-CXR-JPG")
+            .order_by(Patient.created_at.asc())
+            .first()
+        )
 
         upsert_user(db, "admin", "Admin Demo", "admin", settings.access_key_admin, settings.permission_key_admin)
         upsert_user(
@@ -77,19 +72,21 @@ def main():
             "paciente",
             settings.access_key_patient,
             settings.permission_key_patient,
-            patient.id,
+            first_real_patient.id if first_real_patient else None,
         )
         db.commit()
-        print("Demo users ready:")
+        print("Local test users ready:")
         print(f"  admin    {settings.access_key_admin} / {settings.permission_key_admin}")
         print(f"  medico1  {settings.access_key_medico_1} / {settings.permission_key_medico_1}")
         print(f"  medico2  {settings.access_key_medico_2} / {settings.permission_key_medico_2}")
         print(f"  paciente {settings.access_key_patient} / {settings.permission_key_patient}")
-        print(f"  patient_id={patient.id}")
+        if first_real_patient:
+            print(f"  paciente is bound to real MIMIC patient_id={first_real_patient.id}")
+        else:
+            print("  paciente is not bound yet; run scripts/seed_mimic.py after placing real MIMIC files.")
     finally:
         db.close()
 
 
 if __name__ == "__main__":
     main()
-

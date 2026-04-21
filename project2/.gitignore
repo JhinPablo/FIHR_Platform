@@ -12,9 +12,6 @@ dist/
 build/
 datasets/
 **/datasets/
-!datasets/
-!datasets/local-demo/
-!datasets/local-demo/**
 models/*.onnx
 models/*.pth
 models/*.pkl
