@@ -48,19 +48,25 @@ def current_principal(
 
     for access, permission, principal in _env_principals():
         if x_access_key == access and x_permission_key == permission:
-            db_user = db.query(models.User).filter_by(username=principal.username, active=True).first()
-            if db_user:
-                principal = Principal(
-                    user_id=db_user.id,
-                    username=db_user.username,
-                    display_name=db_user.display_name,
-                    role=db_user.role,  # type: ignore[arg-type]
-                    patient_id=db_user.patient_id,
-                )
+            try:
+                db_user = db.query(models.User).filter_by(username=principal.username, active=True).first()
+                if db_user:
+                    principal = Principal(
+                        user_id=db_user.id,
+                        username=db_user.username,
+                        display_name=db_user.display_name,
+                        role=db_user.role,  # type: ignore[arg-type]
+                        patient_id=db_user.patient_id,
+                    )
+            except Exception:
+                pass
             request.state.principal = principal
             return principal
 
-    row = db.query(models.ApiKey).filter_by(access_key=x_access_key, permission_key=x_permission_key, active=True).first()
+    try:
+        row = db.query(models.ApiKey).filter_by(access_key=x_access_key, permission_key=x_permission_key, active=True).first()
+    except Exception:
+        row = None
     if not row or not row.user or not row.user.active:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid API keys")
 

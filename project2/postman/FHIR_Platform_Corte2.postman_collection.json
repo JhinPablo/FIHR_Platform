@@ -1,4 +1,4 @@
-﻿{
+{
   "info": {
     "name": "FHIR Platform Corte 2",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -79,7 +79,7 @@
       }
     },
     {
-      "name": "Media - Upload ECG Header to MinIO",
+      "name": "Media - Upload MIMIC-CXR-JPG Image to MinIO",
       "request": {
         "method": "POST",
         "header": [
@@ -90,12 +90,12 @@
           "mode": "formdata",
           "formdata": [
             { "key": "patient_id", "value": "{{patient_id}}", "type": "text" },
-            { "key": "source_study_id", "value": "107143276", "type": "text" },
-            { "key": "source_dicom_id", "value": "107143276", "type": "text" },
-            { "key": "modality", "value": "ECG", "type": "text" },
-            { "key": "conclusion", "value": "MIMIC-IV-ECG demo WFDB header uploaded to MinIO and linked to DiagnosticReport.", "type": "text" },
-            { "key": "conclusion_code", "value": "164847006", "type": "text" },
-            { "key": "file", "type": "file", "src": "project2/datasets/mimic-iv-ecg-demo-0.1/files/p10000032/s107143276/107143276.hea" }
+            { "key": "source_study_id", "value": "50414267", "type": "text" },
+            { "key": "source_dicom_id", "value": "02aa804e-bde0afdd-112c0b34-7bc16630-4e384014", "type": "text" },
+            { "key": "modality", "value": "CR", "type": "text" },
+            { "key": "conclusion", "value": "MIMIC-CXR-JPG chest radiograph uploaded to MinIO and linked to DiagnosticReport.", "type": "text" },
+            { "key": "conclusion_code", "value": "168731009", "type": "text" },
+            { "key": "file", "type": "file", "src": "project2/datasets/mimic-cxr-jpg/files/p10/p10000032/s50414267/02aa804e-bde0afdd-112c0b34-7bc16630-4e384014.jpg" }
           ]
         },
         "url": "{{base_url}}/images"

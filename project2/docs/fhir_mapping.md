@@ -1,33 +1,32 @@
-# Mapeo PhysioNet demo a FHIR/DB local
+# Mapeo MIMIC a FHIR/DB local
 
-| Fuente demo | FHIR / media | Tabla local |
+| Fuente MIMIC | FHIR / media | Tabla local |
 |---|---|---|
-| `MimicPatient.ndjson.gz` | `Patient` | `patients` |
-| `Patient.identifier` con `identifier/patient` | `Patient.identifier` / extension local | `patients.source_subject_id` |
-| `MimicEncounter.ndjson.gz` | `Encounter` | `encounters` |
-| `Encounter.identifier` con `encounter-hosp` | `Encounter.identifier` | `encounters.source_hadm_id` |
-| `MimicObservationLabevents.ndjson.gz` | `Observation` | `observations` |
-| `Observation.code.coding[0].code` | `Observation.code` | `observations.code` |
-| `Observation.valueQuantity` | `Observation.valueQuantity` | `observations.value/unit` |
-| `record_list.csv.subject_id` | enlace paciente ECG | `patients.source_subject_id` |
-| `record_list.csv.study_id` | `Media` / `ImagingStudy` modalidad `ECG` | `imaging_studies.source_study_id` |
-| WFDB `.hea` y `.dat` | objetos MinIO | `imaging_studies.minio_object_name` |
-| ECG importado | `DiagnosticReport.conclusion` | `diagnostic_reports.conclusion` |
+| `patients.csv.gz.subject_id` | `Patient.identifier` | `patients.source_subject_id` |
+| `patients.csv.gz.gender`, `anchor_age` | `Patient.gender`, extension local | `patients.fhir_resource` |
+| `admissions.csv.gz.hadm_id` | `Encounter.identifier` | `encounters.source_hadm_id` |
+| `admissions.csv.gz.admittime/dischtime` | `Encounter.period` | `encounters.period_start/end` |
+| `labevents.csv.gz.itemid` + `d_labitems.csv.gz` | `Observation.code` | `observations.code/display` |
+| `labevents.csv.gz.valuenum/valueuom` | `Observation.valueQuantity` | `observations.value/unit` |
+| `mimic-cxr-2.0.0-metadata.csv.gz.subject_id` | enlace paciente CXR | `patients.source_subject_id` |
+| `metadata.study_id` | `Media` / `ImagingStudy` modalidad `CXR` | `imaging_studies.source_study_id` |
+| `metadata.dicom_id` + JPG | objeto MinIO | `imaging_studies.minio_object_name` |
+| CheXpert labels / metadata CXR | `DiagnosticReport.conclusion` | `diagnostic_reports.conclusion` |
 | salida ML/DL | `RiskAssessment.prediction` | `risk_reports` |
 | accion de usuario | `AuditEvent` | `audit_log` |
-| licencia open access demo | `Consent` | `consents` |
+| autorizacion academica | `Consent` | `consents` |
 
 ## Bundle de paciente
 
-Un paciente sembrado desde los demos publicos debe tener:
+Un paciente importado desde MIMIC debe tener:
 
 - 1 `Patient`.
 - 0 o mas `Encounter`.
 - 0 o mas `Observation`.
-- 0 o mas `Media` / `ImagingStudy` de modalidad `ECG`.
-- 0 o mas `DiagnosticReport` enlazados a ECG.
+- 0 o mas `Media` / `ImagingStudy` de modalidad `CXR`.
+- 0 o mas `DiagnosticReport` enlazados a imagenes CXR.
 - 0 o mas `RiskAssessment`.
-- 1 `Consent` academico `PHYSIONET_OPEN_ACCESS_DEMO`.
+- 1 `Consent` academico `RESEARCH_DUA`.
 
 ## Paginacion
 

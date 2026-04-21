@@ -1,16 +1,18 @@
-"""Training entrypoint for the MIMIC-IV FHIR demo tabular model.
+"""Training entrypoint for the MIMIC-IV tabular model.
 
-Expected real input:
-  datasets/mimic-iv-fhir-demo-2.1.0/fhir/*.ndjson.gz
+Expected authorized local input:
+  datasets/mimic-iv/hosp/patients.csv.gz
+  datasets/mimic-iv/hosp/admissions.csv.gz
+  datasets/mimic-iv/hosp/labevents.csv.gz
+  datasets/mimic-iv/hosp/d_labitems.csv.gz
 
-The repo intentionally excludes datasets and generated model binaries. The
-production version should train a CPU-friendly classifier, calibrate
-probabilities, export ONNX, and write model cards/metrics.
+The production path should extract clinically meaningful tabular features,
+train a calibrated CPU-deployable model, and export models/ml_model.onnx.
 """
 
 
-def main():
-    print("TODO: train calibrated MIMIC-IV FHIR demo tabular model and export models/ml_model.onnx")
+def main() -> None:
+    print("TODO: train calibrated MIMIC-IV tabular model and export models/ml_model.onnx")
 
 
 if __name__ == "__main__":

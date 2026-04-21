@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Run the public PhysioNet demo seed inside the backend container.
+# Run the real MIMIC-IV + MIMIC-CXR-JPG seed inside the backend container.
 # Usage: ./scripts/seed_docker.sh
 # Requires: docker compose up -d (stack already running)
 set -e
@@ -12,6 +12,6 @@ if [ -z "$CONTAINER" ]; then
 fi
 
 echo "Seeding via container: $CONTAINER"
-docker exec "$CONTAINER" python /scripts/seed_physionet_demo.py \
-  --fhir-root /datasets/mimic-iv-fhir-demo-2.1.0 \
-  --ecg-root /datasets/mimic-iv-ecg-demo-0.1
+docker exec "$CONTAINER" python /scripts/seed_mimic.py \
+  --mimic-iv-root /datasets/mimic-iv \
+  --mimic-cxr-root /datasets/mimic-cxr-jpg

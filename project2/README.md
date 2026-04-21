@@ -3,7 +3,7 @@
 Sistema clinico digital interoperable para UAO Salud Digital. Esta version
 reemplaza la fase anterior por una implementacion limpia basada en FastAPI,
 Supabase PostgreSQL, FHIR-Lite/FHIR R4, doble API-Key, cifrado aplicativo,
-rate limiting, frontend SPA y flujos de inferencia clinica.
+rate limiting, frontend SPA, MinIO y flujos de inferencia clinica.
 
 ## Stack
 
@@ -13,7 +13,7 @@ rate limiting, frontend SPA y flujos de inferencia clinica.
 - Servicios IA: `ml-service` y `dl-service` CPU-first, con adaptadores listos para ONNX.
 - Imagenes: MinIO S3-compatible, bucket `clinical-images`.
 - Reverse proxy: Nginx con rate-limit, headers de seguridad y rutas `/api/`, `/ml/`, `/dl/`.
-- Dataset objetivo: MIMIC-IV FHIR Demo v2.1.0 + MIMIC-IV-ECG Demo v0.1.
+- Dataset objetivo: MIMIC-IV + MIMIC-CXR-JPG.
 
 ## Arranque Local
 
@@ -59,47 +59,51 @@ simulan datos clinicos; los pacientes deben venir del seed MIMIC autorizado.
 En produccion, estas llaves deben generarse como secretos y persistirse en
 Supabase. No se deben committear `.env` ni llaves reales.
 
-## Dataset Publico
+## Datasets Reales
 
-El proyecto usa demos publicos de PhysioNet, disponibles sin credenciales:
+El proyecto ya no usa datasets demo ni pacientes sinteticos. Usa:
 
-- MIMIC-IV Clinical Database Demo on FHIR v2.1.0.
-- MIMIC-IV-ECG Demo v0.1.
+- MIMIC-IV para datos clinicos tabulares.
+- MIMIC-CXR-JPG para radiografias de torax y metadata de estudios.
 
-Las carpetas locales de referencia quedan fuera de Git en:
+Los datasets son de acceso controlado y no se incluyen en el repo. La descarga,
+licencia y estructura esperada estan documentadas en `docs/datasets.md`.
+La explicacion de cada modelo de IA esta documentada en
+`docs/model_explanation.md`.
 
-Estructura esperada:
+Estructura minima esperada:
 
 ```text
 project2/datasets/
-  mimic-iv-fhir-demo-2.1.0/
-    fhir/
-      MimicPatient.ndjson.gz
-      MimicEncounter.ndjson.gz
-      MimicObservationLabevents.ndjson.gz
-  mimic-iv-ecg-demo-0.1/
-    record_list.csv
+  mimic-iv/
+    hosp/
+      patients.csv.gz
+      admissions.csv.gz
+      labevents.csv.gz
+      d_labitems.csv.gz
+  mimic-cxr-jpg/
+    mimic-cxr-2.0.0-metadata.csv.gz
+    mimic-cxr-2.0.0-chexpert.csv.gz
     files/
-      p10000032/
-        s107143276/
-          107143276.hea
-          107143276.dat
+      p10/p10000032/s50414267/*.jpg
 ```
 
-Para cargar un subset demo publico:
+Seed con Docker:
 
 ```bash
 docker compose --profile seed run --rm seed
 ```
 
-El seed principal esta en `scripts/seed_physionet_demo.py`. Si faltan archivos,
-falla con un mensaje explicito. El flujo crea pacientes/encuentros/observaciones
-desde el FHIR demo, sube ECG WFDB reales (`.hea` y `.dat`) a MinIO y enlaza
-`Media`/`DiagnosticReport` con URL presignada. La seleccion prioriza sujetos que
-tengan ECG disponible. El dashboard valida el resultado mediante
-`GET /data/status`.
+Seed sin Docker:
 
-Ver citas y licencia en `docs/datasets.md`.
+```bash
+python scripts/seed_mimic.py \
+  --mimic-iv-root datasets/mimic-iv \
+  --mimic-cxr-root datasets/mimic-cxr-jpg
+```
+
+Si faltan archivos, el seed falla con un mensaje explicito. No hay fallback a
+datos demo.
 
 ## Funcionalidades Cubiertas
 
@@ -116,8 +120,8 @@ Ver citas y licencia en `docs/datasets.md`.
 | Audit log filtrado | Cumplido |
 | Inferencia ML/DL y firma RiskReport | Implementacion inicial |
 | MinIO bucket `clinical-images` | Cumplido en Docker Compose |
-| Objetos ECG reales en informes FHIR | `DiagnosticReport.presentedForm` enlaza MinIO |
-| Estado operativo del flujo MIMIC/Supabase/MinIO | `GET /data/status` |
+| Objetos CXR reales en informes FHIR | `DiagnosticReport.presentedForm` enlaza MinIO |
+| Estado operativo MIMIC/Supabase/MinIO | `GET /data/status` |
 | README datasets sin subir datos | Cumplido en `docs/datasets.md` |
 | Postman | `postman/FHIR_Platform_Corte2.postman_collection.json` |
 

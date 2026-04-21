@@ -11,8 +11,13 @@ dist/
 build/
 *.db
 *.sqlite
+project2/backend/supabase_clinical_seed*.sql
+project2/backend/supabase_seed_export.json
+project2/backend/supabase_sql_chunks/
 *.onnx
 *.pth
 *.pkl
 mlruns/
 .DS_Store
+
+.vercel

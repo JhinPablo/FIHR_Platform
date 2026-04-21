@@ -170,5 +170,5 @@ def infer_ml(body: MlRequest) -> dict[str, Any]:
         "shap_values": shap,
         "top_features": [{"feature": k, "contribution": v} for k, v in top],
         "model": "onnx-lr" if _session else "numpy-fallback",
-        "dataset": "MIMIC-IV FHIR Demo",
+        "dataset": "MIMIC-IV",
     }

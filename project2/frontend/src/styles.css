@@ -307,6 +307,8 @@ a { color: inherit; text-decoration: none; }
 .viewer figure { margin: 0; }
 .viewer figure img { width: 100%; height: 300px; object-fit: contain; background: #040a12; border-radius: 6px; display: block; }
 .viewer figcaption { margin-top: 8px; color: #7eaace; font-family: var(--mono); font-size: 11px; }
+.wfdb-meta { margin-top: 8px; display: grid; gap: 4px; color: #9dbbd0; line-height: 1.45; }
+.wfdb-meta code { display: block; color: #d6e9f7; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 4px; padding: 5px 6px; overflow-wrap: anywhere; }
 
 /* Inference cards */
 .infer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }

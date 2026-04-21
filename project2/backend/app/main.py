@@ -36,12 +36,15 @@ _inference_semaphore = threading.Semaphore(4)
 
 @app.on_event("startup")
 def startup() -> None:
-    Base.metadata.create_all(bind=engine)
-    ensure_runtime_columns()
+    try:
+        Base.metadata.create_all(bind=engine)
+        ensure_runtime_columns()
+    except Exception:
+        # Non-fatal: app still starts; DB endpoints will fail individually.
+        pass
     try:
         minio_client.ensure_bucket()
     except Exception:
-        # The API still starts if MinIO is booting; upload endpoints will retry.
         pass
 
 
@@ -127,7 +130,18 @@ def database_label() -> str:
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "database": database_label(), "dataset": "MIMIC-IV FHIR Demo + MIMIC-IV-ECG Demo"}
+    return {"status": "ok", "database": database_label(), "dataset": "MIMIC-IV + MIMIC-CXR-JPG"}
+
+
+@app.get("/health/db")
+def health_db() -> dict:
+    import traceback
+    try:
+        with engine.connect() as conn:
+            result = conn.execute(text("SELECT COUNT(*) FROM patients")).scalar()
+        return {"db": "ok", "patients": result}
+    except Exception as e:
+        return {"db": "error", "error": str(e), "traceback": traceback.format_exc()}
 
 
 @app.get("/data/status")
@@ -149,7 +163,7 @@ def data_status(
     )
     sample_url = minio_client.presigned_url(latest_media.minio_object_name) if latest_media else None
     return {
-        "dataset": "MIMIC-IV FHIR Demo v2.1.0 + MIMIC-IV-ECG Demo v0.1",
+        "dataset": "MIMIC-IV + MIMIC-CXR-JPG",
         "storage": {
             "database": database_label(),
             "image_bucket": settings.minio_bucket,
@@ -501,8 +515,8 @@ def create_inference(body: InferenceCreate, principal: Principal, db: Session, r
                     str({"features": body.features, "image_url": body.image_url})
                 ),
                 explanation={
-                    "dataset": "MIMIC-IV FHIR Demo + MIMIC-IV-ECG Demo",
-                    "method": "PhysioNet demo FHIR observation and ECG media scoring adapter",
+                    "dataset": "MIMIC-IV + MIMIC-CXR-JPG",
+                    "method": "MIMIC-IV observations and MIMIC-CXR-JPG media scoring adapter",
                     "signals": {"observations": obs_count, "media": media_count},
                 },
             )

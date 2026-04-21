@@ -15,6 +15,7 @@ const state = {
   observations: [],
   reports: [],
   media: [],
+  allMedia: [],
   audit: [],
   consents: [],
   dataStatus: null,
@@ -48,6 +49,32 @@ function resourceEntries(bundle) {
 
 function patientName(p) {
   return p?.name?.[0]?.text || p?.name?.[0]?.family || "Paciente";
+}
+
+function mediaObjectName(m) {
+  return m?.extension?.find?.((e) => String(e.url || "").includes("minio-object"))?.valueString || "";
+}
+
+function mediaStudyId(m) {
+  const objectName = mediaObjectName(m);
+  const ecgMatch = objectName.match(/mimic-iv-ecg-demo\/([^/]+)\/preview\.svg$/);
+  const cxrMatch = objectName.match(/mimic-cxr-jpg\/([^/]+)\//);
+  const extensionStudy = m?.extension?.find?.((e) => String(e.url || "").includes("mimic-study"))?.valueString;
+  return ecgMatch?.[1] || cxrMatch?.[1] || extensionStudy || m?.identifier?.[0]?.value || m?.id?.slice(0, 8) || "unknown";
+}
+
+function imagingDescription(m) {
+  const objectName = mediaObjectName(m);
+  const studyId = mediaStudyId(m);
+  const base = objectName.replace(/preview\.svg$/, "");
+  return {
+    studyId,
+    objectName,
+    preview: objectName || `frontend/public/ecg-previews/${studyId}.svg`,
+    staticPreview: `/ecg-previews/${studyId}.svg`,
+    hea: base ? `${base}${studyId}.hea` : `patients/{patient_id}/mimic-iv-ecg-demo/${studyId}/${studyId}.hea`,
+    dat: base ? `${base}${studyId}.dat` : `patients/{patient_id}/mimic-iv-ecg-demo/${studyId}/${studyId}.dat`,
+  };
 }
 
 function toast(msg, dur = 3200) {
@@ -128,11 +155,21 @@ async function loadDataStatus(shouldRender = true) {
 }
 window.loadDataStatus = loadDataStatus;
 
+async function loadAllMedia(shouldRender = true) {
+  state.allMedia = resourceEntries(await api("/fhir/Media?limit=100&offset=0"));
+  state._allMediaLoaded = true;
+  if (shouldRender) render();
+}
+window.loadAllMedia = loadAllMedia;
+
 async function refreshPatientData(patientId) {
   state.selectedPatient = await api(`/fhir/Patient/${patientId}`);
   state.observations = resourceEntries(await api(`/fhir/Observation?patient_id=${patientId}&limit=80&offset=0`));
   state.reports = resourceEntries(await api(`/fhir/DiagnosticReport?patient_id=${patientId}&limit=20&offset=0`));
   state.media = resourceEntries(await api(`/fhir/Media?patient_id=${patientId}&limit=20&offset=0`));
+  if (!state.media.length && !state._allMediaLoaded) {
+    await loadAllMedia(false);
+  }
   state.consents = resourceEntries(await api(`/consents?patient_id=${patientId}&limit=20&offset=0`));
 }
 
@@ -188,7 +225,7 @@ window.uploadImage = async () => {
   form.append("source_study_id", document.querySelector("#studyId").value || `MIMIC-MANUAL-${Date.now()}`);
   form.append("source_dicom_id", document.querySelector("#dicomId").value || `MIMIC-MANUAL-DICOM-${Date.now()}`);
   form.append("modality", document.querySelector("#modality").value || "CR");
-  form.append("conclusion", document.querySelector("#conclusion").value || "Authorized MIMIC-IV-ECG media pending review.");
+  form.append("conclusion", document.querySelector("#conclusion").value || "Authorized MIMIC-CXR-JPG image pending review.");
   form.append("conclusion_code", "404684003");
   form.append("file", file);
   const res = await fetch(`${API}/images`, { method: "POST", headers: headers(false), body: form });
@@ -337,7 +374,7 @@ function viewDashboardReal() {
   const reports = counts.diagnostic_reports ?? 0;
   const bucket = state.dataStatus?.storage?.image_bucket || "clinical-images";
   const database = state.dataStatus?.storage?.database || "Supabase PostgreSQL";
-  const readyLabel = state.dataStatus?.ready ? "PhysioNet demo imported" : "run seed_physionet_demo.py";
+  const readyLabel = state.dataStatus?.ready ? "MIMIC datasets imported" : "run seed_mimic.py";
   const readyMark = state.dataStatus?.ready ? "OK" : "PENDING";
 
   return `
@@ -382,7 +419,7 @@ function viewDashboardReal() {
   </div>
   <div class="terminal">
 $ data.status<br>
-&gt; dataset: ${state.dataStatus?.dataset || "MIMIC-IV FHIR Demo + MIMIC-IV-ECG Demo"}<br>
+&gt; dataset: ${state.dataStatus?.dataset || "MIMIC-IV FHIR + MIMIC-IV-ECG Demo"}<br>
 &gt; patients: ${total || 0} - observations: ${observations || 0}<br>
 &gt; minio_objects: ${mediaObjects || 0} - reports: ${reports || 0}<br>
 $ fhir.get Patient?_count=50<br>
@@ -394,28 +431,38 @@ $ minio.bucket ${bucket}<br>
 }
 
 function viewImagingReal() {
-  const imgs = state.media.length
-    ? state.media.map(m => {
+  const displayMedia = state.media.length ? state.media : state.allMedia;
+  const showingFallback = !!state.selectedPatient && !state.media.length && state.allMedia.length;
+  const imgs = displayMedia.length
+    ? displayMedia.map(m => {
+      const meta = imagingDescription(m);
       const contentType = m.content?.contentType || "image/svg+xml";
-      const url = m.content?.url || "";
+      const url = m.content?.url || meta.staticPreview;
       const isImage = contentType.startsWith("image/") || !contentType;
-      const study = m.extension?.find(e => e.url?.includes("mimic-study"))?.valueString || m.id?.slice(0,8);
-      const errSrc = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 140'%3E%3Crect fill='%23040a12' width='300' height='140'/%3E%3Ctext fill='%23445566' x='50%25' y='42%25' text-anchor='middle' font-family='monospace' font-size='11'%3EECG preview unavailable%3C/text%3E%3Ctext fill='%23334455' x='50%25' y='62%25' text-anchor='middle' font-family='monospace' font-size='10'%3EUse ↗ link to open in browser%3C/text%3E%3C/svg%3E";
+      const errSrc = meta.staticPreview;
       return `
       <figure>
         ${url && isImage
-          ? `<img src="${url}" alt="MIMIC-IV ECG from MinIO" onerror="this.onerror=null;this.src='${errSrc}'">`
+          ? `<img src="${url}" alt="MIMIC-IV-ECG waveform from MinIO" onerror="this.onerror=null;this.src='${errSrc}'">`
           : `<div style="height:220px;display:flex;align-items:center;justify-content:center;background:#040a12;color:#7eaace;font-family:var(--mono);font-size:12px;border-radius:6px">
-              ${contentType || "ECG"} · MinIO
+              ${contentType || "ECG"} - MinIO
             </div>`}
         <figcaption>
-          ${m.modality?.coding?.[0]?.code || "ECG"} — ${study}
-          ${url ? `<a href="${url}" target="_blank" style="color:#7eaace;margin-left:8px">↗ Open SVG</a>` : ""}
+          <strong>${m.modality?.coding?.[0]?.code || "ECG"} - study ${meta.studyId}</strong>
+          ${url ? `<a href="${url}" target="_blank" style="color:#7eaace;margin-left:8px">Open SVG</a>` : ""}
+          <div class="wfdb-meta">
+            <span>Preview SVG: waveform render stored in MinIO and mirrored as a static frontend asset.</span>
+            <code>${meta.preview}</code>
+            <span>HEA: WFDB header with sampling rate, leads, gain and signal metadata.</span>
+            <code>${meta.hea}</code>
+            <span>DAT: binary waveform signal used to generate this SVG preview.</span>
+            <code>${meta.dat}</code>
+          </div>
         </figcaption>
       </figure>`;
     }).join("")
     : `<div style="display:flex;align-items:center;justify-content:center;height:280px;color:#7eaace;font-family:var(--mono);font-size:12px">
-        Select a patient imported from the ECG demo to view real MinIO media.
+        Select a patient with ECG media or refresh storage status.
       </div>`;
 
   return `
@@ -428,12 +475,18 @@ function viewImagingReal() {
 </div>
 
 <div class="two-col">
-  <div class="viewer">${imgs}</div>
+  <div>
+    ${showingFallback ? `<div class="disclaimer" style="margin-bottom:12px">
+      ${patientName(state.selectedPatient)} does not have ECG media linked in the current subset. Showing available ECG studies from MinIO.
+    </div>` : ""}
+    <div class="viewer">${imgs}</div>
+  </div>
   <div class="panel">
     <h3>Storage flow</h3>
     <p style="color:var(--muted);font-size:13px;line-height:1.6">
-      MIMIC-IV-ECG Demo is imported by <span class="mono-cell">scripts/seed_physionet_demo.py</span>.
-      WFDB header/signal files are uploaded to MinIO bucket <span class="mono-cell">${state.dataStatus?.storage?.image_bucket || "clinical-images"}</span>,
+      MIMIC-IV-ECG WFDB records are rendered as SVG previews. The SVG, .hea
+      header and .dat waveform signal are stored in MinIO bucket
+      <span class="mono-cell">${state.dataStatus?.storage?.image_bucket || "clinical-images"}</span>,
       while Supabase stores normalized <span class="mono-cell">imaging_studies</span> and
       <span class="mono-cell">diagnostic_reports</span> rows.
     </p>
@@ -441,14 +494,15 @@ function viewImagingReal() {
       <p><span class="status-dot"></span>DB media rows: ${state.dataStatus?.counts?.media || 0}</p>
       <p><span class="status-dot"></span>MinIO objects indexed: ${state.dataStatus?.counts?.media_with_minio_objects || 0}</p>
       <p><span class="status-dot"></span>DiagnosticReport rows: ${state.dataStatus?.counts?.diagnostic_reports || 0}</p>
+      <p><span class="status-dot"></span>Loaded for selected patient: ${state.media.length}</p>
+      <p><span class="status-dot"></span>Loaded ECG studies available: ${displayMedia.length}</p>
     </div>
-    <button class="btn" onclick="loadDataStatus()" style="width:100%;justify-content:center;margin-top:12px">
+    <button class="btn" onclick="Promise.all([loadDataStatus(false), loadAllMedia(false)]).then(render)" style="width:100%;justify-content:center;margin-top:12px">
       Refresh storage status
     </button>
   </div>
 </div>`;
 }
-
 /* ================================================================
    AUTH PAGE  (split dark/light, no sidebar)
    ================================================================ */
@@ -660,7 +714,7 @@ function viewDashboard() {
     <div class="trend">${total ? "loaded from Supabase/FHIR" : "MIMIC import pending"}</div>
   </div>
   <div class="stat">
-    <div class="k">ECG media in MinIO</div>
+    <div class="k">CXR media in MinIO</div>
     <div class="v">${withMedia || "—"}</div>
     <div class="trend">${state.dataStatus?.storage?.image_bucket || "clinical-images"}</div>
   </div>
@@ -685,7 +739,7 @@ function viewDashboard() {
        "✓ MinIO bucket — clinical-images",
        "✓ Audit writer — AuditEvent active",
        "✓ ML service — MIMIC-IV FHIR adapter",
-       "✓ DL service — MIMIC-IV-ECG adapter",
+       "✓ DL service — MIMIC-CXR-JPG adapter",
        "⚙  Supabase PostgreSQL — connect DATABASE_URL"].map(x =>
       `<p><span class="status-dot" style="background:${x.startsWith("⚙") ? "#d97706" : "#16a34a"}"></span>${x}</p>`).join("")}
   </div>
@@ -788,7 +842,7 @@ function viewPatient() {
 
 <div class="grid-4" style="margin-bottom:22px">
   <div class="stat"><div class="k">Observations</div><div class="v">${state.observations.length}</div></div>
-  <div class="stat"><div class="k">ECG studies</div><div class="v">${state.media.length}</div></div>
+  <div class="stat"><div class="k">CXR studies</div><div class="v">${state.media.length}</div></div>
   <div class="stat"><div class="k">Reports</div><div class="v">${state.reports.length}</div></div>
   <div class="stat"><div class="k">Consents</div><div class="v">${state.consents.length}</div></div>
 </div>
@@ -830,16 +884,20 @@ function viewPatient() {
    ================================================================ */
 function viewImaging() {
   const imgs = state.media.length
-    ? state.media.map(m => `
+    ? state.media.map(m => {
+      const cxr = cxrDescription(m);
+      const primaryUrl = m.content?.url || "";
+      return `
       <figure>
-        <img src="${m.content?.url}"
-          alt="ECG media"
-          onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 300 300\\'><rect fill=\\'%23111\\' width=\\'300\\' height=\\'300\\'/><text fill=\\'%23666\\' x=\\'50%\\' y=\\'50%\\' text-anchor=\\'middle\\' font-family=\\'monospace\\' font-size=\\'12\\'>Image unavailable</text></svg>'">
+        <img src="${primaryUrl}"
+          alt="CXR image ${cxr.studyId}"
+          onerror="this.onerror=null;this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 300 300\\'><rect fill=\\'%23111\\' width=\\'300\\' height=\\'300\\'/><text fill=\\'%23666\\' x=\\'50%\\' y=\\'50%\\' text-anchor=\\'middle\\' font-family=\\'monospace\\' font-size=\\'12\\'>CXR unavailable</text></svg>'">
         <figcaption>
           ${m.modality?.coding?.[0]?.code || "CR"} · ${m.extension?.[0]?.valueString || m.id?.slice(0,8)}
           ${m.content?.url ? `<a href="${m.content.url}" target="_blank" style="color:#7eaace;margin-left:8px">↗ Full size</a>` : ""}
         </figcaption>
-      </figure>`).join("")
+      </figure>`;
+    }).join("")
     : `<div style="display:flex;align-items:center;justify-content:center;height:280px;color:#7eaace;font-family:var(--mono);font-size:12px">
         No images loaded for selected patient.
       </div>`;
@@ -848,7 +906,7 @@ function viewImaging() {
 <div class="page-head">
   <div>
     <span class="section-sub">AREA 05 · Imaging</span>
-    <div class="section-title">ECG media storage</div>
+    <div class="section-title">CXR image storage</div>
   </div>
   ${state.selectedPatient ? `<span style="font-family:var(--mono);font-size:12px;color:var(--muted)">${patientName(state.selectedPatient)}</span>` : ""}
 </div>
@@ -864,7 +922,7 @@ function viewImaging() {
     </div>
     <div class="form-group">
       <label>DICOM ID</label>
-      <input id="dicomId" placeholder="e.g. MIMIC-IV-ECG study_id">
+      <input id="dicomId" placeholder="e.g. MIMIC-CXR dicom_id">
     </div>
     <div class="form-group">
       <label>Modality</label>
@@ -904,8 +962,8 @@ ${!hasPatient ? `<div class="disclaimer">Select a patient in Patients tab before
 <div class="infer-grid">
   ${[
     ["ML",         "MIMIC-IV FHIR tabular", "XGBoost → ONNX · calibrated probabilities · SHAP explanations"],
-    ["DL",         "MIMIC-IV-ECG waveform", "Compact ECG classifier · WFDB media · DiagnosticReport"],
-    ["MULTIMODAL", "FHIR + ECG fusion",     "Late fusion · combined risk score · end-to-end triage"],
+    ["DL",         "MIMIC-CXR-JPG imaging", "Compact CXR classifier · JPG media · DiagnosticReport"],
+    ["MULTIMODAL", "FHIR + CXR fusion",     "Late fusion · combined risk score · end-to-end triage"],
   ].map(([type, sub, desc]) => `
     <button class="infer-card" onclick="runInference('${type}')" ${!hasPatient ? "disabled style='opacity:.45;cursor:not-allowed'" : ""}>
       <b>${type}</b>
@@ -969,7 +1027,7 @@ function viewReport() {
         <div style="margin-bottom:10px">
           <a class="image-link" href="${img.url}" target="_blank"
             style="color:var(--navy);font-family:var(--mono);font-size:12px">
-            ↗ ${img.title || img.contentType || "ECG media"}
+            ↗ ${img.title || img.contentType || "CXR media"}
           </a>
         </div>`).join("")}
     </div>` : ""}

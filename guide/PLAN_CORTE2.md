@@ -1,82 +1,61 @@
-# Plan de Ejecucion - Corte 2 Sistema Clinico Digital Interoperable
+# Plan Corte 2 - Sistema Clinico Digital Interoperable
 
-> Documento orquestador actualizado. Esta version reemplaza la estrategia de
-> herencia/copia de Corte 1 por una reimplementacion limpia en `project2/`.
->
-> Decision base: **FastAPI + Supabase PostgreSQL + FHIR-Lite/FHIR R4 + doble
-> API-Key + frontend SPA + ML/DL + auditoria clinica**.
+## Decision principal
 
----
+La fase 1 se reemplaza por completo. No se reutiliza persistencia JSON ni
+datos demo como fuente clinica. La nueva plataforma usa FastAPI, Supabase
+PostgreSQL, FHIR-Lite/FHIR R4, doble API-Key, cifrado, rate limiting, MinIO,
+frontend SPA e inferencia ML/DL.
 
-## Fase 0 - Decisiones raiz
+El dataset objetivo queda fijado en **MIMIC-IV + MIMIC-CXR-JPG**.
 
-| Area | Decision |
+## Problema que resuelve
+
+Los datos clinicos reales suelen estar fragmentados: pacientes y admisiones en
+un sistema, laboratorios en otro, diagnosticos codificados por separado,
+imagenes en PACS, reportes en texto y salidas de IA por fuera del HIS. La capa
+FHIR del proyecto resuelve esa fragmentacion convirtiendo MIMIC-IV y
+MIMIC-CXR-JPG a recursos interoperables consumibles por frontend, Postman,
+servicios externos y modelos de IA sin depender del formato original.
+
+## Dataset
+
+- **MIMIC-IV**: pacientes, admisiones, laboratorios, diagnosticos y eventos.
+- **MIMIC-CXR-JPG**: radiografias de torax en JPG, metadata de estudios y
+  etiquetas/reportes.
+
+No se suben datasets al repositorio. El equipo debe gestionar acceso PhysioNet,
+DUA/CITI y ubicar los archivos autorizados bajo `project2/datasets/`.
+
+## Mapeo minimo
+
+| Fuente | Recurso interoperable |
 |---|---|
-| Persistencia | Supabase PostgreSQL, no archivos JSON |
-| Backend | FastAPI + SQLAlchemy/Pydantic |
-| Frontend | SPA Vite, deployable en Vercel/Netlify/Render Static |
-| Dataset | MIMIC-IV FHIR Demo v2.1.0 + MIMIC-IV-ECG Demo v0.1 |
-| Seguridad | Doble API-Key, RBAC, cifrado aplicativo, rate limiting |
-| Interoperabilidad | Fachada FHIR-Lite compatible con recursos FHIR R4 |
-| IA | Servicios ML/DL CPU-first con adaptadores para ONNX |
+| `subject_id` | `Patient` |
+| `hadm_id` | `Encounter` |
+| `labevents` + `d_labitems` | `Observation` |
+| `study_id` / `dicom_id` | `Media` / `ImagingStudy` |
+| labels/reportes CXR | `DiagnosticReport` |
+| salida ML/DL | `RiskAssessment` / `risk_reports` |
+| accesos y cambios | `AuditEvent` / `audit_log` |
+| autorizacion academica | `Consent` |
 
-### Por que usar los demos publicos PhysioNet
-
-El problema central no es solo hacer una prediccion aislada. El problema real
-de salud digital es que los datos clinicos estan fragmentados: pacientes,
-encuentros, observaciones, objetos fisiologicos, reportes y predicciones viven
-en formatos distintos. Los demos publicos permiten demostrar ese problema sin
-gestionar credenciales de acceso controlado durante el desarrollo:
-
-- MIMIC-IV FHIR Demo ya entrega recursos FHIR como `Patient`, `Encounter` y
-  `Observation`.
-- MIMIC-IV-ECG Demo aporta senales diagnosticas reales en formato WFDB
-  (`.hea` + `.dat`) enlazables por `subject_id`.
-- MinIO simula el repositorio de objetos clinicos; Supabase guarda las
-  relaciones normalizadas.
-
-FHIR resuelve la fragmentacion al exponer recursos estables:
-
-- `Patient` para el paciente pseudonimizado.
-- `Encounter` para admisiones/encuentros.
-- `Observation` para laboratorios y signos.
-- `Media` / `ImagingStudy` para ECG/WFDB en MinIO.
-- `DiagnosticReport` para conclusiones asociadas a ECG.
-- `RiskAssessment` para salidas ML/DL.
-- `AuditEvent` y `Consent` para trazabilidad y habeas data.
-
----
-
-## Fase 1 - Monorepo limpio
-
-Carpeta de trabajo: `project2/`.
-
-Estructura implementada:
+## Arquitectura
 
 ```text
 project2/
-  backend/
-  frontend/
-  ml-service/
-  dl-service/
-  scripts/
-  postman/
-  docs/
-  datasets/        # local, ignorado por Git
-  docker-compose.yml
-  .env.example
-  README.md
+  backend/        FastAPI, SQLAlchemy, FHIR endpoints, RBAC, cifrado
+  frontend/       SPA Vite para consola clinica
+  ml-service/     adaptador ML tabular MIMIC-IV
+  dl-service/     adaptador DL imagen MIMIC-CXR-JPG
+  scripts/        seed, usuarios de prueba y entrenamiento
+  postman/        coleccion de validacion
+  docs/           datasets, seguridad, FHIR mapping y estado
 ```
 
-Objetivo: tener una base ejecutable que no reutiliza codigo de Fase 1, pero si
-conserva las capacidades exigidas por la rubrica: PostgreSQL, roles, doble llave,
-FHIR-Lite, paginacion, cifrado y rate limiting.
+## Base de datos
 
----
-
-## Fase 2 - Backend FastAPI + Supabase PostgreSQL
-
-Tablas normalizadas:
+Supabase PostgreSQL con modelo relacional normalizado:
 
 - `users`
 - `api_keys`
@@ -90,163 +69,87 @@ Tablas normalizadas:
 - `consents`
 - `inference_jobs`
 
-Reglas:
+Las credenciales se leen desde `.env`, secretos de Render o secretos de
+Supabase. No deben escribirse en codigo.
 
-- No guardar JSON como persistencia primaria.
-- Usar FKs para relaciones paciente-observacion-media-reporte.
-- Cifrar `identification_doc`, `medical_summary`, notas clinicas y payload
-  sensible de prediccion.
-- Configurar Supabase con `DATABASE_URL`.
-- Mantener SQLite solo como fallback local de desarrollo.
+## Seguridad
 
----
+- `X-Access-Key`: valida acceso inicial; falla con `401`.
+- `X-Permission-Key`: identifica rol y permisos; falla con `403` si no autoriza.
+- Roles:
+  - `admin`: gestiona usuarios, corrige datos y consulta auditoria completa.
+  - `medico`: crea pacientes, observaciones, inferencias y reportes; no borra pacientes.
+  - `paciente/auditor`: solo lectura; paciente solo ve sus propios datos.
+- Campos sensibles cifrados antes de persistir:
+  - `identification_doc`
+  - `medical_summary`
+  - notas clinicas sensibles
+  - payloads internos de prediccion con datos clinicos.
+- Rate limiting con respuesta `429 Too Many Requests`.
 
-## Fase 3 - Identidad, doble llave y RBAC
+## Endpoints minimos
 
-Headers obligatorios:
-
-- `X-Access-Key`: token de entrada. Si falta o falla, `401`.
-- `X-Permission-Key`: token de rol/permisos. Si no autoriza, `403`.
-
-Roles:
-
-- `admin`: gestiona usuarios, corrige datos, consulta audit y soft-delete.
-- `medico`: crea pacientes, observaciones, consentimientos, inferencias y firma.
-- `paciente`: solo lee su propio registro.
-- `auditor`: lectura controlada, sin mutaciones.
-
----
-
-## Fase 4 - FHIR-Lite / FHIR R4
-
-Endpoints publicos minimos:
-
+- `GET /health`
+- `GET /docs`
 - `POST /auth/validate-keys`
-- `GET /data/status`
 - `GET /fhir/Patient?limit=&offset=`
 - `POST /fhir/Patient`
 - `GET /fhir/Patient/{id}`
 - `PATCH /fhir/Patient/{id}`
-- `DELETE /fhir/Patient/{id}` solo admin, como soft-delete
+- `DELETE /fhir/Patient/{id}` solo admin o soft-delete
 - `GET /fhir/Observation?patient_id=&limit=&offset=`
 - `POST /fhir/Observation`
 - `GET /fhir/DiagnosticReport?patient_id=&limit=&offset=`
 - `GET /fhir/Media?patient_id=&limit=&offset=`
-- `GET /audit-log?actor=&role=&action=&patient_id=&limit=&offset=`
-- `GET /consents?patient_id=`
-- `POST /consents`
-
-Todos los listados devuelven `Bundle` paginado con `total`, `limit`, `offset` y
-`entry`.
-
----
-
-## Fase 5 - Datasets demo PhysioNet y seed
-
-Datasets locales:
-
-```text
-project2/datasets/
-  mimic-iv-fhir-demo-2.1.0/
-  mimic-iv-ecg-demo-0.1/
-```
-
-Documentos:
-
-- `docs/datasets.md`: acceso open access, licencia, citas y estructura local.
-- `docs/fhir_mapping.md`: mapeo PhysioNet demo -> FHIR -> DB.
-
-Scripts:
-
-- `scripts/seed_physionet_demo.py`: seed principal.
-- `scripts/seed_mimic.py`: referencia para MIMIC completo, no usado por defecto.
-
-Verificacion:
-
-- El seed crea pacientes, encounters, observaciones, ECG media, reportes y
-  consentimientos desde archivos demo publicos.
-- MinIO contiene objetos en
-  `patients/{patient_id}/mimic-iv-ecg-demo/{study_id}/{study_id}.hea`.
-- `GET /fhir/DiagnosticReport` incluye `presentedForm[].url` presignada.
-- `datasets/` esta excluido por Git.
-
----
-
-## Fase 6 - Inferencia ML/DL y RiskReport
-
-Endpoints:
-
+- `POST /images`
 - `POST /infer/ml`
 - `POST /infer/dl`
 - `POST /infer`
 - `GET /infer/jobs/{id}`
 - `PATCH /risk-reports/{id}/sign`
+- `GET /audit-log?actor=&role=&action=&patient_id=&limit=&offset=`
+- `GET /consents?patient_id=`
+- `POST /consents`
 
-Comportamiento:
+Todas las listas deben soportar `limit` y `offset`.
 
-- `ML` usa variables tabulares derivadas del FHIR demo.
-- `DL` usa media ECG derivada del MIMIC-IV-ECG Demo.
-- `MULTIMODAL` fusiona ambas senales.
-- La salida se persiste como `risk_reports` y se expone como `RiskAssessment`.
-- Firma medica requiere nota clinica de al menos 30 caracteres.
+## Frontend
 
----
+Debe cubrir:
 
-## Fase 7 - Frontend SPA
-
-Pantallas minimas:
-
-- Inicio institucional.
 - Login por doble API-Key.
-- Dashboard con estado `/data/status`.
+- Dashboard operativo.
 - Listado paginado de pacientes.
-- Detalle clinico.
+- Detalle clinico del paciente.
 - Observaciones FHIR.
-- Media ECG desde MinIO.
-- Inferencia ML/DL/Multimodal.
-- RiskReport y firma.
+- Imagenes MIMIC-CXR-JPG desde MinIO.
+- Inferencia ML/DL.
+- Reporte de riesgo firmado.
 - Audit log filtrado.
-- Vista solo lectura para paciente/auditor.
+- Vista paciente/auditor solo lectura.
 
----
+## Test plan
 
-## Fase 8 - Postman, README y deploy
+- Sin `X-Access-Key` -> `401`.
+- Permiso insuficiente -> `403`.
+- Medico intentando borrar paciente -> `403`.
+- Paciente consultando otro paciente -> `403`.
+- Exceso de peticiones -> `429`.
+- Crear paciente y observaciones con FK.
+- Confirmar que el nombre del paciente no se duplica en observaciones.
+- Verificar que campos sensibles no quedan legibles en PostgreSQL.
+- `GET /fhir/Patient?limit=10&offset=0` devuelve maximo 10.
+- `GET /fhir/Observation?patient_id=...` devuelve bundle paginado.
+- `DiagnosticReport` referencia paciente e imagen.
+- `RiskAssessment` referencia observaciones/modelo/reporte.
+- Seed crea pacientes, observaciones, reportes e imagenes vinculadas desde MIMIC.
+- No se incluye ningun archivo MIMIC en el repo.
 
-Entregables:
+## Entregables
 
-- URL GitHub/GitLab con commits significativos por integrante.
-- URL backend Render con Swagger en `/docs`.
-- URL frontend Vercel/Netlify/Render Static.
-- Coleccion Postman con validacion de llaves, `/data/status`, paginacion,
-  media ECG, inferencia, firma RiskReport y audit log.
-- Credenciales de prueba en README o variables de entorno, sin llaves reales.
-- README de datasets con citas y licencia, sin incluir archivos pesados.
-
----
-
-## Fase 9 - Pruebas de aceptacion
-
-Checklist:
-
-- [ ] `401` sin `X-Access-Key`.
-- [ ] `401` sin `X-Permission-Key`.
-- [ ] `403` por rol insuficiente.
-- [ ] `429` al exceder rate limit.
-- [ ] `GET /fhir/Patient?limit=10&offset=0` pagina correctamente.
-- [ ] Seed demo crea pacientes, encounters, observations, media, reports y consent.
-- [ ] Objetos `.hea` y `.dat` estan en MinIO.
-- [ ] Campos sensibles se ven cifrados en base de datos.
-- [ ] Inferencia crea `RiskAssessment`.
-- [ ] Firma RiskReport exige nota clinica >= 30 caracteres.
-- [ ] Audit log filtra por actor, rol, accion y paciente.
-- [ ] Frontend permite recorrer login -> pacientes -> detalle -> media -> inferencia -> firma.
-
----
-
-## Supuestos
-
-- Los demos publicos de PhysioNet son suficientes para desarrollo y entrega
-  academica.
-- Supabase es la base PostgreSQL principal.
-- Render aloja backend FastAPI.
-- El sistema es academico y de apoyo, no un dispositivo diagnostico real.
+- URL GitHub/GitLab con historial de commits.
+- URL Backend Render con Swagger en `/docs`.
+- URL Frontend desplegado.
+- Coleccion Postman con inferencia ML, DL, firma RiskReport, audit log filtrado y paginacion.
+- Credenciales de prueba en README.
+- README de datasets sin archivos de datos en el repo.
