@@ -2,7 +2,20 @@
   "buildCommand": "cd project2/frontend && npm install && npm run build",
   "outputDirectory": "project2/frontend/dist",
   "installCommand": "echo skip",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://fihr-platform-backend.vercel.app/$1"
+    },
+    {
+      "source": "/media/proxy/(.*)",
+      "destination": "https://fihr-platform-backend.vercel.app/media/proxy/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

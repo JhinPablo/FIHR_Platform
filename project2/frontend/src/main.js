@@ -3,8 +3,12 @@
    Three layouts: Landing (public) · Auth (login) · App (authed)
    ================================================================ */
 
+function cleanApiBase(value) {
+  return String(value || "").trim().replace(/^['"]|['"]$/g, "").replace(/\/$/, "");
+}
+
 const DEFAULT_API = import.meta.env.PROD ? "/api" : "http://localhost:8000";
-const API = (localStorage.getItem("apiBase") || import.meta.env.VITE_API_URL || DEFAULT_API).replace(/\/$/, "");
+const API = cleanApiBase(localStorage.getItem("apiBase")) || cleanApiBase(import.meta.env.VITE_API_URL) || DEFAULT_API;
 
 const state = {
   route: location.hash.replace("#", "") || "/",
