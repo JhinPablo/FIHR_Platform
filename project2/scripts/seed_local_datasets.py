@@ -9,7 +9,7 @@ import json
 import mimetypes
 import uuid
 from pathlib import Path
-from urllib import request
+from urllib import parse, request
 from urllib.error import HTTPError
 
 
@@ -38,6 +38,46 @@ def post_json(path: str, payload: dict) -> dict:
     except HTTPError as exc:
         detail = exc.read().decode("utf-8")
         raise RuntimeError(f"POST {path} failed: {exc.code} {detail}") from exc
+
+
+def get_json(path: str) -> dict:
+    req = request.Request(API + path, method="GET", headers=HEADERS)
+    with request.urlopen(req, timeout=30) as res:
+        return json.loads(res.read().decode("utf-8"))
+
+
+def bundle_resources(bundle: dict) -> list[dict]:
+    return [entry.get("resource", {}) for entry in bundle.get("entry", [])]
+
+
+def load_existing_patients() -> dict[str, str]:
+    existing: dict[str, str] = {}
+    offset = 0
+    limit = 100
+    while True:
+        bundle = get_json(f"/fhir/Patient?limit={limit}&offset={offset}")
+        resources = bundle_resources(bundle)
+        for patient in resources:
+            for extension in patient.get("extension", []):
+                if extension.get("url") == "urn:uao:mimic-subject-id":
+                    source_subject_id = str(extension.get("valueString") or "")
+                    if source_subject_id:
+                        existing[source_subject_id] = patient["id"]
+        if offset + limit >= int(bundle.get("total", 0)):
+            break
+        offset += limit
+    return existing
+
+
+def load_existing_media(patient_id: str) -> set[str]:
+    encoded = parse.quote(patient_id)
+    bundle = get_json(f"/fhir/Media?patient_id={encoded}&limit=100&offset=0")
+    object_names: set[str] = set()
+    for media in bundle_resources(bundle):
+        for extension in media.get("extension", []):
+            if extension.get("url") == "urn:uao:minio-object" and extension.get("valueString"):
+                object_names.add(str(extension["valueString"]))
+    return object_names
 
 
 def multipart_upload(path: str, fields: dict[str, str], file_field: str, file_path: Path) -> dict:
@@ -87,25 +127,37 @@ def main() -> None:
     patients = read_csv(DATA / "mimic-iv" / "patients.csv")
     labs = read_csv(DATA / "mimic-iv" / "labs.csv")
     images = read_csv(DATA / "mimic-cxr-jpg" / "metadata.csv")
-    patient_ids: dict[str, str] = {}
+    patient_ids: dict[str, str] = load_existing_patients()
+    seed_existing_subjects = os.environ.get("SEED_EXISTING_SUBJECTS", "false").lower() == "true"
+    seeded_subjects: set[str] = set()
+    created_patients = 0
+    created_observations = 0
+    uploaded_images = 0
 
     for row in patients:
-        created = post_json(
-            "/fhir/Patient",
-            {
-                "resourceType": "Patient",
-                "name": row["name"],
-                "gender": row["gender"],
-                "birthDate": row["birth_date"],
-                "source_subject_id": row["subject_id"],
-                "source_dataset": "MIMIC-IV local-demo",
-                "identification_doc": f"local-demo:{row['subject_id']}",
-                "medical_summary": row["medical_summary"],
-            },
-        )
-        patient_ids[row["subject_id"]] = created["id"]
+        if row["subject_id"] not in patient_ids:
+            created = post_json(
+                "/fhir/Patient",
+                {
+                    "resourceType": "Patient",
+                    "name": row["name"],
+                    "gender": row["gender"],
+                    "birthDate": row["birth_date"],
+                    "source_subject_id": row["subject_id"],
+                    "source_dataset": "MIMIC-IV local-demo",
+                    "identification_doc": f"local-demo:{row['subject_id']}",
+                    "medical_summary": row["medical_summary"],
+                },
+            )
+            patient_ids[row["subject_id"]] = created["id"]
+            created_patients += 1
+            seeded_subjects.add(row["subject_id"])
+        elif seed_existing_subjects:
+            seeded_subjects.add(row["subject_id"])
 
     for row in labs:
+        if row["subject_id"] not in seeded_subjects:
+            continue
         post_json(
             "/fhir/Observation",
             {
@@ -118,13 +170,20 @@ def main() -> None:
                 "source_itemid": row["itemid"],
             },
         )
+        created_observations += 1
 
     for row in images:
+        if row["subject_id"] not in seeded_subjects:
+            continue
         file_path = DATA / "mimic-cxr-jpg" / row["image_path"]
+        patient_id = patient_ids[row["subject_id"]]
+        expected_object = f"patients/{patient_id}/source/{file_path.name.replace(' ', '_')}"
+        if expected_object in load_existing_media(patient_id):
+            continue
         multipart_upload(
             "/images",
             {
-                "patient_id": patient_ids[row["subject_id"]],
+                "patient_id": patient_id,
                 "source_study_id": row["study_id"],
                 "source_dicom_id": row["dicom_id"],
                 "modality": row["modality"],
@@ -134,10 +193,15 @@ def main() -> None:
             "file",
             file_path,
         )
+        uploaded_images += 1
 
-    print(f"Seeded {len(patients)} patients, {len(labs)} observations and {len(images)} MinIO images.")
+    print(
+        "Seed complete: "
+        f"{created_patients} new patients ({len(patient_ids)} mapped), "
+        f"{created_observations} observations posted, "
+        f"{uploaded_images} MinIO images uploaded from dataset files."
+    )
 
 
 if __name__ == "__main__":
     main()
-

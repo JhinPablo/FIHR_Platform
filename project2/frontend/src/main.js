@@ -613,7 +613,7 @@ function viewPatient() {
       <h3>MIMIC identifiers</h3>
       ${(p.extension || []).map(e => `
         <p style="font-family:var(--mono);font-size:12px;color:var(--muted);margin:4px 0">
-          ${e.url?.split(":").pop()}: ${e.valueString || e.valueDecimal || e.valueBoolean ?? "—"}
+          ${e.url?.split(":").pop()}: ${e.valueString ?? e.valueDecimal ?? e.valueBoolean ?? "—"}
         </p>`).join("") || "<p style='color:var(--muted)'>No extensions.</p>"}
     </div>
   </div>
