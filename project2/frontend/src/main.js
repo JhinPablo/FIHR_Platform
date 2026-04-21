@@ -3,7 +3,8 @@
    Three layouts: Landing (public) · Auth (login) · App (authed)
    ================================================================ */
 
-const API = localStorage.getItem("apiBase") || import.meta.env.VITE_API_URL || "http://localhost:8000";
+const DEFAULT_API = import.meta.env.PROD ? "/api" : "http://localhost:8000";
+const API = (localStorage.getItem("apiBase") || import.meta.env.VITE_API_URL || DEFAULT_API).replace(/\/$/, "");
 
 const state = {
   route: location.hash.replace("#", "") || "/",
@@ -139,6 +140,16 @@ window.acceptHabeasData = async () => {
 
 window.declineHabeasData = () => {
   logout();
+};
+
+window.saveApiBase = () => {
+  const value = document.querySelector("#apiBase")?.value.trim();
+  if (value) {
+    localStorage.setItem("apiBase", value.replace(/\/$/, ""));
+  } else {
+    localStorage.removeItem("apiBase");
+  }
+  location.reload();
 };
 
 /* ── Data loaders ───────────────────────────────────────────────── */
@@ -601,6 +612,12 @@ function renderAuth() {
     <label for="permissionKey">X-Permission-Key</label>
     <input id="permissionKey" type="password" placeholder="Paste assigned permission key"
       value="${state.permissionKey}" autocomplete="off">
+
+    <label for="apiBase">Backend API URL</label>
+    <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:12px">
+      <input id="apiBase" type="text" value="${API}" autocomplete="off" spellcheck="false">
+      <button class="btn ghost" onclick="saveApiBase()" style="padding:0 12px">Save</button>
+    </div>
 
     <button class="btn primary" onclick="login()" style="width:100%;justify-content:center;margin-top:4px">
       Sign in to clinical console

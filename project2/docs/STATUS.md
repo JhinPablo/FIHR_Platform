@@ -31,6 +31,16 @@ autorizados desde PhysioNet.
 ## Cambios recientes
 
 - Despliegue frontend realizado en Vercel.
+- Frontend actualizado para no depender de un dominio fijo:
+  - En desarrollo usa `http://localhost:8000`.
+  - En build de Vercel usa `VITE_API_URL` si existe.
+  - Si `VITE_API_URL` esta vacio, cae a `/api`, que requiere rewrite/proxy
+    hacia el backend publico.
+- Supabase local configurado con pooler transaction como `DATABASE_URL`.
+  Tambien quedan registradas en `.env` local las variantes direct,
+  transaction pooler y session pooler. La conexion direct puede requerir red
+  con IPv6; desde Docker se verificaron correctamente los poolers transaction
+  y session.
 - Pacientes renombrados con nombres humanos pseudonimizados en local y Supabase
   remoto; los `subject_id` MIMIC se conservan como identificadores de
   trazabilidad.
